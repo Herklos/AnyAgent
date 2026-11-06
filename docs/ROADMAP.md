@@ -19,12 +19,21 @@ Chosen by the owner (2026-11-06). Done when, in one Anytype space:
 7. One `webhook` trigger (for example a GitHub push) reaches the gateway and wakes the chief.
 8. Killing a node, the gateway or the Temporal worker mid-turn loses nothing that was already in Anytype, and the
    turn resumes or reruns.
+9. The same slice runs, by configuration only, with Temporal self-hosted and Temporal Cloud, and on Anytype's network
+   and a self-hosted any-sync ([ADR 0003](adr/0003-one-shared-temporal-one-workflow-per-agent.md),
+   [ADR 0012](adr/0012-any-anytype-sync-network.md)).
+10. One agent runs on a local model through `llama-server` ([ADR 0014](adr/0014-model-endpoints-local-and-cloud.md)).
+11. The specialist runs in `auto` mode: a decision model (local in one run, cloud in another) approves a routine call
+    and escalates a risky one to the person ([ADR 0015](adr/0015-decision-model-for-approvals.md)).
+12. The chief creates its own `aa_schedule` (`schedule.self`); an edit of a group by an agent without `group.edit` is
+    refused with a notice ([ADR 0013](adr/0013-agent-permissions-over-the-org.md)).
 
-Order: spikes 002 → 004 → 006 → 007 → 009 → 008 ([SPIKES.md](SPIKES.md)).
+Order: spikes 002 → 004 → 006 → 007 → 009 → 011 → 013 → 008, then 012 and 015 ([SPIKES.md](SPIKES.md)).
 
 ## After v0 (unordered)
 
 - Per-agent avatars and profiles synced from `aa_agent` onto exclusive accounts.
+- Computer and desktop use through cua: sandboxes first, then a node's own desktop (opt-in) ([ADR 0016](adr/0016-computer-use-with-cua.md), Q15).
 - Claims in a group; an `auto` router model for unaddressed messages.
 - Harness profiles with fallbacks (Michel ADR 0018); usage and cost written to Anytype.
 - Memory, skills, logs and suggestions as types (from the `anytype-agents` skill).

@@ -24,7 +24,7 @@ It grew out of two things that already exist:
 2. **Temporal is the engine, not the database.** It gives each agent one durable workflow that survives crashes and
    restarts, timers that fire once, and serialised decisions. It holds execution state only.
 3. **One agent, one workflow.** Each agent is exactly one long-lived workflow. Everything that should wake it (a chat
-   message, a task change, a cron fire, a webhook, another agent's request) is a signal or an update to that workflow.
+   message, a task change, a cron fire, a webhook, another agent's request) is delivered to that workflow.
    There is no other place an agent's behaviour hides.
 4. **Talk in chat, work in objects.** Chat is for conversation, @mentions and notices: readable by people. Work that must
    survive and be queried (a task, a handoff, an approval, a result) is a typed object, linked from the message that
@@ -34,10 +34,14 @@ It grew out of two things that already exist:
 6. **Any harness, any model.** CLI agents (Claude Code, Codex, OpenCode, Gemini, Copilot, any ACP agent) and model APIs
    (OpenAI-compatible, local llama.cpp/Ollama/vLLM/LM Studio) sit behind one adapter interface. A new harness is a
    registry entry, not a branch.
-7. **Your machines, your accounts.** Agents run on nodes you own (laptop, VPS, Raspberry Pi), signed in with your own
-   subscriptions or keys. Secrets never leave the node that uses them; Anytype holds references and capabilities.
+7. **Your machines, your accounts, your infrastructure.** Agents run on nodes you own (laptop, VPS, Raspberry Pi),
+   signed in with your own subscriptions or keys, on local or cloud models. Temporal runs self-hosted or on Temporal
+   Cloud, and Anytype syncs on its network or your own any-sync: configuration, not code. Secrets never leave the node
+   that uses them; Anytype holds references and capabilities.
 8. **The human decides.** Risky actions pause on an approval object. You decide with a reaction or an edit from your own
-   Anytype identity; Anytype signs every change with its author's key, so a decision cannot be forged by chat text.
+   Anytype identity; Anytype signs every change with its author's key, so a decision cannot be forged by chat text. A
+   decision model may answer routine requests first when you allow it, but it escalates whenever it is unsure and
+   never fails open. Agents change the org only within the permissions people gave them, and never their own rights.
 9. **Hierarchy by default, autonomy by choice.** Work flows from the human to a coordinator to leads to specialists, as in
    the existing org. A group can opt into letting agents claim work; claims are serialised so two agents never take the
    same task.

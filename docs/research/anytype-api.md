@@ -17,6 +17,10 @@ live `anytype serve` yet ([SPIKES.md](../SPIKES.md) 002).
 - The headless server "requires a dedicated bot account, which you create using `anytype auth create`… mnemonic-based
   login is not supported. The bot account only has access to spaces it explicitly joins" (anytype-cli README, line 31).
   One process is logged in to one account.
+- **Self-hosted networks** (`anyproto/anytype-cli@017b954`): `anytype auth create` and `anytype auth login` take
+  `--network-config <yaml>` (`cmd/auth/create/create.go`, line 87; `cmd/auth/login/login.go`, line 42); the path is
+  kept as `networkConfigPath` (`core/config/config.go`, line 14); `space join` resolves the network id "cached config →
+  YAML file → default Anytype network" (`cmd/space/join/join.go`, lines 80–95) ([ADR 0012](../adr/0012-any-anytype-sync-network.md)).
 - OpenAPI at `GET /v2/docs/openapi.json` and `/v2/docs/openapi.yaml` (`core/api/server/router.go`, lines 147–148).
 
 ## Auth and keys
@@ -118,3 +122,5 @@ of a separately installed server and does not distribute heart ([ADR 0004](../ad
 - That `expected_etag` is checked against the local copy only (inferred from the p2p design). Q7.
 - Resident memory of one `anytype serve` (the cost of each account setup). Spike 003.
 - Whether one account can run in two `anytype serve` instances at once (multi-device). Spike 010.
+- Per-member roles in a space (viewer, editor) as seen through `GET /v2/spaces/{s}/members`. Spike 002.
+- That an account on one network cannot join a space on another. Spike 012.

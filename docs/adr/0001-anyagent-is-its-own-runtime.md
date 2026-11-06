@@ -24,7 +24,7 @@ adapters, and reads Anytype live. There is no apply step.
 - An edited agent, prompt or schedule object takes effect at the next turn boundary.
 - Hermes and Osaurus are not required. Room size, routing and scheduling follow anyagent's own rules.
 - anyagent must provide what those runtimes gave: harness drivers, sessions, approvals, schedules. Most of it comes
-  from Michel ([ADR 0010](0010-reuse-michel-adapters-own-the-workflow.md)) and Temporal ([ADR 0003](0003-one-shared-temporal-one-workflow-per-agent.md)).
+  from Michel ([ADR 0010](0010-reuse-michel-adapters-and-the-npm-harness.md)) and Temporal ([ADR 0003](0003-one-shared-temporal-one-workflow-per-agent.md)).
 - Features Hermes has and anyagent does not yet (voice, Cua computer use, browser profiles, curated memory) are out of
   v0.
 

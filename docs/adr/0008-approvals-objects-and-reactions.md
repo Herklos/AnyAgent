@@ -1,6 +1,6 @@
 # ADR 0008: Approvals are objects, decided by a reaction or an edit from an approver's identity
 
-- Status: accepted (owner, 2026-11-06)
+- Status: accepted (owner, 2026-11-06). Amended 2026-11-06: `auto` mode's judge is a decision model ([ADR 0015](0015-decision-model-for-approvals.md)).
 - Date: 2026-11-06
 
 ## Context
@@ -16,7 +16,7 @@ behind each count" (`core/api/v2/handler/chat.go`, line 146).
 
 ## Decision
 
-1. Approval modes per agent (from Michel): `read_only`, `ask`, `auto` (a judge model decides low-risk actions), `full`.
+1. Approval modes per agent (from Michel): `read_only`, `ask`, `auto` (a decision model races people, [ADR 0015](0015-decision-model-for-approvals.md)), `full`.
    The pure decision function is Michel's `preDecision` ([research/michel-reuse.md](../research/michel-reuse.md)).
 2. When a person must decide, the node creates an **`aa_approval`** object (requester, task, action, risk, summary,
    `expires_at`) and posts a chat message linking it; the workflow waits.
@@ -24,8 +24,8 @@ behind each count" (`core/api/v2/handler/chat.go`, line 146).
    - a ✅ or ❌ reaction appears on that message, and a re-read with `?reactions=full` shows a participant id in the
      space's `approvers` list; or
    - the object's `status` is set to `approved` / `denied` by an approver (author verification: [SPIKES.md](../SPIKES.md) 005).
-4. The event gateway ([ADR 0011](0011-event-gateway.md)) does the re-read and the approver check, then signals the
-   workflow; a node activity records `aa_decided_by` and `aa_decided_at`. Expiry denies.
+4. The event gateway ([ADR 0011](0011-event-gateway.md)) does the re-read and the approver check, then sends the
+   harness tool-approval update to the workflow; a node activity records `aa_decided_by` and `aa_decided_at`. Expiry denies.
 5. Approvers are a list of participant ids on the space's `aa_settings` object, editable only by the space owner.
 
 ## Consequences

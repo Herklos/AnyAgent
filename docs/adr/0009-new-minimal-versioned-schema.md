@@ -1,6 +1,6 @@
 # ADR 0009: A new minimal, versioned schema with prefixed type keys
 
-- Status: accepted (owner, 2026-11-06); key prefix proposed, see Q1
+- Status: accepted (owner, 2026-11-06), including the `aa_` key prefix (Q1, settled the same day)
 - Date: 2026-11-06
 
 ## Context

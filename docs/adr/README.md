@@ -13,6 +13,11 @@ commit as the behaviour it decides.
 | [0006](0006-coordination-hierarchy-with-opt-in-claims.md) | Hierarchy assigns; groups may opt into claims serialised by Temporal | accepted |
 | [0007](0007-chat-for-talk-objects-for-work.md) | Chat for talk, objects for work | accepted |
 | [0008](0008-approvals-objects-and-reactions.md) | Approvals are objects decided by an approver's reaction or edit | accepted |
-| [0009](0009-new-minimal-versioned-schema.md) | New minimal, versioned schema with `aa_` keys | accepted (prefix: Q1) |
-| [0010](0010-reuse-michel-adapters-own-the-workflow.md) | Reuse Michel's adapters; own the workflow, no temporal-agent-harness | **proposed** |
+| [0009](0009-new-minimal-versioned-schema.md) | New minimal, versioned schema with `aa_` keys | accepted |
+| [0010](0010-reuse-michel-adapters-and-the-npm-harness.md) | Reuse Michel's adapters; build the workflow on temporal-agent-harness from npm (pinned, not vendored) | accepted |
 | [0011](0011-event-gateway.md) | An event gateway forwards Anytype and webhook events to workflows | accepted |
+| [0012](0012-any-anytype-sync-network.md) | Anytype's network or a self-hosted any-sync, by configuration only | accepted |
+| [0013](0013-agent-permissions-over-the-org.md) | Agents may change the org according to their permissions | accepted |
+| [0014](0014-model-endpoints-local-and-cloud.md) | Model endpoints: llama.cpp and any OpenAI-compatible API, local or cloud | accepted |
+| [0015](0015-decision-model-for-approvals.md) | A decision model judges `auto` approvals, racing a person, never failing open | accepted |
+| [0016](0016-computer-use-with-cua.md) | Desktop and computer use through cua | accepted as a plan (after v0) |

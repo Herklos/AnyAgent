@@ -17,7 +17,7 @@ Go was chosen first, then reconsidered when the owner asked whether Go was requi
 - The realtime API is reachable from TypeScript exactly as from Go: [spike 001](../../spikes/001-ts-sse/) consumes both v2
   streams (chat and object search) with Node 22 `fetch`, including the POST stream that `EventSource` cannot open.
 - Temporal's TypeScript SDK is first class, and Michel's harness adapters are TypeScript
-  ([ADR 0010](0010-reuse-michel-adapters-own-the-workflow.md)).
+  ([ADR 0010](0010-reuse-michel-adapters-and-the-npm-harness.md)).
 
 ## Decision
 

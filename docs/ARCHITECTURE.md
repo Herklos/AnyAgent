@@ -15,25 +15,27 @@ Status: **proposed** (specification stage). Decisions are in [adr/](adr/); open 
 │ anytype serve (viewer, read-only key) │  │ anytype serve (node-a)   │  │ …            │
 │ sources: chat SSE, object SSE,        │  │ Temporal worker          │  │              │
 │          webhooks  ◄── POST /hooks/…  │  │   queue node:node-a      │  │              │
-│ dedupe → route → signalWithStart      │  │ harness adapters:        │  │              │
+│ dedupe → route → update-with-start    │  │ harness adapters:        │  │              │
 │ reconciler: aa_schedule → Schedules   │  │   claude-code, codex,    │  │              │
 └────────┬──────────────────────────────┘  │   opencode, openai, acp  │  │              │
-         │ signals                         └───▲──────────────────────┘  └───▲──────────┘
+         │ updates                         └───▲──────────────────────┘  └───▲──────────┘
          ▼                                     │ activities                   │
 ┌──────────────────────────── one shared Temporal ──────────────────────────────┐
-│ AnyAgent workflow per agent (agent:<space>:<agentId>) · Temporal Schedules    │
+│ AnyAgent (defineAgent, npm harness) per agent · Temporal Schedules            │
 └───────────────────────────────────────────────────────────────────────────────┘
 ```
 
 | Component | Runs where | Responsibility |
 | --- | --- | --- |
 | **Anytype space** | every member's device, synced p2p by any-sync | Source of truth: the org, the work, the conversation ([ADR 0002](adr/0002-anytype-is-the-source-of-truth.md)). |
-| **Event gateway** | one per deployment, next to Temporal ([ADR 0011](adr/0011-event-gateway.md)) | The only way in: Anytype chat and object streams, webhooks → dedupe → route → signal. Reconciles schedules. Reads Anytype, never writes. |
-| **Temporal** | one shared cluster, self-hosted or Cloud ([ADR 0003](adr/0003-one-shared-temporal-one-workflow-per-agent.md)) | One workflow per agent, Temporal Schedules, serialised updates. |
-| **Agent workflow** | Temporal (deterministic code) | Inbox, turn loop, approval wait, claims. Spec: [agent-workflow.md](specs/agent-workflow.md). |
+| **Event gateway** | one per deployment, next to Temporal ([ADR 0011](adr/0011-event-gateway.md)) | The only way in: Anytype chat and object streams, webhooks → dedupe → route → update-with-start. Loop guard, rotation, schedule reconciler. Reads Anytype, never writes. |
+| **Temporal** | one per deployment: self-hosted or Temporal Cloud, chosen by configuration ([ADR 0003](adr/0003-one-shared-temporal-one-workflow-per-agent.md)) | One workflow per agent, Temporal Schedules, serialised updates. |
+| **Agent workflow** | Temporal (deterministic code) | `defineAgent` from `@temporalio/agent-harness` (npm, pinned): turn queue, approval gate and auto mode, claims. Spec: [agent-workflow.md](specs/agent-workflow.md). |
 | **Node** | each machine that runs agents | Temporal worker on `node:<handle>`; runs turns through harness adapters; writes to Anytype through the endpoint of each agent's account ([ADR 0005](adr/0005-identity-agents-map-to-accounts.md)). |
 | **`anytype serve`** | one per Anytype account, anywhere on the private network | Anytype JSON API (`:31012`) for that account ([research](research/anytype-api.md)). One shared account, a pool, or one per agent ([ADR 0005](adr/0005-identity-agents-map-to-accounts.md)). |
-| **Harness adapters** | node, inside activities | Claude Code, Codex, OpenCode, any ACP agent, OpenAI-compatible APIs ([ADR 0010](adr/0010-reuse-michel-adapters-own-the-workflow.md)). |
+| **Harness adapters** | node, inside activities | Claude Code, Codex, OpenCode, any ACP agent, OpenAI-compatible APIs ([ADR 0010](adr/0010-reuse-michel-adapters-and-the-npm-harness.md)). |
+| **Model endpoints** | node config | llama.cpp (`llama-server`) and any OpenAI-compatible API, local or cloud, for agents and the decision model ([ADR 0014](adr/0014-model-endpoints-local-and-cloud.md)). |
+| **Tool profiles** | node config | MCP servers given to harnesses; computer use through cua after v0 ([ADR 0016](adr/0016-computer-use-with-cua.md)). |
 
 Read and write paths are split: the gateway has a **read-only** key as a space **viewer**; nodes have read-write keys
 and post through their agents' accounts. A compromised gateway can wake agents but cannot write to the space.
@@ -42,6 +44,10 @@ and post through their agents' accounts. A compromised gateway can wake agents b
 on one bot account, a pool of shared accounts, or one account each are the same code with different data. On a shared
 account, agents add a handle tag (`**@handle**`) and the tag says who spoke; on an exclusive account, the account does.
 People never share an account with agents, so a person's message or approval cannot come from an agent.
+
+**Infrastructure choices are configuration**: Temporal self-hosted or Cloud ([ADR 0003](adr/0003-one-shared-temporal-one-workflow-per-agent.md)),
+Anytype's sync network or a self-hosted any-sync ([ADR 0012](adr/0012-any-anytype-sync-network.md)), local or cloud
+models ([ADR 0014](adr/0014-model-endpoints-local-and-cloud.md)). An all-local deployment needs no cloud account.
 
 ## 2. Placement
 
@@ -71,8 +77,8 @@ Proven in TypeScript against a mock of heart's exact framing: [spike 001](../spi
 live `anytype serve` ([SPIKES.md](SPIKES.md) 002).
 
 **Pipeline**: normalise → dedupe (key: message id, `objectId@last_modified_date`, webhook delivery id) → route →
-`signalWithStart` → commit cursor. The cursor is committed only after Temporal accepts the signal; workflows drop
-repeated keys, so a crash re-delivers and never double-executes.
+update-with-start (the harness message update, `updateId` = key) → commit cursor once the update is accepted. A crash
+re-delivers; a repeated key is dropped by Temporal within a run and by the gateway's key store across runs.
 
 **Routing a chat message** (in the chat of an `aa_group`):
 
@@ -86,15 +92,17 @@ repeated keys, so a crash re-delivers and never double-executes.
 | Author not in `aa_allowed_authors` (when set) and not a node | nobody |
 
 **Routing an object change**: an `aa_task` change → its lead, assignee and reviewer; an `aa_approval` decision → the
-requester (after verifying the approver, §6); an edit to `aa_agent` / `aa_prompt` / `aa_group` / rules → `configChanged`
-to the affected agents; `aa_schedule` / `aa_trigger` changes → the reconciler; `object_change` triggers → their owners.
+requester (after verifying the approver, §6); an edit to `aa_agent` / `aa_prompt` / `aa_group` / rules → nothing to
+deliver (the next turn reads it), except archiving an agent, which closes its workflow; `aa_schedule` / `aa_trigger`
+changes → the reconciler; `object_change` triggers → their owners. An org change by an agent account without the
+permission is ignored once authors can be read ([ADR 0013](adr/0013-agent-permissions-over-the-org.md), spike 005).
 
 ### 3.2 The turn
 
-The workflow coalesces pending signals into **one turn** when the agent is idle (Michel ADR 0014). It calls `runTurn`
-on the agent's node with the batch and the session id; the node reads the agent's configuration fresh from Anytype,
-drives the harness, answers permission requests through an update to the workflow, and returns the reply, usage and
-session id.
+Each delivery is a harness handler call. Deliveries that arrive during a turn are queued, and each becomes the next turn
+(the harness 0.3.1 does not coalesce; spike 006). The turn reads the agent's configuration fresh from Anytype, calls
+`runTurn` on the agent's node, which drives the harness and answers permission requests through an update to the
+workflow, and returns the reply, usage and session id. The session id stays on the node, so it survives rotation.
 
 ### 3.3 Out: nodes write
 
@@ -105,6 +113,8 @@ Only node activities write to Anytype, through the endpoint of the agent's `aa_a
 - **Receipts**: 👀 (seen), ⏳ (working), ✅ (done) reactions, removed when outdated.
 - **Work**: create or patch `aa_task`, `aa_approval`, schedule projections. Idempotent: each write carries an operation
   key (`aa_op_key`) and the activity reads before it writes.
+- **Org changes** (agents, groups, schedules, triggers) only within the agent's `aa_permissions`, checked on this path;
+  rights, approvers and accounts are written by people only ([ADR 0013](adr/0013-agent-permissions-over-the-org.md)).
 
 ## 4. Work and coordination ([ADR 0006](adr/0006-coordination-hierarchy-with-opt-in-claims.md), [ADR 0007](adr/0007-chat-for-talk-objects-for-work.md))
 
@@ -119,20 +129,24 @@ Only node activities write to Anytype, through the endpoint of the agent's `aa_a
 ## 5. Time and triggers
 
 - **Schedules**: the gateway's reconciler maps each `aa_schedule` (cron, timezone, enabled) to a Temporal Schedule
-  that signals the owner's workflow; overlap: skip. `aa_next_run` / `aa_last_run` are written back by a node activity.
+  whose `ScheduleKick` action wakes the owner's workflow; overlap: skip. `aa_next_run` / `aa_last_run` are written back by a node activity.
 - **Triggers**: `webhook` (gateway endpoint + HMAC with a secret in the gateway config), `object_change` (a saved
   search evaluated on the object stream), `chat_pattern` (a regex on a group's chat). New kinds are registry entries.
 
 ## 6. Approvals ([ADR 0008](adr/0008-approvals-objects-and-reactions.md))
 
 1. A permission request reaches the workflow as an update; `preDecision` (agent's `aa_approval_mode`) allows, denies or
-   asks.
-2. Ask: a node activity creates `aa_approval` and a chat message linking it; the workflow waits (timer on
+   asks, and applies the hard floors.
+2. Ask: a node activity creates `aa_approval` and a chat message linking it; the harness approval gate waits (timer on
    `aa_expires_at`).
-3. You react ✅ / ❌ or set `aa_status`. On `reactions_updated` (counts only), the gateway re-reads the message with
+3. In `auto` mode a **decision model** (local or cloud, [ADR 0015](adr/0015-decision-model-for-approvals.md)) judges
+   the call against the agent's criteria **in a race with you**: the first decision wins, and `escalate`, errors and
+   timeouts leave it to you. It never fails open.
+4. You react ✅ / ❌ or set `aa_status`. On `reactions_updated` (counts only), the gateway re-reads the message with
    `?reactions=full` and forwards the decision only if a participant id is in `aa_approvers`. An object edit counts only
    if its author is an approver ([SPIKES.md](SPIKES.md) 005).
-4. The workflow resumes or refuses with the reason; a node records `aa_decided_by` / `aa_decided_at`.
+5. The workflow resumes or refuses with the reason; a node records `aa_decided_by` (a participant id or
+   `model:<endpoint>/<model>`) and `aa_decided_at`.
 
 ## 7. Live configuration
 
@@ -144,24 +158,30 @@ another tool's config.
 
 | Failure | Effect | Recovery |
 | --- | --- | --- |
-| Node down | Its agents' turns wait in Temporal; signals keep queuing in the workflows | Node returns and polls; turns run |
+| Node down | Its agents' turns wait in Temporal; deliveries keep queuing in the workflows | Node returns and polls; turns run |
 | Gateway down | Nothing wakes; Anytype keeps working for people; webhooks get errors | Restart: chat resumes from cursors, object stream re-snapshots and is diffed against the cache |
-| Gateway cursor file lost | Possible re-delivery | Workflows drop repeated keys |
+| Gateway cursor file lost | Possible re-delivery | Temporal drops a repeated update id within a run |
 | `anytype serve` down (node) | That node cannot read config or write | Activities retry with backoff |
-| Temporal down | No turns, no schedule fires, no signals (gateway buffers by not committing cursors) | Resume where they were |
+| Temporal down | No turns, no schedule fires, no deliveries (gateway buffers by not committing cursors) | Resume where they were |
+| Decision model down | `auto` mode escalates every gated call to people | Approvals wait for a person |
 | Temporal wiped | Execution history lost, nothing about the org | `anyagent rebuild`: one workflow per live agent, schedules reconciled |
 | Concurrent object edits | any-sync merges | One writer per field; claims through a Temporal update |
 
 ## 9. Extension points
 
-- **Harnesses**: registry entries in `packages/harness` ([ADR 0010](adr/0010-reuse-michel-adapters-own-the-workflow.md)).
+- **Harnesses**: registry entries in `packages/harness` ([ADR 0010](adr/0010-reuse-michel-adapters-and-the-npm-harness.md)).
 - **Gateway source kinds** and **trigger kinds**: registries ([ADR 0011](adr/0011-event-gateway.md)).
 - **Routing modes** for unaddressed messages: `lead`, `everyone`, `none`; an `auto` router model later.
 - **Identity** port: agents map to accounts by data; one implementation covers one shared account, a pool, and one
   account per agent ([ADR 0005](adr/0005-identity-agents-map-to-accounts.md)).
 - **AnytypeClient** port: HTTP/SSE in v0; embedded heart possible later ([ADR 0004](adr/0004-typescript-over-the-http-api.md)).
+- **Permissions**: registry of permission ids ([ADR 0013](adr/0013-agent-permissions-over-the-org.md)).
+- **Model endpoint kinds** (`openai_compatible` in v0, covering llama.cpp) ([ADR 0014](adr/0014-model-endpoints-local-and-cloud.md)).
+- **Approval evaluators** (`model` in v0) ([ADR 0015](adr/0015-decision-model-for-approvals.md)).
+- **Tool-profile kinds**, including `computer` (cua first) ([ADR 0016](adr/0016-computer-use-with-cua.md)).
 
 ## 10. Deliberately not generalised (v0)
 
 - One space per deployment, one gateway (no HA pair yet).
-- No chat platforms besides Anytype; no sandbox; no migration from the `anytype-agents` schema.
+- No chat platforms besides Anytype; no sandbox in v0 (cua sandboxes come with computer use, after v0); no migration
+  from the `anytype-agents` schema.

@@ -1,7 +1,7 @@
 # What anyagent reuses from Michel
 
 Source: [Herklos/Michel](https://github.com/Herklos/Michel) at `402865d` (2026-11-06), Apache-2.0, the same licence as
-anyagent. Decision: [ADR 0010](../adr/0010-reuse-michel-adapters-own-the-workflow.md) (proposed).
+anyagent. Decision: [ADR 0010](../adr/0010-reuse-michel-adapters-and-the-npm-harness.md) (accepted).
 
 ## Code to copy
 
@@ -27,9 +27,24 @@ verified on a real Codex (audit G176)"; live tests need opt-in variables and rea
 
 | Michel path | Why not |
 | --- | --- |
-| `vendor/temporal-agent-harness` (submodule of `Herklos/temporal-agent-harness`) and `MichelAgent` on `defineAgent` | The agent loop lives in the harness, so the workflow cannot `continueAsNew` ("The agent workflow cannot, because that loop lives in the harness fork", `packages/temporal/workflows/AGENTS.md`). anyagent owns a ~300-line workflow instead. The harness itself is MIT and on npm as `@temporalio/agent-harness`, marked "Experimental. APIs change between releases." |
 | `packages/hub`, `packages/storage`, `packages/starfish`, `apps/server`, `apps/app` | Replaced by Anytype (storage, chat, console). |
 | `MichelChannel` (sequencer and router of a channel) | Replaced by the event gateway and Anytype chat ordering. |
+
+## Reused as a dependency, not copied
+
+| Michel path | anyagent |
+| --- | --- |
+| `vendor/temporal-agent-harness` (a submodule pinning upstream `ce68611`; the fork has no patches of its own) | `@temporalio/agent-harness` from npm, pinned with the Temporal SDK it is locked to ([research](temporal-agent-harness.md)) |
+| `MichelAgent` on `defineAgent` (`packages/temporal/workflows/src/agent.ts`) | The pattern: handlers, a custom permission update, policy from the approval mode, a rotation query. anyagent's `AnyAgent` follows it ([spec](../specs/agent-workflow.md)) |
+| Hub rotation of agent runs before 1,500 updates, never with a turn in flight | Done by anyagent's gateway ([ADR 0011](../adr/0011-event-gateway.md)) |
+
+## Michel's plans anyagent follows
+
+| Michel source | Plan | anyagent |
+| --- | --- | --- |
+| `docs/PLAN.md` line 429; `docs/adr/0003-harness-adapters.md` line 12 | `openai_compatible` providers incl. llama.cpp, model discovery | [ADR 0014](../adr/0014-model-endpoints-local-and-cloud.md) |
+| `docs/PLAN.md` lines 313 and 574 | `auto` approvals by a pluggable evaluator using any configured model; nothing fails open | [ADR 0015](../adr/0015-decision-model-for-approvals.md) |
+| `docs/PLAN.md` §15, line 97; ADR 0012 | Computer-use ladder, Linux containers first, through `vercel-labs/agent-desktop` | [ADR 0016](../adr/0016-computer-use-with-cua.md): the same seam, cua first (Michel does not mention cua at `402865d`) |
 
 ## Ideas to reuse (no code)
 
