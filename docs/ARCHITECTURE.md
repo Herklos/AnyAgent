@@ -31,12 +31,17 @@ Status: **proposed** (specification stage). Decisions are in [adr/](adr/); open 
 | **Event gateway** | one per deployment, next to Temporal ([ADR 0011](adr/0011-event-gateway.md)) | The only way in: Anytype chat and object streams, webhooks → dedupe → route → signal. Reconciles schedules. Reads Anytype, never writes. |
 | **Temporal** | one shared cluster, self-hosted or Cloud ([ADR 0003](adr/0003-one-shared-temporal-one-workflow-per-agent.md)) | One workflow per agent, Temporal Schedules, serialised updates. |
 | **Agent workflow** | Temporal (deterministic code) | Inbox, turn loop, approval wait, claims. Spec: [agent-workflow.md](specs/agent-workflow.md). |
-| **Node** | each machine that runs agents | Temporal worker on `node:<handle>`; runs turns through harness adapters; writes to Anytype as its account ([ADR 0005](adr/0005-identity-one-account-per-node-first.md)). |
-| **`anytype serve`** | gateway and each node, each with its own bot account | Local Anytype JSON API on `127.0.0.1:31012` ([research](research/anytype-api.md)). |
+| **Node** | each machine that runs agents | Temporal worker on `node:<handle>`; runs turns through harness adapters; writes to Anytype through the endpoint of each agent's account ([ADR 0005](adr/0005-identity-agents-map-to-accounts.md)). |
+| **`anytype serve`** | one per Anytype account, anywhere on the private network | Anytype JSON API (`:31012`) for that account ([research](research/anytype-api.md)). One shared account, a pool, or one per agent ([ADR 0005](adr/0005-identity-agents-map-to-accounts.md)). |
 | **Harness adapters** | node, inside activities | Claude Code, Codex, OpenCode, any ACP agent, OpenAI-compatible APIs ([ADR 0010](adr/0010-reuse-michel-adapters-own-the-workflow.md)). |
 
 Read and write paths are split: the gateway has a **read-only** key as a space **viewer**; nodes have read-write keys
-and post as themselves. A compromised gateway can wake agents but cannot write to the space.
+and post through their agents' accounts. A compromised gateway can wake agents but cannot write to the space.
+
+**Accounts** ([ADR 0005](adr/0005-identity-agents-map-to-accounts.md)): each agent links one `aa_account`. All agents
+on one bot account, a pool of shared accounts, or one account each are the same code with different data. On a shared
+account, agents add a handle tag (`**@handle**`) and the tag says who spoke; on an exclusive account, the account does.
+People never share an account with agents, so a person's message or approval cannot come from an agent.
 
 ## 2. Placement
 
@@ -73,7 +78,8 @@ repeated keys, so a crash re-delivers and never double-executes.
 
 | Message | Signalled |
 | --- | --- |
-| Authored by a node account (an agent's own reply) | agents it @mentions only, counted against `aa_max_hops` |
+| Authored by an agent account (resolved to an agent by account or tag) | agents it @mentions only, counted against `aa_max_hops` |
+| Authored by a shared agent account without a valid tag | nobody (unattributed agent message) |
 | @mentions `@handle` | those agents |
 | `@all` / `@everyone` | every member agent |
 | No mention | by `aa_routing`: `lead` (default) → the lead; `everyone`; `none` |
@@ -92,7 +98,8 @@ session id.
 
 ### 3.3 Out: nodes write
 
-Only node activities write to Anytype, as the node's account with the agent's handle tag:
+Only node activities write to Anytype, through the endpoint of the agent's `aa_account` (local or remote
+`anytype serve`), with the handle tag when the account is shared:
 
 - **Replies** with `reply_to` the triggering message; visible text only, no thinking or tool inputs.
 - **Receipts**: 👀 (seen), ⏳ (working), ✅ (done) reactions, removed when outdated.
@@ -150,7 +157,8 @@ another tool's config.
 - **Harnesses**: registry entries in `packages/harness` ([ADR 0010](adr/0010-reuse-michel-adapters-own-the-workflow.md)).
 - **Gateway source kinds** and **trigger kinds**: registries ([ADR 0011](adr/0011-event-gateway.md)).
 - **Routing modes** for unaddressed messages: `lead`, `everyone`, `none`; an `auto` router model later.
-- **Identity** port: node account + handle tag in v0; one account per agent planned ([ADR 0005](adr/0005-identity-one-account-per-node-first.md)).
+- **Identity** port: agents map to accounts by data; one implementation covers one shared account, a pool, and one
+  account per agent ([ADR 0005](adr/0005-identity-agents-map-to-accounts.md)).
 - **AnytypeClient** port: HTTP/SSE in v0; embedded heart possible later ([ADR 0004](adr/0004-typescript-over-the-http-api.md)).
 
 ## 10. Deliberately not generalised (v0)

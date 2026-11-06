@@ -11,6 +11,9 @@ Formats are Anytype property formats: `text`, `number`, `select`, `multi_select`
 ```
 aa_settings (1 per space) ── approvers, schema_version, rules → aa_prompt
 aa_node ◄── node ── aa_agent ── prompt ──► aa_prompt
+                      │ account
+                      ▼
+                   aa_account (1 shared, a pool, or 1 per agent)
                       │  ▲ members/lead
                       ▼  │
                    aa_group ── chat_id ──► Anytype chat
@@ -27,7 +30,7 @@ One per space. Created by `anyagent bootstrap`.
 | Key | Format | Writer | Notes |
 | --- | --- | --- | --- |
 | `aa_schema_version` | text | bootstrap/migrate | Semver of this schema, e.g. `0.1.0` |
-| `aa_approvers` | text | space owner | Comma-separated participant ids allowed to decide approvals ([ADR 0008](../adr/0008-approvals-objects-and-reactions.md)) |
+| `aa_approvers` | text | space owner | Comma-separated participant ids allowed to decide approvals ([ADR 0008](../adr/0008-approvals-objects-and-reactions.md)). Must not name an `aa_account` ([ADR 0005](../adr/0005-identity-agents-map-to-accounts.md)) |
 | `aa_rules` | objects → `aa_prompt` | person | Rules every agent follows (the Shared Rules equivalent) |
 | `aa_temporal_namespace` | text | person | Informational; the real address is node config |
 
@@ -38,10 +41,23 @@ A machine that runs agents. Body: free notes.
 | Key | Format | Writer | Notes |
 | --- | --- | --- | --- |
 | `aa_handle` | text | person | Stable lowercase id, e.g. `mac-studio`. Task queue = `node:<handle>` |
-| `aa_participant_id` | text | node (at registration) | The node's Anytype account in this space ([ADR 0005](../adr/0005-identity-one-account-per-node-first.md)) |
 | `aa_harnesses` | multi_select | node | Harnesses detected on the machine (`claude-code`, `codex`, `opencode`, `openai`, …) |
 | `aa_last_seen` | date | node | Heartbeat, written at most every 5 minutes |
+| `aa_accounts` | multi_select | node | Account handles this node has an endpoint for (from its config; informational) |
 | `aa_lifecycle` | select | person | `live` \| `paused` \| `retired` |
+
+## aa_account
+
+An Anytype account agents write through ([ADR 0005](../adr/0005-identity-agents-map-to-accounts.md)). Its endpoint
+(URL and API key) lives in node configuration, never here. One shared account, a pool, or one per agent are all
+expressed by how many `aa_agent`s link the same `aa_account`.
+
+| Key | Format | Writer | Notes |
+| --- | --- | --- | --- |
+| `aa_handle` | text | person | Stable id used in node config, e.g. `bots`, `eng-pool`, `chief` |
+| `aa_participant_id` | text | `anyagent account add` | The account's participant id in this space (from `GET /v2/spaces/{s}/members/me`) |
+| `aa_tag_always` | checkbox | person | Add the handle tag even when one agent uses the account alone |
+| `aa_lifecycle` | select | person | `live` \| `retired` |
 
 ## aa_agent
 
@@ -49,6 +65,7 @@ A machine that runs agents. Body: free notes.
 | --- | --- | --- | --- |
 | `aa_handle` | text | person | Mention handle, unique in the space, e.g. `chief` |
 | `aa_node` | objects → `aa_node` | person | Home node; turns run there |
+| `aa_account` | objects → `aa_account` | person | The account it posts as; the home node must have an endpoint for it |
 | `aa_harness` | select | person | Registry id: `claude-code`, `codex`, `opencode`, `openai`, `acp`, … |
 | `aa_model` | text | person | Model name passed to the harness; empty = harness default |
 | `aa_effort` | select | person | `low` \| `medium` \| `high` (when the harness supports it) |

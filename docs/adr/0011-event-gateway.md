@@ -25,15 +25,16 @@ A dedicated **event gateway** process (`apps/gateway`) is the only path from the
    workflow's idempotency keys drop the repeat.
 3. **Reconciler**: the gateway also turns `aa_schedule` objects into Temporal Schedules and keeps `aa_next_run` /
    `aa_last_run` up to date (through a node activity, since the gateway does not write to Anytype, see 4).
-4. **Least privilege**: the gateway has its **own Anytype bot account**, a **viewer** in the space, with a **read-only**
-   API key. It never writes to Anytype. All writes stay on nodes, as their agents ([ADR 0005](0005-identity-one-account-per-node-first.md)).
+4. **Least privilege**: the gateway reads with a **read-only** API key, on its own **viewer** account (recommended) or on
+   one of the agent accounts ([ADR 0005](0005-identity-agents-map-to-accounts.md), decision 6). It never writes to Anytype. All writes stay on nodes, as their agents ([ADR 0005](0005-identity-agents-map-to-accounts.md)).
 5. **State**: cursors (chat state ids, webhook delivery ids) in a local SQLite file. Losing it is safe: the gateway
    re-snapshots and workflows drop duplicates by key.
 6. **Placement**: next to Temporal (same private network); the webhook endpoint is the only port exposed beyond it.
 
 ## Consequences
 
-- Nodes no longer open streams; they run a Temporal worker, harness adapters and their own `anytype serve` for writes.
+- Nodes no longer open streams; they run a Temporal worker and harness adapters, and write through their agents'
+  account endpoints.
 - One subscriber per space: no duplicate signals, one place to observe lag (`event age at signal` metric).
 - A second central component. While it is down nothing wakes: chat resumes from `Last-Event-ID`; the object stream has
   no replay, so the gateway diffs the new snapshot against its cache (`last_modified_date`) to emit missed changes;

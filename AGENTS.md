@@ -30,4 +30,5 @@ proved and what it did not). Planned once code starts: `packages/` (TypeScript, 
    come from Anytype objects or node config. A new harness is a registry entry, a new trigger is a kind. Every ADR has
    an **Extension points** section and says what it deliberately does not generalise.
 7. **Spikes prove one thing each** and say honestly what they did not prove (a mock is not a live server).
-8. **Never push to `main`.** Work lands on a branch and the owner merges.
+8. **Branches.** During the specification stage the owner has the work pushed directly to `main`. Agents other than the
+   one the owner is working with land on a branch, and the owner merges.
