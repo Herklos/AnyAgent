@@ -15,7 +15,7 @@ schedules and the rest. The owner also chose one shared Temporal for durable exe
    approvals, results and the conversation.
 2. **Temporal holds execution state only**: workflow histories, pending signals, timers, Temporal Schedules derived from
    `aa_schedule` objects, in-flight turns and harness session ids.
-3. **Every cross-agent message goes through Anytype first** (a chat message or an object), and ingress turns it into a
+3. **Every cross-agent message goes through Anytype first** (a chat message or an object), and the event gateway ([ADR 0011](0011-event-gateway.md)) turns it into a
    Temporal signal. The single exception is a claim ([ADR 0006](0006-coordination-hierarchy-with-opt-in-claims.md)),
    whose outcome is written to Anytype immediately.
 4. **Rebuild is a supported operation**: from an empty Temporal, `anyagent rebuild` starts one workflow per live

@@ -19,7 +19,7 @@ Anytype alone cannot serialise decisions across machines: any-sync merges concur
 1. One Temporal cluster serves every node of a deployment (self-hosted over a private network such as Tailscale, or
    Temporal Cloud). Each node is a Temporal worker on its own task queue `node:<handle>`.
 2. Each `aa_agent` is exactly one workflow with id `agent:<spaceId>:<agentObjectId>`, started with `signalWithStart`
-   by whichever node first has an event for it, and kept alive with `continueAsNew`.
+   by the event gateway ([ADR 0011](0011-event-gateway.md)) when it has the first event for it, and kept alive with `continueAsNew`.
 3. Everything that wakes an agent is a signal or an update to that workflow: chat messages, object changes, schedule
    fires, trigger fires, approval decisions, claims. The contract is in [specs/agent-workflow.md](../specs/agent-workflow.md).
 4. `aa_schedule` objects become Temporal Schedules whose action signals the owner's workflow.

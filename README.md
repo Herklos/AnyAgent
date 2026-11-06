@@ -11,25 +11,28 @@ your choice, and coordinates with the others through the same Anytype spaces you
 ## The idea in one picture
 
 ```
-            you (Anytype desktop / mobile)
-                        │  chat, objects, reactions
-                        ▼
+                you (Anytype desktop / mobile): chat, objects, ✅/❌
+                                    │
    ┌──────────────── Anytype space (p2p, end-to-end encrypted) ────────────────┐
    │  Agents · Groups (chats) · Tasks · Schedules · Triggers · Approvals · …   │
-   └──────▲────────────────────────▲─────────────────────────────▲─────────────┘
-          │ HTTP + SSE             │                             │
-   ┌──────┴──────┐          ┌──────┴──────┐               ┌──────┴──────┐
-   │  node: Mac  │          │  node: VPS  │               │  node: Pi   │   anytype serve + anyagent node
-   │ claude-code │          │ codex, api  │               │ local model │   (one Anytype account per node)
-   └──────▲──────┘          └──────▲──────┘               └──────▲──────┘
-          └──────── activities ────┴─── one shared Temporal ─────┘
-                        (one durable workflow per agent)
+   └──────┬──────────────────────────▲──────────────────────────────▲──────────┘
+          │ SSE (read-only)          │ HTTP writes                  │
+   ┌──────▼────────┐          ┌──────┴──────┐                ┌──────┴──────┐
+   │ event gateway │◄─webhooks│  node: Mac  │                │  node: Pi   │   each node: anytype serve
+   │ route+dedupe  │          │ claude-code │      …         │ local model │   + Temporal worker
+   └──────┬────────┘          └──────▲──────┘                └──────▲──────┘   + harness adapters
+          │ signals                  └──── activities ──────────────┤
+          ▼                                                         │
+   ┌──────────────── one shared Temporal: one workflow per agent ───┴──────────┐
+   └───────────────────────────────────────────────────────────────────────────┘
 ```
 
 - **Anytype is the source of truth and the bus.** Who the agents are, what they must do, when, and what they said all
   live in Anytype. Edit an agent object and the next turn uses it. There is no apply step.
 - **Temporal is the engine, not the database.** Each agent is exactly one long-lived workflow. Chat messages, object
   changes, cron schedules and webhooks become signals to it. Its state can be rebuilt from Anytype.
+- **One way in.** An event gateway reads the Anytype streams (with a read-only key) and receives webhooks, then forwards
+  each event to the workflow of the agent it concerns.
 - **Any harness, any model.** Claude Code, Codex, OpenCode, any ACP agent, or an OpenAI-compatible API (including local
   models) behind one adapter interface, reused from [Michel](https://github.com/Herklos/Michel).
 - **Talk in chat, work in objects.** Conversation happens in Anytype chats. Durable work (tasks, approvals, schedules)
