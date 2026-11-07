@@ -62,3 +62,10 @@ verified on a real Codex (audit G176)"; live tests need opt-in variables and rea
 
 - Share instead of copy? A published `@herklos/harness-adapters` package used by both Michel and anybot would avoid
   drift. Q9.
+
+
+## Copied into AnyBot (WP4)
+
+Copied at `402865d` on 2026-11-07 into `packages/harness/src/*` and `packages/core/src/floor/*` (see `THIRD_PARTY_NOTICES.md`).
+OpenAI adapter and OpenCode descriptor were **not** copied (WP4 scope). Registry drops `opencode`; adds `vibe` (headless-cli) and `startSession`.
+Changes from Michel: `.js` import paths, package rename, `ANYAGENT_FAKE_*` env, clientInfo `anybot`, Grok/Vibe `shipping: v1` until live spike 007.

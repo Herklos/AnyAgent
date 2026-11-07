@@ -9,15 +9,21 @@
       "default": "./dist/index.js"
     }
   },
+  "bin": {
+    "anyagent-fake-agent": "./bin/anyagent-fake-agent.mjs"
+  },
   "files": [
-    "dist"
+    "dist",
+    "bin"
   ],
   "scripts": {
     "build": "tsc -b",
     "typecheck": "tsc -b --pretty false",
-    "test": "vitest run --config ../../vitest.config.ts --project @anyagent/harness"
+    "test": "tsc -b && vitest run --config ../../vitest.config.ts --project @anyagent/harness"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@agentclientprotocol/claude-agent-acp": "0.99.1"
+  },
   "devDependencies": {
     "typescript": "5.9.3",
     "vitest": "5.1.0"
