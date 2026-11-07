@@ -17,7 +17,14 @@ function listPackageJsonFiles(dir) {
   const out = [];
   if (!existsSync(dir)) return out;
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (entry.name === "node_modules" || entry.name === "dist" || entry.name === ".git") continue;
+    if (
+      entry.name === "node_modules" ||
+      entry.name === "dist" ||
+      entry.name === ".git" ||
+      entry.name === "fixtures"
+    ) {
+      continue;
+    }
     const path = join(dir, entry.name);
     if (entry.isDirectory()) out.push(...listPackageJsonFiles(path));
     else if (entry.name === "package.json") out.push(path);

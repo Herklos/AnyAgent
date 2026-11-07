@@ -1,0 +1,7 @@
+{
+  "name": "fixture-deep-import",
+  "version": "0.0.0",
+  "dependencies": {
+    "@temporalio/workflow": "^1.24.0"
+  }
+}
