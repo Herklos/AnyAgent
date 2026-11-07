@@ -17,7 +17,11 @@
     "typecheck": "tsc -b --pretty false",
     "test": "vitest run --config ../../vitest.config.ts --project @anyagent/core"
   },
-  "dependencies": {},
+  "dependencies": {
+    "zod": "4.6.7",
+    "yaml": "2.9.1",
+    "@anyagent/backend": "workspace:*"
+  },
   "devDependencies": {
     "typescript": "5.9.3",
     "vitest": "5.1.0"

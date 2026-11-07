@@ -1,0 +1,16 @@
+version: 1
+temporal: { address: "localhost:7233", namespace: "default" }
+state: { dir: "~/.anyagent" }
+node: { handle: "my-laptop", workdirRoots: ["~"] }
+tuning: { turnTimeoutMin: 60, rotateAfterAccepted: 1500, maxMessageChars: 8000 }
+orgs:
+  - id: personal
+    backend:
+      {
+        kind: anytype,
+        url: "http://127.0.0.1:31012",
+        readKeyEnv: ANYAGENT_PERSONAL_KEY,
+        writeKeyEnv: ANYAGENT_PERSONAL_KEY,
+      }
+    space: "<space id>"
+harnesses: {}
