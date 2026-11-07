@@ -6,8 +6,8 @@ blocks below, never a bare "done"; `NOT RUN (reason)` for anything not run.
 | WP | Status | Branch / last commit | Owner of the work | Notes |
 | --- | --- | --- | --- | --- |
 | WP1 | done | `cursor/v1-wp1-carryover-gate-d30c` | cloud agent | ANY-12; ADR 0021 proposed (own gate); merged #10 |
-| WP2 | in progress | `cursor/v1-wp2-approval-gate-d30c` | cloud agent | ApprovalBook + ask + Temporal gate |
-| WP3 | not started | | | |
+| WP2 | done | `cursor/v1-wp2-approval-gate-d30c` | cloud agent | ApprovalBook + ask + Temporal gate; merged #11 |
+| WP3 | done | `cursor/v1-wp3-approvals-anytype-d30c` | cloud agent | aa_approval + gateway reactions |
 | WP4 | not started | | | |
 | WP5 | not started | | | |
 | WP6 | not started | | | |
@@ -22,7 +22,8 @@ Status values: `not started`, `in progress`, `blocked (reason)`, `done`.
 
 ## Differences between the built interfaces and this pack
 
-(none yet)
+- Saved query `Approvals – Pending`: backend has no saved-query API in the port; skipped with doctor silence (list pending via `org.list` instead).
+- Status-edit approvals: implemented when `modifiedById` is present; ignored when missing (spike 005 still NOT RUN live).
 
 ## Pins actually installed
 
@@ -59,15 +60,15 @@ Achievements:
 
 Deviations: harness spike 021 not built (early exit on criteria 1/2/5).
 
-### WP2: approval gate and ask mode  (in progress, 2026-11-07)
+### WP2: approval gate and ask mode  (done, 2026-11-07)
 
 Built:
 - `packages/workflows/src/core/{approval-book,approval}.ts`; own-core optional `approvals`
 - `decidePermission` mode `ask`; schema/config `approvalTtlMinutes`; resolveConfig `mode-unsupported`
-- Node `permissionClient` bridge; stub `createApproval`/`recordDecision`
+- Node `permissionClient` bridge; stub `createApproval`/`recordDecision` (filled in WP3)
 - Tests T-V1-WP2-01..09, 11, 12; `spikes/006-agent-core/APPROVALS.md`
 
-Checks: `pnpm check` PASS locally (pending CI)
+Checks: `pnpm check` PASS; merged #11
 
 Achievements:
 - [x] ask turn pauses on gated call; approve/deny/expiry Temporal paths
@@ -75,3 +76,22 @@ Achievements:
 - [x] responsive status/rotation while pending
 - [x] events per approval measured (APPROVALS.md)
 - [x] specs updated
+
+### WP3: approvals in Anytype  (done, 2026-11-07)
+
+Built:
+- Schema `0.2.0`: `aa_approval` + `aa_settings.aa_approvers` + `aa_request_id`
+- `resolveApprovers` (spike 011), `summariseAction` / `riskForKind`, `decideFromReactions` / `decideFromStatusEdit`
+- Node `createApproval` / `recordDecision`; gateway `approvals` watcher + `TemporalDecisionClient`
+- `init` upgrade path; doctor D13–D15
+- Tests T-V1-WP3-01..11 (automated); T-V1-WP3-12 live **NOT RUN** (no throwaway Anytype)
+
+Checks: `pnpm check` PASS locally (453 tests); CI pending
+
+Achievements:
+- [x] person decides ask via reaction path (MemoryBackend + Temporal e2e)
+- [x] decision recorded on object + chat confirmation
+- [x] schema upgrade additive/idempotent; schema.md matches
+- [x] spike 011 table in CI; status-edit when modifier visible
+
+Deviations: saved-query `Approvals – Pending` skipped (no port API); live T-V1-WP3-12 NOT RUN.

@@ -55,8 +55,9 @@ Failure → exactly one notice, then the loop continues:
 - **Permissions.** `runTurn` answers each harness permission request with `decidePermission(approvalMode, …)`
   (floor first; `read_only` / `full` / `ask`). In `ask`, safe kinds allow; gated calls go through workflow update
   `anybot.permission` and wait for `anybot.decision` or TTL expiry. Temporal failure denies
-  (`approval service unavailable`). Anytype `aa_approval` objects land in WP3 (`createApproval` / `recordDecision`
-  are stubs until then). `ask` on a harness without `permissionCallbacks` fails `resolveConfig` with `mode-unsupported`.
+  (`approval service unavailable`). `createApproval` / `recordDecision` persist `aa_approval` + chat notices;
+  the gateway reaction watcher sends `anybot.decision` for ✅/❌ from `aa_approvers` (deny wins; agents refused).
+  `ask` on a harness without `permissionCallbacks` fails `resolveConfig` with `mode-unsupported`.
 - **Session.** Session id is stored on the node (`NodeStore.sessions`, keyed by workflow id). Reused only when
   harness, model and mode are unchanged; survives workflow rotation and worker restart.
 - **Idempotent delivery.** `deliver` records `ops(key, message_id)`; a retry with the same key posts nothing.
@@ -80,10 +81,10 @@ Not started in WP6 (still gateway / later WP). Spec sketch for later; v0 has no 
 | `markReceived` | 👀 on the inbound message | same; best effort (errors logged) |
 | `runTurn` | Open/resume harness; `decidePermission`; heartbeat 10 s; cancel → `session.cancel()` | 60 m, heartbeat 60 s, **maximumAttempts: 1** |
 | `deliver` | Post reply or notice; split long replies; swap 👀→✅; idempotent `key` | 5 m, retry ×3 |
+| `createApproval` | Idempotent `aa_approval` + chat notice (`aa_request_id`) | 1 m, retry ×3 |
+| `recordDecision` | Set status / decided_* + confirmation reply | 1 m, retry ×3 |
 
-`createApproval` / `judgeApproval` are **not in v0**.
+## Not in v0 / later
 
-## Not in v0
-
-Approvals / ask / auto modes, streaming replies, editable "working…" messages, multi-node, coalescing and mid-turn
+Auto mode and the decision model, streaming replies, editable "working…" messages, multi-node, coalescing and mid-turn
 steering, schedules/triggers as turns, computer use ([ADR 0016](../adr/0016-computer-use-with-cua.md)).

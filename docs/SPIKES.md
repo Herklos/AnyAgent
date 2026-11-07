@@ -15,7 +15,7 @@ what it did not.
 | 008 | Two nodes, one gateway, one space: the v2 slice end to end | planned | See [ROADMAP.md](ROADMAP.md) |
 | 009 | Schema bootstrap: create the `aa_*` types, properties and Queries through the v2 API, idempotently | **partial** | |
 | 010 | Can one account be logged in by `anytype serve` on two machines at once (multi-device), or must a shared account use one remote `anytype serve`? | planned | Decides how the one-account setup spans several nodes ([ADR 0005](adr/0005-identity-agents-map-to-accounts.md)) |
-| 011 | Identity resolution table test: person, exclusive agent account, shared account with and without tag, approver that is an agent account (refused) | planned | Pure function; runs in CI |
+| 011 | Identity resolution table test: person, exclusive agent account, shared account with and without tag, approver that is an agent account (refused) | **partial** | `resolveApprovers` table in CI (person, owners fallback, agent refused, left member, unknown id); shared-account-with-tag waits for v2 accounts |
 | 012 | Spike 002 against a **self-hosted any-sync** (`anytype auth create --network-config`): bot accounts join, both streams work, and an account on another network cannot join the space | planned | [ADR 0012](adr/0012-any-anytype-sync-network.md) |
 | 013 | Permission check table test: each permission × object × change, the person-only fields, and `ask` permissions creating an approval | planned | Pure function; runs in CI ([ADR 0013](adr/0013-agent-permissions-over-the-org.md)) |
 | 014 | Computer use with cua: a harness drives a cua Linux sandbox through MCP for one task with approvals; cost of a sandbox and a macOS VM per node | planned, after v0 | [ADR 0016](adr/0016-computer-use-with-cua.md) |

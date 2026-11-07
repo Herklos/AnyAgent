@@ -18,7 +18,12 @@ export async function cmdInit(opts: {
     if (showTermsNoticeOnce(config.state.dir, org.id)) {
       process.stdout.write(`${TERMS_NOTICE}\n`);
     }
-    const report = await initOrg(backend, { checkOnly: opts.check === true });
+    const self = await backend.identity.self();
+    const report = await initOrg(backend, {
+      checkOnly: opts.check === true,
+      ownerIds: org.owners?.length ? org.owners : [self.id],
+      agentAccounts: [self.id],
+    });
     info({
       cmd: "init",
       org: org.id,

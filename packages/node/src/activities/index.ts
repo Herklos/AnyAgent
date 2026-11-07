@@ -1,12 +1,16 @@
 import type { Backend } from "@anyagent/backend";
 import type { NodeStore } from "../store.js";
+import { createCreateApproval } from "./create-approval.js";
 import { createDeliver } from "./deliver.js";
 import { createMarkReceived } from "./mark-received.js";
+import { createRecordDecision } from "./record-decision.js";
 import { createResolveConfig } from "./resolve-config.js";
 import { createRunTurn } from "./run-turn.js";
 
+export { createCreateApproval } from "./create-approval.js";
 export { createDeliver, splitReply } from "./deliver.js";
 export { createMarkReceived } from "./mark-received.js";
+export { createRecordDecision } from "./record-decision.js";
 export { createResolveConfig } from "./resolve-config.js";
 export { createRunTurn, HarnessUnavailable } from "./run-turn.js";
 
@@ -45,8 +49,7 @@ export function createNodeActivities(
       ...(opts.permissionClient ? { permissionClient: opts.permissionClient } : {}),
       ...(opts.approvalTtlMs !== undefined ? { approvalTtlMs: opts.approvalTtlMs } : {}),
     }),
-    // WP3: persist to Anytype. WP2 stubs keep the workflow gate testable.
-    createApproval: async () => {},
-    recordDecision: async () => {},
+    createApproval: createCreateApproval({ backendForOrg: opts.backendForOrg }),
+    recordDecision: createRecordDecision({ backendForOrg: opts.backendForOrg }),
   };
 }

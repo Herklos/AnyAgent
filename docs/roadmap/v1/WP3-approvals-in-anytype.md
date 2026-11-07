@@ -78,10 +78,10 @@ pnpm check
 
 ## Achievements
 
-- [ ] A person decides an `ask` request from Anytype with a reaction; nobody else can; expiry denies; restarts and repeats are harmless.
-- [ ] The decision, its author and its time are recorded on the approval object, and the chat shows the result.
-- [ ] The schema upgrade is additive and idempotent; `schema.md` matches.
-- [ ] Spike 011's table is in the tests, and the status-edit path is either implemented or documented as unavailable.
+- [x] A person decides an `ask` request from Anytype with a reaction; nobody else can; expiry denies; restarts and repeats are harmless.
+- [x] The decision, its author and its time are recorded on the approval object, and the chat shows the result.
+- [x] The schema upgrade is additive and idempotent; `schema.md` matches.
+- [x] Spike 011's table is in the tests, and the status-edit path is either implemented or documented as unavailable.
 
 ## Stop and ask when
 

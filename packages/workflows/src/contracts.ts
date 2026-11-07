@@ -89,14 +89,23 @@ export interface NodeActivities {
   }): Promise<void>;
   runTurn(i: TurnRequest): Promise<TurnResult>;
   deliver(i: DeliverRequest): Promise<{ messageId: string }>;
-  /** WP3 fills these in against Anytype; WP2 stubs are no-ops. */
   createApproval(i: {
+    orgId: string;
+    spaceId: string;
+    agentId: string;
     requestId: string;
     toolName: string;
     summary: string;
     risk: string;
-  }): Promise<void>;
+    expiresInMs: number;
+    kind?: string;
+    title?: string;
+    rawInput?: unknown;
+  }): Promise<{ approvalObjectId: string; messageId: string }>;
   recordDecision(i: {
+    orgId: string;
+    spaceId: string;
+    agentId: string;
     requestId: string;
     approved: boolean;
     decidedBy: string;
