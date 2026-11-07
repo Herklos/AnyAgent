@@ -8,6 +8,8 @@ const TUNING_DEFAULTS = {
   turnTimeoutMin: 60,
   rotateAfterAccepted: 1500,
   maxMessageChars: 8000,
+  /** Must stay below turnTimeoutMin (doctor WP3). */
+  approvalTtlMinutes: 30,
 } as const;
 
 const OrgSchema = z
@@ -52,6 +54,12 @@ const ConfigSchema = z
           .optional(),
         rotateAfterAccepted: z.number().int().positive().max(100_000).optional(),
         maxMessageChars: z.number().int().positive().max(1_000_000).optional(),
+        approvalTtlMinutes: z
+          .number()
+          .int()
+          .positive()
+          .max(24 * 60)
+          .optional(),
       })
       .strict()
       .optional(),
@@ -86,6 +94,7 @@ export type AnyagentConfig = Omit<z.infer<typeof ConfigSchema>, "tuning"> & {
     turnTimeoutMin: number;
     rotateAfterAccepted: number;
     maxMessageChars: number;
+    approvalTtlMinutes: number;
   };
 };
 
@@ -140,6 +149,7 @@ export function loadConfig(path: string): AnyagentConfig {
       turnTimeoutMin: cfg.tuning?.turnTimeoutMin ?? TUNING_DEFAULTS.turnTimeoutMin,
       rotateAfterAccepted: cfg.tuning?.rotateAfterAccepted ?? TUNING_DEFAULTS.rotateAfterAccepted,
       maxMessageChars: cfg.tuning?.maxMessageChars ?? TUNING_DEFAULTS.maxMessageChars,
+      approvalTtlMinutes: cfg.tuning?.approvalTtlMinutes ?? TUNING_DEFAULTS.approvalTtlMinutes,
     },
   };
 }

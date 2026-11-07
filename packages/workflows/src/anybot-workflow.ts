@@ -37,7 +37,13 @@ function nodeActs(nodeQueue: string) {
 
 export async function AnyBot(init: AgentInit): Promise<void> {
   const { acts, runTurnActs } = nodeActs(init.nodeQueue);
-  const core = createOwnCore();
+  const core = createOwnCore({
+    approvals: true,
+    approvalActivities: {
+      createApproval: acts.createApproval,
+      recordDecision: acts.recordDecision,
+    },
+  });
   await core.run(async (input: ChatInput) => {
     await handleTurn(init, input, acts, runTurnActs);
   });

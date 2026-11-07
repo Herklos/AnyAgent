@@ -4,6 +4,8 @@ export const CHAT_UPDATE = "anyagent.chat";
 export const CLOSE_SIGNAL = "anyagent.close";
 export const STATUS_QUERY = "anyagent.status";
 export const ROTATION_QUERY = "anyagent.rotation";
+export const PERMISSION_UPDATE = "anybot.permission";
+export const DECISION_UPDATE = "anybot.decision";
 
 export interface ChatInput {
   key: string;
@@ -21,6 +23,13 @@ export interface Admission {
   turnNumber: number;
 }
 
+export interface PendingApprovalView {
+  requestId: string;
+  summary: string;
+  risk: string;
+  ageMs?: number;
+}
+
 export interface CoreStatus {
   state: "idle" | "running" | "closing";
   queued: number;
@@ -30,6 +39,7 @@ export interface CoreStatus {
   currentKey?: string;
   historyLength: number;
   continueAsNewSuggested: boolean;
+  pendingApprovals?: PendingApprovalView[];
 }
 
 export interface RotationHint {

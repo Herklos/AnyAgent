@@ -2,7 +2,7 @@ import type { ObjectRecord } from "@anyagent/backend";
 
 /** `fake` is the scripted ACP harness for tests (WP4/WP6); not a shipping option. */
 export type HarnessId = "claude-code" | "codex" | "grok" | "vibe" | "fake";
-export type ApprovalMode = "read_only" | "full";
+export type ApprovalMode = "read_only" | "full" | "ask";
 export type Lifecycle = "live" | "paused";
 
 export interface AgentSpec {
@@ -19,7 +19,7 @@ export interface AgentSpec {
 
 const HANDLE_RE = /^[a-z][a-z0-9-]{1,30}$/;
 const HARNESSES = new Set<string>(["claude-code", "codex", "grok", "vibe", "fake"]);
-const MODES = new Set<string>(["read_only", "full"]);
+const MODES = new Set<string>(["read_only", "full", "ask"]);
 const LIFECYCLES = new Set<string>(["live", "paused"]);
 
 export type ParseResult =

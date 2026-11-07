@@ -1,6 +1,7 @@
 import { isAbsolute, resolve } from "node:path";
 import type { Backend } from "@anyagent/backend";
 import { type AgentSpec, lastModifierAcceptable, parseAgentSpec } from "@anyagent/core";
+import { descriptorFor } from "@anyagent/harness";
 import type { AgentSpecWire, ResolvedConfig } from "@anyagent/workflows";
 
 export interface ResolveConfigDeps {
@@ -93,6 +94,25 @@ export function createResolveConfig(deps: ResolveConfigDeps) {
     const wd = workdirAllowed(parsed.spec.workdir, deps.workdirRoots, deps.stateDir, i.agentId);
     if (!wd.ok) {
       return { ok: false, reason: "workdir-outside-roots", detail: wd.detail };
+    }
+
+    if (parsed.spec.approvalMode === "ask") {
+      try {
+        const desc = descriptorFor(parsed.spec.harness);
+        if (desc.permissionCallbacks === false) {
+          return {
+            ok: false,
+            reason: "mode-unsupported",
+            detail: `${parsed.spec.harness} has no permission callbacks; ask is refused (ADR 0020)`,
+          };
+        }
+      } catch (err) {
+        return {
+          ok: false,
+          reason: "mode-unsupported",
+          detail: err instanceof Error ? err.message : String(err),
+        };
+      }
     }
 
     const spec = toWire(parsed.spec);

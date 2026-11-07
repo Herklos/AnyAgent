@@ -52,8 +52,11 @@ Failure → exactly one notice, then the loop continues:
 | deliver post failed after retries | log only (no second notice) |
 
 - **Queueing.** AgentCore admits updates in order; one turn at a time.
-- **Permissions (v0).** `runTurn` answers each harness permission request with `decidePermission(approvalMode, …)`
-  (WP4 floor + read_only kinds). No mid-turn `permission` update and no `aa_approval` objects in v0.
+- **Permissions.** `runTurn` answers each harness permission request with `decidePermission(approvalMode, …)`
+  (floor first; `read_only` / `full` / `ask`). In `ask`, safe kinds allow; gated calls go through workflow update
+  `anybot.permission` and wait for `anybot.decision` or TTL expiry. Temporal failure denies
+  (`approval service unavailable`). Anytype `aa_approval` objects land in WP3 (`createApproval` / `recordDecision`
+  are stubs until then). `ask` on a harness without `permissionCallbacks` fails `resolveConfig` with `mode-unsupported`.
 - **Session.** Session id is stored on the node (`NodeStore.sessions`, keyed by workflow id). Reused only when
   harness, model and mode are unchanged; survives workflow rotation and worker restart.
 - **Idempotent delivery.** `deliver` records `ops(key, message_id)`; a retry with the same key posts nothing.

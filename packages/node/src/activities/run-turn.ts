@@ -11,7 +11,12 @@ import {
   type PermissionRequest,
   startSession,
 } from "@anyagent/harness";
-import type { TurnRequest, TurnResult } from "@anyagent/workflows";
+import type {
+  PermissionUpdateInput,
+  PermissionUpdateResult,
+  TurnRequest,
+  TurnResult,
+} from "@anyagent/workflows";
 import { Context, heartbeat } from "@temporalio/activity";
 import { ApplicationFailure } from "@temporalio/common";
 import type { NodeStore } from "../store.js";
@@ -23,6 +28,14 @@ export class HarnessUnavailable extends Error {
   }
 }
 
+/** Minimal client surface used to ask the workflow for an approval. */
+export interface PermissionWorkflowClient {
+  executePermission(
+    workflowId: string,
+    input: PermissionUpdateInput,
+  ): Promise<PermissionUpdateResult>;
+}
+
 export interface RunTurnDeps {
   store: NodeStore;
   /** Override session open (tests). */
@@ -30,6 +43,10 @@ export interface RunTurnDeps {
     req: TurnRequest,
     resumeId: string | undefined,
   ) => Promise<{ session: HarnessSession; resumed: string }>;
+  /** Temporal client bridge for ask-mode permission updates. */
+  permissionClient?: PermissionWorkflowClient;
+  /** Approval TTL in ms (from config.tuning.approvalTtlMinutes). */
+  approvalTtlMs?: number;
 }
 
 function mapKind(kind: string | undefined): PermissionKind | undefined {
@@ -125,7 +142,7 @@ async function openFakeOrReal(
       {
         cwd,
         env,
-        approvalMode: req.spec.approvalMode,
+        approvalMode: req.spec.approvalMode === "ask" ? "full" : req.spec.approvalMode,
         ...(req.spec.model ? { model: req.spec.model } : {}),
         instructions: req.spec.instructions,
       },
@@ -139,7 +156,7 @@ async function openFakeOrReal(
       req.spec.harness,
       {
         cwd: req.spec.workdir ?? process.cwd(),
-        approvalMode: req.spec.approvalMode,
+        approvalMode: req.spec.approvalMode === "ask" ? "full" : req.spec.approvalMode,
         ...(req.spec.model ? { model: req.spec.model } : {}),
         instructions: req.spec.instructions,
       },
@@ -155,6 +172,8 @@ async function openFakeOrReal(
 }
 
 export function createRunTurn(deps: RunTurnDeps) {
+  const ttlMs = deps.approvalTtlMs ?? 30 * 60 * 1000;
+
   return async function runTurn(req: TurnRequest): Promise<TurnResult> {
     const prior = deps.store.getSession(req.workflowId);
     const same =
@@ -191,6 +210,39 @@ export function createRunTurn(deps: RunTurnDeps) {
       });
       const reject = preq.options.find((o) => /reject/i.test(o.optionId) || /reject/i.test(o.kind));
       const allow = preq.options.find((o) => /allow/i.test(o.optionId) || /allow/i.test(o.kind));
+
+      if (d.needsApproval) {
+        const requestId =
+          (preq as { toolCallId?: string }).toolCallId ??
+          `perm:${req.messageId}:${preq.toolName ?? "tool"}`;
+        let gate: PermissionUpdateResult;
+        try {
+          if (!deps.permissionClient) {
+            gate = { approved: false, reason: "approval service unavailable" };
+          } else {
+            gate = await deps.permissionClient.executePermission(req.workflowId, {
+              requestId,
+              toolName: preq.toolName ?? preq.title ?? "tool",
+              needsApproval: true,
+              expiresInMs: ttlMs,
+              ...(mapped ? { kind: mapped } : {}),
+              ...(preq.title ? { title: preq.title } : {}),
+              ...(preq.rawInput !== undefined ? { rawInput: preq.rawInput } : {}),
+            });
+          }
+        } catch {
+          gate = { approved: false, reason: "approval service unavailable" };
+        }
+        if (gate.approved) {
+          return { outcome: "selected", optionId: allow?.optionId ?? "allow" };
+        }
+        return {
+          outcome: "selected",
+          optionId: reject?.optionId ?? "reject",
+          reason: gate.reason ?? "denied",
+        };
+      }
+
       if (d.allow) {
         return { outcome: "selected", optionId: allow?.optionId ?? "allow" };
       }

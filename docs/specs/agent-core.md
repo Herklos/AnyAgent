@@ -37,6 +37,16 @@ Workflow-safe: no Node imports, no `zod`, no `Date`, no `Math.random`.
    Tests: T-WP3-04, T-WP3-05, T-WP3-10
 7. **Determinism.** No clock, randomness or I/O in this module.
    Tests: T-WP3-11
+8. **Approval gate (v1).** Optional `approvals: true` registers updates `anybot.permission` and `anybot.decision` with an `ApprovalBook`. Permission waits for a decision or TTL; expiry denies once. Status lists `pendingApprovals`; rotation `idle` is false while any are pending.
+   Tests: T-V1-WP2-03, T-V1-WP2-04, T-V1-WP2-05
+9. **Repeated permission id.** A second `permission` update with the same `requestId` shares one book entry and one decision.
+   Tests: T-V1-WP2-06
+10. **Unknown decision.** `anybot.decision` for an unknown id fails non-retryable `UnknownApproval`; a second decision after resolve is ignored.
+    Tests: T-V1-WP2-07
+11. **Concurrent permissions.** Two pending requests can be decided in either order.
+    Tests: T-V1-WP2-08
+12. **Responsiveness.** Status, rotation and close remain available while a permission update is in flight; close drains after the turn.
+    Tests: T-V1-WP2-09
 
 ## How to add an implementation
 
