@@ -76,7 +76,9 @@ Checks:
 - `pnpm -r build` -> PASS (`dist/` in every package)
 - `node scripts/check-pins.mjs` -> `ok: 1.24.0 everywhere` (PASS)
 - `git status --short` after build -> no untracked `dist/` (PASS; `dist/` in `.gitignore`)
-- CI Temporal job: no longer uses `temporalio/setup-temporal` (v0.1.0 was broken; tests use `createLocal()`). WP0 has no Temporal integration tests yet (WP3). Local `bundleWorkflowCode` PASS (T-WP0-03). Green CI achievement left unticked until a green Temporal job run is recorded.
+- CI Temporal job: no longer uses `temporalio/setup-temporal` (v0.1.0 was broken; tests use `createLocal()`). WP0 has no Temporal integration tests yet (WP3). Local `bundleWorkflowCode` PASS (T-WP0-03).
+- Vitest project roots are absolute from the config file so `pnpm --filter @anyagent/workflows test` (CI temporal job) does not resolve `packages/*` under the package cwd.
+- Green CI achievement left unticked until a green Temporal job run is recorded.
 
 Achievements:
 - [ ] `pnpm check` is green locally and in CI, with the Temporal job either green or explicitly skipped with a reason.
