@@ -40,3 +40,12 @@ Order: spikes 002 → 004 → 006 → 007 → 009 → 011 → 013 → 008, then 
 - Verified work: a gate command at an exact commit, landing on a branch (Michel ADR 0019).
 - More gateway sources (email, RSS, GitHub App); HA gateway pair.
 - Migration from the `anytype-agents` schema; a Hermes/Osaurus delegating harness if still useful.
+- `backend-any` once `any` leaves developer preview or Anytwo ships ([ADR 0017](adr/0017-anytype-backend-behind-a-port.md), signals in [research/any-vs-anytype.md](research/any-vs-anytype.md)).
+
+## Much later
+
+Weak adapters behind the backend port ([ADR 0017](adr/0017-anytype-backend-behind-a-port.md)): they lack capabilities
+(live streams, resume cursors, reactions), and anyagent works without them.
+
+- A Starfish backend (to assess).
+- A Notion backend. No spike until there is a stated need.

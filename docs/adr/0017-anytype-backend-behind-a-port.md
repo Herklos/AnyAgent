@@ -1,6 +1,6 @@
 # ADR 0017: Build on Anytype (anytype-heart) behind a backend port; plan `any` as the second backend
 
-- Status: **proposed**. The owner decides ([OPEN-QUESTIONS.md](../OPEN-QUESTIONS.md) Q16).
+- Status: accepted (owner, 2026-11-07: option C; other backends possible, none planned, Notion very late)
 - Date: 2026-11-07
 
 ## Context
@@ -18,7 +18,7 @@ The options:
 - **B.** `any` only.
 - **C.** Anytype now, behind a port, with `any` planned as the second backend.
 
-## Decision (proposed)
+## Decision
 
 1. **C.** v0 runs on Anytype (anytype-heart through `anytype serve`). It is the only backend with released apps, and it
    is where people work today.
@@ -39,7 +39,20 @@ The options:
    suite must pass against a heart adapter (spike 002) before that adapter is accepted. A production `backend-any`
    is written when a signal in the research note fires: `any` leaves developer preview, Anytwo ships publicly, or
    the bridge ships.
-5. **Schema stays semantic.** The `aa_*` schema ([ADR 0009](0009-new-minimal-versioned-schema.md)) describes types and
+5. **Other backends are possible, none are planned for v0.** The port is not limited to Anytype's two products.
+   Two are on the far roadmap, as **weak adapters** (they will lack capabilities, and anyagent must work without
+   them):
+   - **Starfish** (Drakkar's sync library, which Michel is moving to, Michel ADR 0029): to assess later.
+   - **Notion**: very late. Its API offers no live stream or resume cursor that we found, and no reactions or
+     agent envelope for chat (third-party sources, unverified). Notion is a hosted service, so it weakens principles
+     1, 7 and 8 of the [vision](../VISION.md). No spike for it now.
+
+   **What any backend must offer**, whatever else it lacks: the author of every message and object change; delivery of
+   events at least once, with a way to reconcile after a gap (a cursor, or a full read the adapter diffs); and a way
+   for a person to approve that an agent cannot forge. The conformance checks that need no capability are the minimum
+   today. Reactions are not yet a capability: the first weak adapter will make them one, with approval by an object
+   edit as the fallback ([ADR 0008](0008-approvals-objects-and-reactions.md)).
+6. **Schema stays semantic.** The `aa_*` schema ([ADR 0009](0009-new-minimal-versioned-schema.md)) describes types and
    fields, not heart's storage. Each adapter maps it to its backend's object model.
 
 ## What spike 016 showed about the port
@@ -57,8 +70,8 @@ Source: [spike 016](../../spikes/016-backend-port-any/README.md), one account on
 - **A group and its chat** are the same object on `any` (a type with a `chat` part) and two linked objects on
   Anytype. The port keeps them as a group id and a chat id.
 - **Not proven:** a second author or approver, sync, object removals during a gap, anything on heart. See the spike.
-- Until this ADR is accepted, [ADR 0011](0011-event-gateway.md) and [ARCHITECTURE.md](../ARCHITECTURE.md) describe the
-  Anytype adapter's behaviour (`Last-Event-ID`); the gateway will speak to the port.
+- [ADR 0011](0011-event-gateway.md) and [ARCHITECTURE.md](../ARCHITECTURE.md) still describe the Anytype adapter's
+  behaviour (`Last-Event-ID`); they are to be brought in line when the gateway is written against the port.
 
 ## Consequences
 
@@ -70,11 +83,13 @@ Source: [spike 016](../../spikes/016-backend-port-any/README.md), one account on
 
 ## Extension points
 
-- A backend is a registry entry with a conformance suite: `anytype`, later `any`.
+- A backend is a registry entry with a conformance suite: `anytype`, later `any`, possibly weak adapters (Starfish,
+  Notion) far later.
 - `any`'s extras (windowed subscriptions, roles, the chat `agent` envelope, vector search) are optional capabilities of
   the port. Code checks for a capability; it never checks which backend it has.
 
 ## Not generalised
 
 - No sync or mirroring between two backends, and no org spanning both.
-- No backend other than the two Anytype products.
+- No backend is built for v0 other than Anytype's; `any` waits for its signals and the weak adapters for the far
+  roadmap. Nothing is written for them now, and the port gains no feature that only they would use.

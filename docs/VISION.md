@@ -18,7 +18,8 @@ It grew out of two things that already exist:
 
 ## Principles
 
-1. **Anytype is the source of truth and the bus.** Anything a person or another agent needs to see (who an agent is, its
+1. **Anytype is the source of truth and the bus.** (Behind a backend port, [ADR 0017](adr/0017-anytype-backend-behind-a-port.md):
+   Anytype now, its successor `any` next, other backends only far later and weaker.) Anything a person or another agent needs to see (who an agent is, its
    instructions, its schedules, a task, an approval, a reply) is an Anytype object or chat message. If Temporal and every
    node were wiped, the team could be rebuilt from the space.
 2. **Temporal is the engine, not the database.** It gives each agent one durable workflow that survives crashes and

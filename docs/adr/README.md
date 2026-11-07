@@ -21,4 +21,4 @@ commit as the behaviour it decides.
 | [0014](0014-model-endpoints-local-and-cloud.md) | Model endpoints: llama.cpp and any OpenAI-compatible API, local or cloud | accepted |
 | [0015](0015-decision-model-for-approvals.md) | A decision model judges `auto` approvals, racing a person, never failing open | accepted |
 | [0016](0016-computer-use-with-cua.md) | Desktop and computer use through cua | accepted as a plan (after v0) |
-| [0017](0017-anytype-backend-behind-a-port.md) | Anytype (anytype-heart) behind a backend port; `any` planned as the second backend | proposed |
+| [0017](0017-anytype-backend-behind-a-port.md) | Anytype (anytype-heart) behind a backend port; `any` planned as the second backend; others far later | accepted |
