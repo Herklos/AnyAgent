@@ -124,3 +124,10 @@ of a separately installed server and does not distribute heart ([ADR 0004](../ad
 - Whether one account can run in two `anytype serve` instances at once (multi-device). Spike 010.
 - Per-member roles in a space (viewer, editor) as seen through `GET /v2/spaces/{s}/members`. Spike 002.
 - That an account on one network cannot join a space on another. Spike 012.
+
+## Verified live
+
+**NOT RUN (2026-11-07).** Spike 002 did not run: no throwaway `anytype serve` was available in the implementing
+environment. The `@anyagent/backend-anytype` adapter is exercised against `test/mock-heart.ts` only and exports
+`meta.verified: false`. Items remain under *Not yet verified* until a live pass records request/response evidence.
+
