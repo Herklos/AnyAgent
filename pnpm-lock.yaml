@@ -28,7 +28,44 @@ importers:
         version: 5.1.0(@opentelemetry/api@1.10.0)(@types/node@22.19.1)(vite@8.3.6(@types/node@22.19.1)(terser@5.51.2)(yaml@2.9.1))
 
   apps/cli:
+    dependencies:
+      '@anyagent/admin':
+        specifier: workspace:*
+        version: link:../../packages/admin
+      '@anyagent/backend':
+        specifier: workspace:*
+        version: link:../../packages/backend
+      '@anyagent/backend-anytype':
+        specifier: workspace:*
+        version: link:../../packages/backend-anytype
+      '@anyagent/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@anyagent/gateway':
+        specifier: workspace:*
+        version: link:../../packages/gateway
+      '@anyagent/harness':
+        specifier: workspace:*
+        version: link:../../packages/harness
+      '@anyagent/node':
+        specifier: workspace:*
+        version: link:../../packages/node
+      '@anyagent/workflows':
+        specifier: workspace:*
+        version: link:../../packages/workflows
+      '@temporalio/client':
+        specifier: 1.24.0
+        version: 1.24.0
+      '@temporalio/worker':
+        specifier: 1.24.0
+        version: 1.24.0
+      yaml:
+        specifier: 2.9.1
+        version: 2.9.1
     devDependencies:
+      '@temporalio/testing':
+        specifier: 1.24.0
+        version: 1.24.0
       typescript:
         specifier: 5.9.3
         version: 5.9.3

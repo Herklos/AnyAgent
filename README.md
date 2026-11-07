@@ -4,9 +4,9 @@
 [Anytype](https://anytype.io) objects and chats. Each agent runs on a machine of yours, with the harness or model API of
 your choice, and coordinates with the others through the same Anytype spaces you already use.
 
-> **Status: specification.** Nothing runs yet beyond [spike 001](spikes/001-ts-sse/). This repository is being specified,
-> designed and spiked in the open. Read the [vision](docs/VISION.md), the [architecture](docs/ARCHITECTURE.md) and the
-> [decisions](docs/adr/).
+> **Status: v0 in progress.** Packages WP0–WP6 are merged; the `anybot` CLI (WP7) brings `init` / `agent` / `run` /
+> `doctor`. Live Anytype and live harness checks remain NOT RUN. Read the [vision](docs/VISION.md), the
+> [architecture](docs/ARCHITECTURE.md), the [decisions](docs/adr/), and [Getting started](docs/GETTING-STARTED.md).
 
 ## The idea in one picture
 
@@ -67,6 +67,19 @@ your choice, and coordinates with the others through the same Anytype spaces you
 [Michel](https://github.com/Herklos/Michel) (durable agents on Temporal, harness adapters, verified work),
 [Herklos/skills](https://github.com/Herklos/skills) (`anytype-agents`, `hermes-profiles`, `osaurus-agents`: an org of
 agents run from Anytype by hand), Hermes Agent Bot Mode, Osaurus, Noodle.
+
+## Try it
+
+See [docs/GETTING-STARTED.md](docs/GETTING-STARTED.md). Short version:
+
+```bash
+pnpm install && pnpm build
+cp examples/anybot.config.yaml ./anybot.config.yaml   # edit keys/space/temporal
+pnpm --filter anyagent exec node dist/main.js init --config anybot.config.yaml
+pnpm --filter anyagent exec node dist/main.js agent create chief --harness fake --config anybot.config.yaml
+pnpm --filter anyagent exec node dist/main.js doctor --config anybot.config.yaml
+pnpm --filter anyagent exec node dist/main.js run --config anybot.config.yaml
+```
 
 ## Develop
 
