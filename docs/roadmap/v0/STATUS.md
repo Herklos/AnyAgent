@@ -8,7 +8,7 @@ a bare "done". A package is `done` only when every achievement is ticked and eve
 | WP0 | done | `cursor/v0-wp0-workspace-d30c` | cloud agent | |
 | WP1 | done (live NOT RUN) | `cursor/v0-wp1-backend-d30c` | cloud agent | Spike 002 not run; adapter `verified: false` |
 | WP2 | not started | | | |
-| WP3 | done | `cursor/v0-wp3-agent-core-d30c` | cloud agent | Temporal contract passed locally |
+| WP3 | done | `cursor/v0-wp3-agent-core-d30c` | cloud agent | Contract + spike 006 measurement + replay/budget |
 | WP4 | not started | | | |
 | WP5 | not started | | | |
 | WP6 | not started | | | |
@@ -122,15 +122,15 @@ Built:
 - `e2e/support/temporal.ts`, `docs/specs/agent-core.md`, `spikes/006-agent-core/README.md`
 
 Checks:
-- `pnpm --filter @anyagent/workflows test` -> PASS (unit + Temporal contract T-WP3-06..10)
-- `pnpm check` -> PASS
-- Spike 006 events/bytes measurement table -> deferred detail in spike README (contract ran; full 50-message history table can be filled on next pass); T-WP3-11/12 replay+budget not asserted yet as separate tests (contract path exercised)
+- `pnpm --filter @anyagent/workflows test` -> PASS (unit + per-behaviour Temporal contract T-WP3-06..10/08b + T-WP3-11 replay + T-WP3-12 budget)
+- Spike 006: **11.18 events / ~4.9 KB per message** (50 msgs); budget 14.5; under stop condition (25)
+- Queries are pure (no `setHistoryLength` mutation); missing Temporal server uses vitest `skip(reason)`
 
 Achievements:
 - [x] Core behind `AgentCore`, pure logic separated from Temporal wiring.
 - [x] Contract suite exported and passes on our core on a real Temporal test server.
-- [ ] Events/bytes per message fully tabulated — stubbed in spike 006 pending dedicated measurement test.
+- [x] Events/bytes per message fully tabulated — spike 006 + research Measured section.
 - [x] `docs/specs/agent-core.md` exists.
 - [x] No `@temporalio/agent-harness*`.
 
-Deviations: T-WP3-11 replay and T-WP3-12 budget assertion left for a follow-up commit once the 50-message measurement is recorded; contract coverage of close/order/fail/status is green.
+Deviations: none material after review fixes. Review briefly set status to in-progress while measurement was missing; now complete.

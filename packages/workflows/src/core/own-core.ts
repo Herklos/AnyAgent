@@ -62,15 +62,20 @@ export function createOwnCore(opts?: { rotateAfterAccepted?: number }): AgentCor
       setHandler(closeSignal, () => {
         queue.requestClose();
       });
+      // Queries are pure: pass workflowInfo into snapshot/rotation; never store it.
       setHandler(statusQuery, () => {
-        queue.setHistoryLength(workflowInfo().historyLength);
-        queue.setContinueAsNewSuggested(workflowInfo().continueAsNewSuggested);
-        return queue.snapshot();
+        const info = workflowInfo();
+        return queue.snapshot({
+          historyLength: info.historyLength,
+          continueAsNewSuggested: info.continueAsNewSuggested,
+        });
       });
       setHandler(rotationQuery, () => {
-        queue.setHistoryLength(workflowInfo().historyLength);
-        queue.setContinueAsNewSuggested(workflowInfo().continueAsNewSuggested);
-        return queue.rotation();
+        const info = workflowInfo();
+        return queue.rotation({
+          historyLength: info.historyLength,
+          continueAsNewSuggested: info.continueAsNewSuggested,
+        });
       });
 
       for (;;) {

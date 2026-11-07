@@ -19,8 +19,6 @@ export class AdmissionQueue {
   private closing = false;
   private running = false;
   private currentKey: string | undefined;
-  private historyLength = 0;
-  private continueAsNewFromTemporal = false;
 
   constructor(opts?: { rotateAfterAccepted?: number }) {
     this.rotateAfterAccepted = opts?.rotateAfterAccepted ?? 1500;
@@ -65,14 +63,6 @@ export class AdmissionQueue {
     this.closing = true;
   }
 
-  setHistoryLength(n: number): void {
-    this.historyLength = n;
-  }
-
-  setContinueAsNewSuggested(v: boolean): void {
-    this.continueAsNewFromTemporal = v;
-  }
-
   get isClosing(): boolean {
     return this.closing;
   }
@@ -90,24 +80,28 @@ export class AdmissionQueue {
     return this.queue.map((q) => q.input);
   }
 
-  snapshot(): CoreStatus {
+  /**
+   * Pure snapshot. Temporal fields are passed in (queries must not mutate state).
+   */
+  snapshot(info?: { historyLength?: number; continueAsNewSuggested?: boolean }): CoreStatus {
+    const historyLength = info?.historyLength ?? 0;
     const continueAsNewSuggested =
-      this.continueAsNewFromTemporal || this.accepted >= this.rotateAfterAccepted;
+      (info?.continueAsNewSuggested ?? false) || this.accepted >= this.rotateAfterAccepted;
     const status: CoreStatus = {
       state: this.closing ? "closing" : this.running ? "running" : "idle",
       queued: this.queue.length,
       turns: this.turns,
       accepted: this.accepted,
       failed: this.failed,
-      historyLength: this.historyLength,
+      historyLength,
       continueAsNewSuggested,
     };
     if (this.currentKey !== undefined) status.currentKey = this.currentKey;
     return status;
   }
 
-  rotation(): RotationHint {
-    const snap = this.snapshot();
+  rotation(info?: { historyLength?: number; continueAsNewSuggested?: boolean }): RotationHint {
+    const snap = this.snapshot(info);
     return {
       continueAsNewSuggested: snap.continueAsNewSuggested,
       historyLength: snap.historyLength,
