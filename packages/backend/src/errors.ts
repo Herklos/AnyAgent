@@ -1,6 +1,6 @@
 /**
  * Copied from spikes/016-backend-port-any/port.ts (ConflictError, NotFoundError)
- * at commit of that spike, then extended for WP1 typed errors.
+ * at source commit c194379 (spike 016 on main), then extended for WP1 typed errors.
  * Licence: Apache-2.0 (same as anyagent). Changes: Unauthorized, Unavailable,
  * Unsupported; Conflict/NotFound renamed to match WP1 names with aliases.
  */

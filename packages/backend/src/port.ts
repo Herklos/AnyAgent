@@ -1,6 +1,6 @@
 /**
  * Copied from spikes/016-backend-port-any/port.ts.
- * Source commit: repository spike tree at WP1 promotion.
+ * Source commit: c194379 (spike 016 on main).
  * Licence: Apache-2.0 (same as anyagent).
  * Changes: ObjectRecord.body; objects.create body; chat.create; errors moved to errors.ts.
  */
@@ -54,10 +54,13 @@ export interface ChatMessage {
   text: string;
   replyTo?: string;
   agent?: AgentEnvelope;
+  /** Participant ids @-mentioned in the text (empty when the backend does not parse them). */
   mentions: string[];
+  /** Optional control payload (stop/close); backends without control leave this undefined. */
   control?: { kind: string; hard?: boolean };
   createdAt: string;
   edited: boolean;
+  /** Emoji → participant ids. Prefer a `?reactions=full` read when deciding on a reaction. */
   reactions: Record<string, string[]>;
   cursor: string;
 }
@@ -93,6 +96,7 @@ export interface Backend {
   readonly capabilities: ReadonlySet<Capability>;
 
   identity: {
+    /** The participant this connection writes as (message authors are participants). */
     self(): Promise<{ id: string }>;
     roleOf(participantId: string): Promise<Role | undefined>;
   };
@@ -131,6 +135,11 @@ export interface Backend {
   };
 
   events: {
+    /**
+     * Ends when `signal` aborts. With `after`, replays what changed since that
+     * cursor, then `ready`, then live. Reconnects by itself from the last event
+     * id; on a dropped socket the consumer must not see duplicates.
+     */
     watch(
       spec: WatchSpec,
       opts?: { after?: string; signal?: AbortSignal },
@@ -160,7 +169,12 @@ export interface SchemaAdmin {
   ensureSchema(defs: TypeDef[]): Promise<void>;
 }
 
-/** Cursors are opaque, but a backend may promise they are comparable. Both backends here use integers. */
+/**
+ * Compare two cursors when a backend promises they are orderable integers.
+ * Anytype resume ids are opaque — adapters must not call this on heart cursors;
+ * use history order / message ids instead. MemoryBackend and the reference
+ * conformance backends use integer sequences.
+ */
 export function compareCursor(a: string, b: string): number {
   const x = BigInt(a);
   const y = BigInt(b);

@@ -3,7 +3,10 @@ import { Conflict, NotFound, Unauthorized, Unavailable } from "@anyagent/backend
 export interface HeartClientOptions {
   baseUrl: string;
   apiKey: string;
-  /** Version header observed live; default from research until spike 002 confirms. */
+  /**
+   * UNVERIFIED: `Anytype-Version` is not listed in docs/research/anytype-api.md.
+   * Kept as a default until spike 002 confirms whether heart requires it.
+   */
   versionHeader?: string;
   timeoutMs?: number;
   fetchImpl?: typeof fetch;
@@ -93,12 +96,23 @@ export class HeartClient {
 
   async stream(
     path: string,
-    opts: { headers?: Record<string, string>; signal?: AbortSignal } = {},
+    opts: {
+      method?: string;
+      body?: unknown;
+      headers?: Record<string, string>;
+      signal?: AbortSignal;
+    } = {},
   ): Promise<Response> {
+    const method = opts.method ?? "GET";
     const init: RequestInit = {
-      method: "GET",
-      headers: this.headers({ Accept: "text/event-stream", ...opts.headers }),
+      method,
+      headers: this.headers({
+        Accept: "text/event-stream",
+        ...(opts.body !== undefined ? { "Content-Type": "application/json" } : {}),
+        ...opts.headers,
+      }),
     };
+    if (opts.body !== undefined) init.body = JSON.stringify(opts.body);
     if (opts.signal) init.signal = opts.signal;
     let res: Response;
     try {

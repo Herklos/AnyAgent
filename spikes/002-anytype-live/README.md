@@ -20,6 +20,16 @@ throwaway network access were available to the implementing agent. The adapter i
 5. Run `ANYAGENT_LIVE_ANYTYPE=1 pnpm --filter @anyagent/backend-anytype test` and update
    `docs/research/anytype-api.md` "Verified live".
 
+## Unverified adapter choices (labelled in code)
+
+Until a live run fills fixtures, the adapter assumes:
+
+- `ensureSchema` lists `GET …/types` then `POST …/types` + `POST …/properties` (no ensure route).
+- `chat.general()` lists `GET …/chats` and picks/creates a chat named `general`.
+- Reaction toggle body is `{ emoji }` (endpoint is toggle; `on` is synthesised client-side).
+- `Anytype-Version` request header default `2025-11-08` (not in the research note).
+- Object PATCH body `{ patch, expect }` field names.
+
 ## What was not proven
 
 Everything that needs a live heart process. Mock conformance does **not** prove heart framing, auth scopes, or stream
