@@ -10,7 +10,7 @@ a bare "done". A package is `done` only when every achievement is ticked and eve
 | WP2 | done | `cursor/v0-wp2-schema-config-d30c` | cloud agent | Fail-closed review fixes |
 | WP3 | done | `cursor/v0-wp3-agent-core-d30c` | cloud agent | Contract + spike 006 measurement + replay/budget |
 | WP4 | blocked (Michel@402865d not reachable: GitHub 404) | | | Needs owner access to Herklos/Michel for adapter copy |
-| WP5 | not started | | | |
+| WP5 | done (spike 004 partial) | `cursor/v0-wp5-gateway-d30c` | cloud agent | Spike 004 on SDK test server; Cloud/self-hosted NOT RUN |
 | WP6 | not started | | | |
 | WP7 | not started | | | |
 | WP8 | not started | | | |
@@ -138,6 +138,29 @@ Deviations: none material after review fixes. Review briefly set status to in-pr
 ## Questions for the owner
 
 - **WP4:** `Herklos/Michel@402865d` returns 404 from this environment. Please grant access or provide a mirror so adapters/floor can be copied with provenance.
+
+### WP5: event gateway  (done (spike 004 partial), 2026-11-07)
+
+Built:
+- `packages/gateway/src/{state,pipeline,delivery,rotation,agents,supervisor,log,index}.ts`
+- `packages/gateway/test/{pipeline,state,delivery,agents,rotation,supervisor,temporal.delivery,smoke}.test.ts` + support helpers
+- `spikes/004-update-with-start/README.md`
+- MemoryBackend test helpers: `postAs`, `deleteObject`
+- Docs: `docs/SPIKES.md` (004 partial)
+
+Checks:
+- `pnpm --filter @anyagent/gateway test` -> PASS (T-WP5-01..11; Temporal on SDK test server; T-WP5-06 looped ×20)
+- Delivery awaits `handle.result()` after ACCEPTED so AgentClosed is visible; exponential backoff ~10s; typed `WorkflowUpdateFailedError` detection
+- Agent discovery reconnects; chat watch delays on clean end; `pruneDelivered` daily
+- Spike 004 self-hosted/Cloud minimum version -> NOT RUN
+
+Achievements:
+- [x] No message lost or doubled across crash / outage / rotation paths covered by T-WP5-03..07, 11.
+- [x] Failing org never blocks another (T-WP5-08, 09).
+- [x] Unauthorised authors and own messages never start a turn (T-WP5-01).
+- [ ] Spike 004 five questions on a **self-hosted** server + minimum version — **partial** (SDK test server only; Cloud/self-hosted NOT RUN; blocks WP8 for that reason).
+
+Deviations: gateway Temporal tests use WP3 `coreFixtureWorkflow` (AnyAgent workflow is WP6). `workflowIdReusePolicy: ALLOW_DUPLICATE` set so post-rotation / post-close update-with-start can start a new run. Pack achievement boxes left unticked (evidence lives here).
 
 ### WP2: schema, config, init, agent create  (done, 2026-11-07)
 

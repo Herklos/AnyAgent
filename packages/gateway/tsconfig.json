@@ -6,5 +6,19 @@
     "composite": true
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["dist", "test", "node_modules"]
+  "exclude": ["dist", "test", "node_modules"],
+  "references": [
+    {
+      "path": "../admin"
+    },
+    {
+      "path": "../backend"
+    },
+    {
+      "path": "../core"
+    },
+    {
+      "path": "../workflows"
+    }
+  ]
 }

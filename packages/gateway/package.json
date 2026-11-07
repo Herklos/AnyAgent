@@ -18,9 +18,19 @@
     "test": "vitest run --config ../../vitest.config.ts --project @anyagent/gateway"
   },
   "dependencies": {
-    "@temporalio/client": "1.24.0"
+    "@anyagent/admin": "workspace:*",
+    "@anyagent/backend": "workspace:*",
+    "@anyagent/core": "workspace:*",
+    "@anyagent/workflows": "workspace:*",
+    "@temporalio/client": "1.24.0",
+    "@temporalio/common": "1.24.0",
+    "better-sqlite3": "13.0.3"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "9.6.0",
+    "@temporalio/testing": "1.24.0",
+    "@temporalio/worker": "1.24.0",
+    "@temporalio/workflow": "1.24.0",
     "typescript": "5.9.3",
     "vitest": "5.1.0"
   }

@@ -61,4 +61,18 @@ describe("T-WP2-02 agent spec", () => {
       expect(byField.aa_approval_mode).toMatch(/expected a string/);
     }
   });
+
+  it("blank aa_chat is required (createAgent placeholder before link)", () => {
+    const r = parseAgentSpec(
+      base({
+        aa_handle: "chief",
+        aa_harness: "claude-code",
+        aa_chat: "",
+      }),
+    );
+    expect(r.ok).toBe(false);
+    if (!r.ok) {
+      expect(r.errors.some((e) => e.field === "aa_chat" && /required/.test(e.message))).toBe(true);
+    }
+  });
 });

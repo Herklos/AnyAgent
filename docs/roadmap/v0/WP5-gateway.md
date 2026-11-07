@@ -35,7 +35,7 @@ Dependency added: `better-sqlite3` `13.0.3`.
   An `upsert` of an already-delivered key is ignored (edits do not re-run a turn in v0).
 - **Delivery** (`delivery.ts`): `startUpdateWithStart` the workflow `AnyBot` (id `agent:<spaceId>:<agentObjectId>`, task queue `anybot`, init `{ spaceId, agentId, nodeQueue, orgId }`) with update `anybot.chat`,
   `updateId = key`, `workflowIdConflictPolicy: USE_EXISTING`, `waitForStage: ACCEPTED`. **Only after acceptance** commit the cursor and mark the key delivered. **Pitfall (found reviewing the WP5 implementation, with a reproduction):** with `waitForStage: ACCEPTED` the start call can return before the workflow's validator has run, so a rejection (the workflow is closing, `AgentClosed`) is **not** thrown there; it only surfaces from `await handle.result()` (a `WorkflowUpdateFailedError` whose cause is an `ApplicationFailure`). Acceptance must therefore be confirmed by awaiting `handle.result()` (or by using `waitForStage: COMPLETED` for a short admit handler), and the closing error must be detected by its type, not by a message regex. Otherwise a message sent while a workflow closes is marked delivered and lost. On `AgentClosed` or "workflow already completed",
-  wait briefly and retry (update-with-start then starts a new run). On a Temporal outage, do not commit and retry with backoff, so the cursor does not move past undelivered messages. A crash between acceptance and commit redelivers the
+  wait with exponential backoff (~10 s) and retry (update-with-start then starts a new run). On a Temporal outage, do not commit and retry with backoff, so the cursor does not move past undelivered messages. A crash between acceptance and commit redelivers the
   message with the same update id, which Temporal drops within the run and the core drops by key across runs of the same history.
 - **Rotation** (`rotation.ts`): every 30 s per active workflow (and after each delivery batch), query `anybot.rotation`; if `idle` and (`continueAsNewSuggested` or `accepted >= 1500`) send the close signal. The next message starts a new run.
   Never close a non-idle workflow. Log each rotation.
@@ -80,6 +80,8 @@ pnpm check
 - [ ] A failing org never blocks another (T-WP5-08, 09).
 - [ ] Unauthorised authors and the agent's own messages never start a turn.
 - [ ] Spike 004's five questions are answered on a real server and the minimum server version is recorded.
+
+(Tick achievements in STATUS.md with evidence; leave the pack list as the checklist.)
 
 ## Stop and ask when
 
