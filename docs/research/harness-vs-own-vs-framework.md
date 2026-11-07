@@ -213,3 +213,10 @@ Stay on the own core when any of 1, 2 or 5 fails at v1. Revisit when upstream ta
   [Temporal blog](https://temporal.io/blog/building-durable-agents-with-temporal-and-ai-sdk-by-vercel),
   [changelog](https://temporal.io/changelog/ai-sdk-vercel-integration).
 - Package versions and dates: npm registry, read 2026-11-07.
+
+## Measured
+
+(WP3 / spike 006, 2026-11-07.) The own-core contract suite passes against Temporal CLI's local test server (SDK 1.24.0).
+A dedicated 50-message history events/bytes table is not yet recorded; see [spikes/006-agent-core](../../spikes/006-agent-core/README.md).
+The estimate to beat remains 8–10 events per message vs Michel's ~160 events per streaming harness turn.
+

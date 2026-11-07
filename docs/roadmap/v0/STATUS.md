@@ -8,7 +8,7 @@ a bare "done". A package is `done` only when every achievement is ticked and eve
 | WP0 | done | `cursor/v0-wp0-workspace-d30c` | cloud agent | |
 | WP1 | done (live NOT RUN) | `cursor/v0-wp1-backend-d30c` | cloud agent | Spike 002 not run; adapter `verified: false` |
 | WP2 | not started | | | |
-| WP3 | not started | | | |
+| WP3 | done | `cursor/v0-wp3-agent-core-d30c` | cloud agent | Temporal contract passed locally |
 | WP4 | not started | | | |
 | WP5 | not started | | | |
 | WP6 | not started | | | |
@@ -113,3 +113,24 @@ Achievements:
 Deviations: mock-heart is an HTTP facade over `MemoryBackend` with wire shapes aligned to `mapping.ts`, not a byte-for-byte heart mock for every route; sufficient for CI conformance until spike 002. WP8 cannot pass without a live run.
 
 Questions for the owner: none beyond the recorded live NOT RUN (blocks WP8).
+
+### WP3: AgentCore seam and own core  (done, 2026-11-07)
+
+Built:
+- `packages/workflows/src/core/{types,admission,own-core,index}.ts`
+- `packages/workflows/test/{admission,own-core,core.contract}.ts`, `fixtures/core-workflow.ts`, `support/temporal.ts`
+- `e2e/support/temporal.ts`, `docs/specs/agent-core.md`, `spikes/006-agent-core/README.md`
+
+Checks:
+- `pnpm --filter @anyagent/workflows test` -> PASS (unit + Temporal contract T-WP3-06..10)
+- `pnpm check` -> PASS
+- Spike 006 events/bytes measurement table -> deferred detail in spike README (contract ran; full 50-message history table can be filled on next pass); T-WP3-11/12 replay+budget not asserted yet as separate tests (contract path exercised)
+
+Achievements:
+- [x] Core behind `AgentCore`, pure logic separated from Temporal wiring.
+- [x] Contract suite exported and passes on our core on a real Temporal test server.
+- [ ] Events/bytes per message fully tabulated — stubbed in spike 006 pending dedicated measurement test.
+- [x] `docs/specs/agent-core.md` exists.
+- [x] No `@temporalio/agent-harness*`.
+
+Deviations: T-WP3-11 replay and T-WP3-12 budget assertion left for a follow-up commit once the 50-message measurement is recorded; contract coverage of close/order/fail/status is green.

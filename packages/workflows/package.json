@@ -11,6 +11,10 @@
     "./workflows": {
       "types": "./dist/workflows.d.ts",
       "default": "./dist/workflows.js"
+    },
+    "./core": {
+      "types": "./dist/core/index.d.ts",
+      "default": "./dist/core/index.js"
     }
   },
   "files": [
@@ -27,6 +31,10 @@
   },
   "devDependencies": {
     "typescript": "5.9.3",
-    "vitest": "5.1.0"
+    "vitest": "5.1.0",
+    "@temporalio/testing": "1.24.0",
+    "@temporalio/worker": "1.24.0",
+    "@temporalio/client": "1.24.0",
+    "@temporalio/activity": "1.24.0"
   }
 }
