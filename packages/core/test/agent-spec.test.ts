@@ -43,4 +43,22 @@ describe("T-WP2-02 agent spec", () => {
       expect(fields).toContain("aa_chat");
     }
   });
+
+  it("present but wrongly typed fields error instead of defaulting", () => {
+    const r = parseAgentSpec(
+      base({
+        aa_handle: "chief",
+        aa_harness: "claude-code",
+        aa_chat: "chat1",
+        aa_lifecycle: ["paused"] as unknown as string,
+        aa_approval_mode: 1 as unknown as string,
+      }),
+    );
+    expect(r.ok).toBe(false);
+    if (!r.ok) {
+      const byField = Object.fromEntries(r.errors.map((e) => [e.field, e.message]));
+      expect(byField.aa_lifecycle).toMatch(/expected a string/);
+      expect(byField.aa_approval_mode).toMatch(/expected a string/);
+    }
+  });
 });

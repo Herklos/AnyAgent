@@ -22,15 +22,17 @@ export async function createAgent(
   if (!HANDLE_RE.test(opts.handle)) {
     throw new Error(`invalid handle: ${opts.handle}`);
   }
+  // Duplicate-handle check is list-then-create (CLI race is acceptable for v0).
   const existing = await backend.org.list("aa_agent", { aa_handle: opts.handle });
   if (existing.length > 0) {
     throw new Error(`duplicate handle: ${opts.handle}`);
   }
-  const chatId = await backend.chat.create({ name: `agent:${opts.handle}` });
+
+  // Object first (repairable if a later step fails). Chat second, then link.
   const fields: Record<string, string> = {
     aa_handle: opts.handle,
     aa_harness: opts.harness,
-    aa_chat: chatId,
+    aa_chat: "",
     aa_approval_mode: opts.mode ?? "read_only",
     aa_lifecycle: "live",
     aa_model: opts.model ?? "",
@@ -42,7 +44,14 @@ export async function createAgent(
     fields,
     body: DEFAULT_BODY,
   });
-  return { agentId: obj.id, chatId };
+  try {
+    const chatId = await backend.chat.create({ name: `agent:${opts.handle}` });
+    await backend.objects.update(obj.id, { aa_chat: chatId });
+    return { agentId: obj.id, chatId };
+  } catch (err) {
+    // Leave the agent object for the operator to repair or delete; no orphan chat.
+    throw err;
+  }
 }
 
 export async function listAgents(

@@ -28,6 +28,9 @@ harnesses: {}
       const cfg = loadConfig(path);
       expect(cfg.orgs).toHaveLength(1);
       expect(cfg.node.handle).toBe("lap");
+      expect(cfg.tuning.turnTimeoutMin).toBe(60);
+      expect(cfg.tuning.rotateAfterAccepted).toBe(1500);
+      expect(cfg.tuning.maxMessageChars).toBe(8000);
     } finally {
       rmSync(path, { force: true });
     }
@@ -45,11 +48,40 @@ orgs:
     backend: { kind: anytype, url: "u", readKeyEnv: K, writeKeyEnv: K }
     space: "s"
   - id: a
+    backend: { kind: anytype, url: "u", readKeyEnv: K, writeKeyEnv: K }
+    space: "s"
+  - id: b
     backend: { kind: other, url: "u", readKeyEnv: K, writeKeyEnv: K }
     space: "s"
 `);
     try {
       expect(() => loadConfig(path)).toThrow(/config invalid/);
+      try {
+        loadConfig(path);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        expect(msg).toMatch(/duplicate org id/);
+        expect(msg).toMatch(/handle|BAD|lowercase/i);
+        expect(msg).toMatch(/extra|Unrecognized|kind/i);
+      }
+    } finally {
+      rmSync(path, { force: true });
+    }
+  });
+
+  it("rejects relative workdirRoots after expansion", () => {
+    const path = writeCfg(`
+version: 1
+temporal: { address: "localhost:7233", namespace: "default" }
+state: { dir: "/tmp/aa" }
+node: { handle: "lap", workdirRoots: ["relative/path"] }
+orgs:
+  - id: personal
+    backend: { kind: anytype, url: "http://127.0.0.1:31012", readKeyEnv: K, writeKeyEnv: K }
+    space: "s1"
+`);
+    try {
+      expect(() => loadConfig(path)).toThrow(/absolute/);
     } finally {
       rmSync(path, { force: true });
     }

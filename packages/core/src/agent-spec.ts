@@ -25,42 +25,67 @@ export type ParseResult =
   | { ok: true; spec: AgentSpec }
   | { ok: false; errors: Array<{ field: string; message: string }> };
 
+function readStringField(
+  fields: Record<string, unknown>,
+  key: string,
+  errors: Array<{ field: string; message: string }>,
+  opts: { required?: boolean; defaultValue?: string } = {},
+): string {
+  const raw = fields[key];
+  if (raw === undefined || raw === null) {
+    if (opts.required) {
+      errors.push({ field: key, message: "required" });
+      return "";
+    }
+    return opts.defaultValue ?? "";
+  }
+  if (typeof raw !== "string") {
+    errors.push({
+      field: key,
+      message: `expected a string, got ${Array.isArray(raw) ? "array" : typeof raw}`,
+    });
+    return "";
+  }
+  return raw;
+}
+
 export function parseAgentSpec(record: ObjectRecord, body?: string): ParseResult {
   const errors: Array<{ field: string; message: string }> = [];
-  const f = record.fields;
+  const f = record.fields as Record<string, unknown>;
 
-  const handle = typeof f.aa_handle === "string" ? f.aa_handle : "";
-  if (!HANDLE_RE.test(handle)) {
+  const handle = readStringField(f, "aa_handle", errors, { required: true });
+  if (handle && !HANDLE_RE.test(handle)) {
     errors.push({ field: "aa_handle", message: "must match ^[a-z][a-z0-9-]{1,30}$" });
   }
 
-  const harness = typeof f.aa_harness === "string" ? f.aa_harness : "";
-  if (!harness) errors.push({ field: "aa_harness", message: "required" });
-  else if (!HARNESSES.has(harness)) {
+  const harness = readStringField(f, "aa_harness", errors, { required: true });
+  if (harness && !HARNESSES.has(harness)) {
     errors.push({ field: "aa_harness", message: `unknown value ${harness}` });
   }
 
-  const chatId = typeof f.aa_chat === "string" ? f.aa_chat : "";
-  if (!chatId) errors.push({ field: "aa_chat", message: "required" });
+  const chatId = readStringField(f, "aa_chat", errors, { required: true });
 
-  const modeRaw = typeof f.aa_approval_mode === "string" ? f.aa_approval_mode : "read_only";
-  if (!MODES.has(modeRaw)) {
+  const modeRaw = readStringField(f, "aa_approval_mode", errors, { defaultValue: "read_only" });
+  if (modeRaw && !MODES.has(modeRaw)) {
     errors.push({ field: "aa_approval_mode", message: `unknown value ${modeRaw}` });
   }
 
-  const lifeRaw = typeof f.aa_lifecycle === "string" ? f.aa_lifecycle : "live";
-  if (!LIFECYCLES.has(lifeRaw)) {
+  // Lifecycle: only default when absent. Wrong type must not become "live".
+  const lifeRaw = readStringField(f, "aa_lifecycle", errors, { defaultValue: "live" });
+  if (lifeRaw && !LIFECYCLES.has(lifeRaw)) {
     errors.push({ field: "aa_lifecycle", message: `unknown value ${lifeRaw}` });
   }
 
-  const authorsRaw = typeof f.aa_allowed_authors === "string" ? f.aa_allowed_authors : "";
+  const authorsRaw = readStringField(f, "aa_allowed_authors", errors, { defaultValue: "" });
   const allowedAuthors = authorsRaw
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
 
-  const model = typeof f.aa_model === "string" && f.aa_model ? f.aa_model : undefined;
-  const workdir = typeof f.aa_workdir === "string" && f.aa_workdir ? f.aa_workdir : undefined;
+  const modelRaw = readStringField(f, "aa_model", errors, { defaultValue: "" });
+  const workdirRaw = readStringField(f, "aa_workdir", errors, { defaultValue: "" });
+  const model = modelRaw || undefined;
+  const workdir = workdirRaw || undefined;
   const instructions = body ?? record.body ?? "";
 
   if (errors.length) return { ok: false, errors };

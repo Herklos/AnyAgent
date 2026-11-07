@@ -1,8 +1,14 @@
+import { isAbsolute, resolve } from "node:path";
 import { readFileSync } from "node:fs";
 import { homedir } from "node:os";
-import { resolve } from "node:path";
 import { parse as parseYaml } from "yaml";
 import { z } from "zod";
+
+const TUNING_DEFAULTS = {
+  turnTimeoutMin: 60,
+  rotateAfterAccepted: 1500,
+  maxMessageChars: 8000,
+} as const;
 
 const OrgSchema = z
   .object({
@@ -38,9 +44,9 @@ const ConfigSchema = z
       .strict(),
     tuning: z
       .object({
-        turnTimeoutMin: z.number().optional(),
-        rotateAfterAccepted: z.number().optional(),
-        maxMessageChars: z.number().optional(),
+        turnTimeoutMin: z.number().int().positive().max(24 * 60).optional(),
+        rotateAfterAccepted: z.number().int().positive().max(100_000).optional(),
+        maxMessageChars: z.number().int().positive().max(1_000_000).optional(),
       })
       .strict()
       .optional(),
@@ -49,7 +55,36 @@ const ConfigSchema = z
   })
   .strict();
 
-export type AnyagentConfig = z.infer<typeof ConfigSchema>;
+/** Collect duplicate org ids from raw YAML so they report with other schema errors. */
+function duplicateOrgIdMessages(data: unknown): string[] {
+  if (!data || typeof data !== "object" || !("orgs" in data)) return [];
+  const orgs = (data as { orgs: unknown }).orgs;
+  if (!Array.isArray(orgs)) return [];
+  const seen = new Map<string, number>();
+  const msgs: string[] = [];
+  for (let i = 0; i < orgs.length; i++) {
+    const row = orgs[i];
+    if (!row || typeof row !== "object" || !("id" in row)) continue;
+    const id = String((row as { id: unknown }).id);
+    const prev = seen.get(id);
+    if (prev !== undefined) {
+      msgs.push(`orgs.${i}.id: duplicate org id "${id}" (also at index ${prev})`);
+    } else {
+      seen.set(id, i);
+    }
+  }
+  return msgs;
+}
+
+export type AnyagentConfig = Omit<z.infer<typeof ConfigSchema>, "tuning"> & {
+  tuning: {
+    turnTimeoutMin: number;
+    rotateAfterAccepted: number;
+    maxMessageChars: number;
+  };
+};
+
+export { TUNING_DEFAULTS };
 
 function expandHome(p: string): string {
   if (p === "~") return homedir();
@@ -61,22 +96,46 @@ export function loadConfig(path: string): AnyagentConfig {
   const raw = readFileSync(path, "utf8");
   const data: unknown = parseYaml(raw);
   const parsed = ConfigSchema.safeParse(data);
+  const dupMsgs = duplicateOrgIdMessages(data);
   if (!parsed.success) {
-    const msgs = parsed.error.issues.map((i) => `${i.path.join(".") || "(root)"}: ${i.message}`);
-    // Report every problem at once
+    const msgs = [
+      ...parsed.error.issues.map((i) => `${i.path.join(".") || "(root)"}: ${i.message}`),
+      ...dupMsgs,
+    ];
     throw new Error(`config invalid:\n- ${msgs.join("\n- ")}`);
   }
+  if (dupMsgs.length) {
+    throw new Error(`config invalid:\n- ${dupMsgs.join("\n- ")}`);
+  }
   const cfg = parsed.data;
-  const ids = cfg.orgs.map((o) => o.id);
-  if (new Set(ids).size !== ids.length) {
-    throw new Error("config invalid:\n- orgs: duplicate org ids");
+  const stateDir = expandHome(cfg.state.dir);
+  const workdirRoots = cfg.node.workdirRoots.map(expandHome);
+  const rootErrors: string[] = [];
+  if (!isAbsolute(stateDir)) {
+    rootErrors.push(`state.dir: must be absolute after ~ expansion, got "${stateDir}"`);
+  }
+  for (let i = 0; i < workdirRoots.length; i++) {
+    if (!isAbsolute(workdirRoots[i]!)) {
+      rootErrors.push(
+        `node.workdirRoots.${i}: must be absolute after ~ expansion, got "${workdirRoots[i]}"`,
+      );
+    }
+  }
+  if (rootErrors.length) {
+    throw new Error(`config invalid:\n- ${rootErrors.join("\n- ")}`);
   }
   return {
     ...cfg,
-    state: { dir: expandHome(cfg.state.dir) },
+    state: { dir: stateDir },
     node: {
       ...cfg.node,
-      workdirRoots: cfg.node.workdirRoots.map(expandHome),
+      workdirRoots,
+    },
+    tuning: {
+      turnTimeoutMin: cfg.tuning?.turnTimeoutMin ?? TUNING_DEFAULTS.turnTimeoutMin,
+      rotateAfterAccepted:
+        cfg.tuning?.rotateAfterAccepted ?? TUNING_DEFAULTS.rotateAfterAccepted,
+      maxMessageChars: cfg.tuning?.maxMessageChars ?? TUNING_DEFAULTS.maxMessageChars,
     },
   };
 }

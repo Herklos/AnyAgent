@@ -7,7 +7,7 @@ a bare "done". A package is `done` only when every achievement is ticked and eve
 | --- | --- | --- | --- | --- |
 | WP0 | done | `cursor/v0-wp0-workspace-d30c` | cloud agent | |
 | WP1 | done (live NOT RUN) | `cursor/v0-wp1-backend-d30c` | cloud agent | Spike 002 not run; adapter `verified: false` |
-| WP2 | done | `cursor/v0-wp2-schema-config-d30c` | cloud agent | |
+| WP2 | done | `cursor/v0-wp2-schema-config-d30c` | cloud agent | Fail-closed review fixes |
 | WP3 | done | `cursor/v0-wp3-agent-core-d30c` | cloud agent | Contract + spike 006 measurement + replay/budget |
 | WP4 | blocked (Michel@402865d not reachable: GitHub 404) | | | Needs owner access to Herklos/Michel for adapter copy |
 | WP5 | not started | | | |
@@ -146,7 +146,13 @@ Built: `packages/core/src/{schema,agent-spec,author-policy,config}.ts`, `package
 Checks:
 - `pnpm --filter @anyagent/core test` -> PASS
 - `pnpm --filter @anyagent/admin test` -> PASS
-- live admin -> NOT RUN
+- live admin -> NOT RUN (placeholder test)
 
-Achievements: v0 schema as data; config loader; createAgent/listAgents; author policy + lastModifierAcceptable; schema.md updated.
-Spike 009/005: proven on reference backend; live Anytype not available.
+Achievements:
+- [x] v0 schema as data
+- [x] config loader with defaults, bounds, absolute roots, errors together
+- [x] createAgent / listAgents (object-first; orphan chat cleaned up)
+- [x] author policy with required agentAccountId; lastModifierAcceptable fail-closed when capable
+- [x] schema.md updated
+
+Spikes 009/005: reference backend only; live Anytype NOT RUN; 005's last-modifier answer unknown.

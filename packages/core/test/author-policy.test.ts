@@ -8,6 +8,7 @@ describe("T-WP2-03 author policy", () => {
         spec: { allowedAuthors: [] },
         authorId: "owner1",
         ownerIds: ["owner1"],
+        agentAccountId: "agent",
       }),
     ).toBe(true);
     expect(
@@ -15,6 +16,7 @@ describe("T-WP2-03 author policy", () => {
         spec: { allowedAuthors: [] },
         authorId: "other",
         ownerIds: ["owner1"],
+        agentAccountId: "agent",
       }),
     ).toBe(false);
     expect(
@@ -22,6 +24,7 @@ describe("T-WP2-03 author policy", () => {
         spec: { allowedAuthors: ["a", "b"] },
         authorId: "b",
         ownerIds: ["owner1"],
+        agentAccountId: "agent",
       }),
     ).toBe(true);
     expect(
@@ -33,13 +36,60 @@ describe("T-WP2-03 author policy", () => {
       }),
     ).toBe(false);
   });
+
+  it("agent account listed in allowedAuthors is still refused", () => {
+    expect(
+      isAllowedAuthor({
+        spec: { allowedAuthors: ["agent", "friend"] },
+        authorId: "agent",
+        ownerIds: ["owner1"],
+        agentAccountId: "agent",
+      }),
+    ).toBe(false);
+  });
 });
 
 describe("T-WP2-07 lastModifierAcceptable", () => {
-  it("table", () => {
-    expect(lastModifierAcceptable("owner", ["owner"], [])).toBe(true);
-    expect(lastModifierAcceptable("friend", ["owner"], ["friend"])).toBe(true);
-    expect(lastModifierAcceptable("stranger", ["owner"], [])).toBe(false);
-    expect(lastModifierAcceptable(undefined, ["owner"], [])).toBe(true);
+  it("table for capable and incapable backends", () => {
+    expect(
+      lastModifierAcceptable({
+        capable: true,
+        modifiedById: "owner",
+        ownerIds: ["owner"],
+        allowedAuthors: [],
+      }).result,
+    ).toBe("ok");
+    expect(
+      lastModifierAcceptable({
+        capable: true,
+        modifiedById: "friend",
+        ownerIds: ["owner"],
+        allowedAuthors: ["friend"],
+      }).result,
+    ).toBe("ok");
+    expect(
+      lastModifierAcceptable({
+        capable: true,
+        modifiedById: "stranger",
+        ownerIds: ["owner"],
+        allowedAuthors: [],
+      }).result,
+    ).toBe("forbidden-modifier");
+    expect(
+      lastModifierAcceptable({
+        capable: true,
+        modifiedById: undefined,
+        ownerIds: ["owner"],
+        allowedAuthors: [],
+      }).result,
+    ).toBe("unknown-modifier-refused");
+    expect(
+      lastModifierAcceptable({
+        capable: false,
+        modifiedById: undefined,
+        ownerIds: ["owner"],
+        allowedAuthors: [],
+      }).result,
+    ).toBe("not-checked");
   });
 });

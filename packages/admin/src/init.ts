@@ -1,20 +1,22 @@
-import type { Backend, SchemaAdmin } from "@anyagent/backend";
+import type { Backend, SchemaAdmin, TypeDef } from "@anyagent/backend";
 import { V0_SCHEMA, V0_SCHEMA_VERSION } from "@anyagent/core";
 
 export interface InitReport {
-  schema: "created" | "unchanged";
-  settings: "created" | "unchanged";
+  schema: "created" | "unchanged" | "would-create";
+  settings: "created" | "unchanged" | "would-create";
+  /** Types/fields that would be (or were) ensured. */
+  plan?: Array<{ type: string; fields: string[] }>;
   message: string;
+}
+
+function planFromSchema(defs: TypeDef[]) {
+  return defs.map((d) => ({ type: d.key, fields: d.fields.map((f) => f.key) }));
 }
 
 export async function initOrg(
   backend: Backend & SchemaAdmin,
   opts: { checkOnly?: boolean } = {},
 ): Promise<InitReport> {
-  if (opts.checkOnly) {
-    return { schema: "unchanged", settings: "unchanged", message: "check only" };
-  }
-
   const existing = await backend.org.list("aa_settings");
   if (existing.length > 0) {
     const ver = String(existing[0]?.fields.aa_schema_version ?? "");
@@ -25,15 +27,25 @@ export async function initOrg(
     }
   }
 
-  await backend.ensureSchema(V0_SCHEMA);
-  let settings: "created" | "unchanged" = "unchanged";
-  let schema: "created" | "unchanged" = "unchanged";
+  const plan = planFromSchema(V0_SCHEMA);
+  const settingsMissing = existing.length === 0;
 
-  const afterTypes = await backend.org.list("aa_settings");
-  if (afterTypes.length === 0 && existing.length === 0) {
-    // first ensureSchema may have created type but no object yet
-    schema = "created";
+  if (opts.checkOnly) {
+    return {
+      schema: settingsMissing ? "would-create" : "unchanged",
+      settings: settingsMissing ? "would-create" : "unchanged",
+      plan,
+      message: settingsMissing
+        ? `check only: would ensure ${plan.length} types and create aa_settings`
+        : "check only: nothing to do",
+    };
   }
+
+  const beforeSettings = await backend.org.list("aa_settings");
+  await backend.ensureSchema(V0_SCHEMA);
+
+  let settings: "created" | "unchanged" = "unchanged";
+  let schema: "created" | "unchanged" = beforeSettings.length === 0 ? "created" : "unchanged";
 
   const settingsList = await backend.org.list("aa_settings");
   if (settingsList.length === 0) {
@@ -49,7 +61,7 @@ export async function initOrg(
     schema === "unchanged" && settings === "unchanged"
       ? "nothing to do"
       : `schema=${schema} settings=${settings}`;
-  return { schema, settings, message: msg };
+  return { schema, settings, plan, message: msg };
 }
 
 function compareSemver(a: string, b: string): number {
