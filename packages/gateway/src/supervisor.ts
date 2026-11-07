@@ -1,5 +1,6 @@
 import { type Backend, Unauthorized, Unavailable, type WatchEvent } from "@anyagent/backend";
 import { type AgentMap, startAgentDiscovery, type TrackedAgent } from "./agents.js";
+import { type ApprovalWatcher, type DecisionClient, startApprovalWatcher } from "./approvals.js";
 import type { DeliveryClient } from "./delivery.js";
 import { deliverAndCommit } from "./delivery.js";
 import { logGateway } from "./log.js";
@@ -14,6 +15,9 @@ export interface OrgSupervisorOpts {
   state: GatewayState;
   delivery: DeliveryClient;
   rotation?: RotationClient;
+  decision?: DecisionClient;
+  /** Agent account ids refused as approvers (defaults to identity.self). */
+  agentAccounts?: string[];
   nodeQueue: string;
   ownerIds: string[];
   workflowType?: string;
@@ -49,6 +53,7 @@ export function startOrgSupervisor(opts: OrgSupervisorOpts): OrgSupervisor {
   let discoveryStop: (() => Promise<void>) | undefined;
   let rotationTimer: ReturnType<typeof setInterval> | undefined;
   let pruneTimer: ReturnType<typeof setInterval> | undefined;
+  let approvalWatcher: ApprovalWatcher | undefined;
   const chatWatchers = new Map<string, AbortController>();
   let agents: AgentMap = new Map();
   let selfId = "";
@@ -70,6 +75,7 @@ export function startOrgSupervisor(opts: OrgSupervisorOpts): OrgSupervisor {
       if (pruneTimer) clearInterval(pruneTimer);
       for (const ac of chatWatchers.values()) ac.abort();
       chatWatchers.clear();
+      await approvalWatcher?.stop();
       await discoveryStop?.();
     },
     handleChatEvent: async (agent, event) => {
@@ -93,6 +99,21 @@ export function startOrgSupervisor(opts: OrgSupervisorOpts): OrgSupervisor {
   }
 
   async function handleEvent(agent: TrackedAgent, event: WatchEvent): Promise<void> {
+    // Approval reactions land as chat updates on the agent's own notice message.
+    if (event.kind === "chat" && event.message && approvalWatcher) {
+      try {
+        await approvalWatcher.handleChatMessage(event.message);
+      } catch (err) {
+        logGateway({
+          org: opts.orgId,
+          space: opts.spaceId,
+          agent: agent.agentId,
+          outcome: "approval-chat-error",
+          detail: err instanceof Error ? err.message.slice(0, 200) : String(err),
+        });
+      }
+    }
+
     const outcome = pipelineEvent({
       event,
       agent: { agentId: agent.agentId, spec: agent.spec },
@@ -249,6 +270,17 @@ export function startOrgSupervisor(opts: OrgSupervisorOpts): OrgSupervisor {
   void (async () => {
     try {
       selfId = (await opts.backend.identity.self()).id;
+      if (opts.decision) {
+        approvalWatcher = startApprovalWatcher({
+          orgId: opts.orgId,
+          spaceId: opts.spaceId,
+          backend: opts.backend,
+          decision: opts.decision,
+          ownerIds: opts.ownerIds,
+          agentAccounts: opts.agentAccounts ?? [selfId],
+          ...(opts.sleep ? { sleep: opts.sleep } : {}),
+        });
+      }
       const discovery = await startAgentDiscovery({
         backend: opts.backend,
         orgId: opts.orgId,
@@ -309,10 +341,12 @@ export function startGateway(opts: {
     backend: Backend;
     ownerIds: string[];
     nodeQueue: string;
+    agentAccounts?: string[];
   }>;
   state: GatewayState;
   delivery: DeliveryClient;
   rotation?: RotationClient;
+  decision?: DecisionClient;
   workflowType?: string;
   taskQueue?: string;
   rotateAfterAccepted?: number;
@@ -331,6 +365,8 @@ export function startGateway(opts: {
       state: opts.state,
       delivery: opts.delivery,
       ...(opts.rotation ? { rotation: opts.rotation } : {}),
+      ...(opts.decision ? { decision: opts.decision } : {}),
+      ...(org.agentAccounts ? { agentAccounts: org.agentAccounts } : {}),
       ...(opts.workflowType ? { workflowType: opts.workflowType } : {}),
       ...(opts.taskQueue ? { taskQueue: opts.taskQueue } : {}),
       ...(opts.rotateAfterAccepted !== undefined

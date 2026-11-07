@@ -7,6 +7,18 @@ export {
   type TrackedAgent,
 } from "./agents.js";
 export {
+  type ApprovalWatcher,
+  type ApprovalWatcherOpts,
+  type DecisionClient,
+  evaluateApprovalMessage,
+  evaluateApprovalObject,
+  loadApproverContext,
+  type PendingApprovalView,
+  pendingFromObject,
+  startApprovalWatcher,
+  TemporalDecisionClient,
+} from "./approvals.js";
+export {
   type DeliverAndCommitOpts,
   type DeliveryClient,
   type DeliveryTarget,

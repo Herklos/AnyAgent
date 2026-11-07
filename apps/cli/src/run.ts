@@ -4,10 +4,16 @@ import { listAgents } from "@anyagent/admin";
 import {
   GatewayState,
   startGateway,
+  TemporalDecisionClient,
   TemporalDeliveryClient,
   TemporalRotationClient,
 } from "@anyagent/gateway";
-import { createNodeActivities, startNodeWorker, startWorkers } from "@anyagent/node";
+import {
+  createNodeActivities,
+  startNodeWorker,
+  startWorkers,
+  TemporalPermissionClient,
+} from "@anyagent/node";
 import { nodeQueueFor } from "@anyagent/workflows";
 import { Client, Connection } from "@temporalio/client";
 import { NativeConnection } from "@temporalio/worker";
@@ -38,11 +44,18 @@ export async function cmdRun(opts: { config?: string }): Promise<number> {
     return 1;
   }
 
+  const temporalConn = await Connection.connect({ address: config.temporal.address });
+  const client = new Client({ connection: temporalConn, namespace: config.temporal.namespace });
+  const permissionClient = TemporalPermissionClient.fromClient(client);
+  const approvalTtlMs = config.tuning.approvalTtlMinutes * 60 * 1000;
+
   const workflowsPath = resolveWorkflowsPath();
   const workers = await startWorkers({
     config,
     backends,
     workflowsPath,
+    permissionClient,
+    approvalTtlMs,
   });
 
   const connection = await NativeConnection.connect({
@@ -60,6 +73,8 @@ export async function cmdRun(opts: { config?: string }): Promise<number> {
     workdirRoots: config.node.workdirRoots,
     stateDir: config.state.dir,
     maxMessageChars: config.tuning.maxMessageChars,
+    permissionClient,
+    approvalTtlMs,
   });
   const extraWorkers: Awaited<ReturnType<typeof startNodeWorker>>[] = [];
   for (const org of config.orgs) {
@@ -79,29 +94,33 @@ export async function cmdRun(opts: { config?: string }): Promise<number> {
     }
   }
 
-  const temporalConn = await Connection.connect({ address: config.temporal.address });
-  const client = new Client({ connection: temporalConn, namespace: config.temporal.namespace });
   const delivery = TemporalDeliveryClient.fromClient(client);
   const rotation = new TemporalRotationClient(client.workflow);
+  const decision = TemporalDecisionClient.fromClient(client);
   const state = new GatewayState(join(config.state.dir, "gateway.sqlite"));
 
   const gateway = startGateway({
     state,
     delivery,
     rotation,
+    decision,
     workflowType: "AnyBot",
     taskQueue: "anybot",
     rotateAfterAccepted: config.tuning.rotateAfterAccepted,
-    orgs: config.orgs.map((org) => {
-      const backend = backends.get(org.id)!;
-      return {
-        orgId: org.id,
-        spaceId: org.space,
-        backend,
-        nodeQueue: nodeQueueFor(org.space, config.node.handle),
-        ownerIds: org.owners ?? [],
-      };
-    }),
+    orgs: await Promise.all(
+      config.orgs.map(async (org) => {
+        const backend = backends.get(org.id)!;
+        const self = await backend.identity.self();
+        return {
+          orgId: org.id,
+          spaceId: org.space,
+          backend,
+          nodeQueue: nodeQueueFor(org.space, config.node.handle),
+          ownerIds: org.owners ?? [],
+          agentAccounts: [self.id],
+        };
+      }),
+    ),
   });
 
   info({ cmd: "run", config: path, orgs: config.orgs.map((o) => o.id) });

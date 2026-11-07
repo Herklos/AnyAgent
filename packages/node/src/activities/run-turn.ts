@@ -1,7 +1,12 @@
 import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { decidePermission, type PermissionKind } from "@anyagent/core";
+import {
+  decidePermission,
+  type PermissionKind,
+  riskForKind,
+  summariseAction,
+} from "@anyagent/core";
 import {
   AcpSession,
   descriptorFor,
@@ -215,6 +220,14 @@ export function createRunTurn(deps: RunTurnDeps) {
         const requestId =
           (preq as { toolCallId?: string }).toolCallId ??
           `perm:${req.messageId}:${preq.toolName ?? "tool"}`;
+        const toolName = preq.toolName ?? preq.title ?? "tool";
+        const summary = summariseAction({
+          toolName,
+          ...(mapped ? { kind: mapped } : {}),
+          ...(preq.title ? { title: preq.title } : {}),
+          ...(preq.rawInput !== undefined ? { rawInput: preq.rawInput } : {}),
+        });
+        const risk = riskForKind(mapped);
         let gate: PermissionUpdateResult;
         try {
           if (!deps.permissionClient) {
@@ -222,9 +235,11 @@ export function createRunTurn(deps: RunTurnDeps) {
           } else {
             gate = await deps.permissionClient.executePermission(req.workflowId, {
               requestId,
-              toolName: preq.toolName ?? preq.title ?? "tool",
+              toolName,
               needsApproval: true,
               expiresInMs: ttlMs,
+              summary,
+              risk,
               ...(mapped ? { kind: mapped } : {}),
               ...(preq.title ? { title: preq.title } : {}),
               ...(preq.rawInput !== undefined ? { rawInput: preq.rawInput } : {}),

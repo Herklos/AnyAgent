@@ -8,6 +8,28 @@ export {
   parseAgentSpec,
 } from "./agent-spec.js";
 export {
+  type DecideApprovalInput,
+  type DecideApprovalResult,
+  decideFromReactions,
+  decideFromStatusEdit,
+  type ReactionSnapshot,
+} from "./approval-decision.js";
+export {
+  type ApprovalRiskLevel,
+  type ApprovalSummaryInput,
+  decodeApprovalMessageRef,
+  encodeApprovalMessageRef,
+  formatApprovalChatNotice,
+  formatDecisionNotice,
+  riskForKind,
+  summariseAction,
+} from "./approval-wire.js";
+export {
+  type ResolveApproversInput,
+  type ResolveApproversResult,
+  resolveApprovers,
+} from "./approvers.js";
+export {
   isAllowedAuthor,
   lastModifierAcceptable,
   type ModifierCheck,
@@ -35,4 +57,9 @@ export {
   type PermissionRequest,
   READ_ONLY_KINDS,
 } from "./permission.js";
-export { V0_SCHEMA, V0_SCHEMA_VERSION } from "./schema.js";
+export {
+  SCHEMA_VERSION,
+  V0_SCHEMA,
+  V0_SCHEMA_VERSION,
+  V1_SCHEMA_VERSION,
+} from "./schema.js";

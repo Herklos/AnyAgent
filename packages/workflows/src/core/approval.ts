@@ -51,7 +51,11 @@ export interface ApprovalActivities {
     toolName: string;
     summary: string;
     risk: ApprovalRisk;
-  }): Promise<void>;
+    expiresInMs: number;
+    kind?: string;
+    title?: string;
+    rawInput?: unknown;
+  }): Promise<void | { approvalObjectId: string; messageId: string }>;
   recordDecision(i: {
     requestId: string;
     approved: boolean;
@@ -121,6 +125,10 @@ export function installApprovalGate(opts?: {
             toolName: entry.toolName,
             summary: entry.summary,
             risk: entry.risk,
+            expiresInMs: ttl,
+            ...(input.kind !== undefined ? { kind: input.kind } : {}),
+            ...(input.title !== undefined ? { title: input.title } : {}),
+            ...(input.rawInput !== undefined ? { rawInput: input.rawInput } : {}),
           });
         }
 

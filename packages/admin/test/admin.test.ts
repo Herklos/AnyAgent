@@ -7,9 +7,9 @@ describe("T-WP2-04 initOrg", () => {
   it("second run reports no changes; newer schema refused", async () => {
     const b = new MemoryBackend();
     await b.ensureSchema([...SPIKE_SCHEMA, ...V0_SCHEMA]);
-    const r1 = await initOrg(b);
+    const r1 = await initOrg(b, { ownerIds: ["owner"], agentAccounts: [b.me] });
     expect(r1.message).toMatch(/created|nothing|settings/);
-    const r2 = await initOrg(b);
+    const r2 = await initOrg(b, { ownerIds: ["owner"], agentAccounts: [b.me] });
     expect(r2.message).toBe("nothing to do");
 
     const settings = await b.org.list("aa_settings");
@@ -21,7 +21,9 @@ describe("T-WP2-04 initOrg", () => {
         fields: { aa_schema_version: "9.0.0" },
       });
     }
-    await expect(initOrg(b)).rejects.toThrow(/newer/);
+    await expect(initOrg(b, { ownerIds: ["owner"], agentAccounts: [b.me] })).rejects.toThrow(
+      /newer/,
+    );
   });
 });
 
@@ -29,7 +31,7 @@ describe("T-WP2-05 createAgent", () => {
   it("object and chat exist; duplicate and invalid refused", async () => {
     const b = new MemoryBackend();
     await b.ensureSchema(V0_SCHEMA);
-    await initOrg(b);
+    await initOrg(b, { ownerIds: ["owner"], agentAccounts: [b.me] });
     const { agentId, chatId } = await createAgent(b, {
       handle: "chief",
       harness: "claude-code",
@@ -47,7 +49,7 @@ describe("T-WP2-06 listAgents", () => {
   it("returns valid and broken without throwing", async () => {
     const b = new MemoryBackend();
     await b.ensureSchema(V0_SCHEMA);
-    await initOrg(b);
+    await initOrg(b, { ownerIds: ["owner"], agentAccounts: [b.me] });
     await createAgent(b, { handle: "ok-bot", harness: "claude-code" });
     await b.objects.create("aa_agent", {
       name: "broken",

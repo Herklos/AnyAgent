@@ -13,6 +13,8 @@ export interface StartWorkersOpts {
   workflowsPath: string;
   temporalAddress?: string;
   namespace?: string;
+  permissionClient?: import("./activities/run-turn.js").PermissionWorkflowClient;
+  approvalTtlMs?: number;
 }
 
 /**
@@ -47,6 +49,8 @@ export async function startWorkers(opts: StartWorkersOpts): Promise<{
     workdirRoots: opts.config.node.workdirRoots,
     stateDir: opts.config.state.dir,
     maxMessageChars: opts.config.tuning.maxMessageChars,
+    ...(opts.permissionClient ? { permissionClient: opts.permissionClient } : {}),
+    ...(opts.approvalTtlMs !== undefined ? { approvalTtlMs: opts.approvalTtlMs } : {}),
   });
 
   const workflowWorker = await Worker.create({

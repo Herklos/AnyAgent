@@ -49,7 +49,7 @@ describe("T-WP7-03 / T-WP7-04 doctor checks", () => {
     const path = writeCfg(dir);
     const config = loadConfig(path);
     const backend = new MemoryBackend();
-    await initOrg(backend);
+    await initOrg(backend, { ownerIds: ["owner-1"], agentAccounts: [backend.me] });
     const deps = {
       config,
       configPath: path,
@@ -68,7 +68,7 @@ describe("T-WP7-03 / T-WP7-04 doctor checks", () => {
     const path = writeCfg(dir);
     const config = loadConfig(path);
     const backend = new MemoryBackend();
-    await initOrg(backend);
+    await initOrg(backend, { ownerIds: ["owner-1"], agentAccounts: [backend.me] });
     const deps = {
       config,
       configPath: path,
@@ -95,7 +95,7 @@ describe("T-WP7-03 / T-WP7-04 doctor checks", () => {
     const path = writeCfg(dir);
     const config = loadConfig(path);
     const backend = new MemoryBackend();
-    await initOrg(backend);
+    await initOrg(backend, { ownerIds: ["owner-1"], agentAccounts: [backend.me] });
     await createAgent(backend, { handle: "chief", harness: "fake" });
     await backend.objects.create("aa_agent", {
       name: "bad",
@@ -135,7 +135,7 @@ describe("T-WP7-03 / T-WP7-04 doctor checks", () => {
     const path = writeCfg(dir);
     const config = loadConfig(path);
     const backend = new MemoryBackend();
-    await initOrg(backend);
+    await initOrg(backend, { ownerIds: ["owner-1"], agentAccounts: [backend.me] });
     const report = await runDoctor({
       config,
       configPath: path,
@@ -157,6 +157,9 @@ describe("T-WP7-03 / T-WP7-04 doctor checks", () => {
       "D10",
       "D11",
       "D12",
+      "D13",
+      "D14",
+      "D15",
     ]);
     expect(typeof report.ok).toBe("boolean");
     JSON.stringify(report);

@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { isAbsolute, resolve } from "node:path";
 import type { Backend, SchemaAdmin } from "@anyagent/backend";
 import type { AnyagentConfig } from "@anyagent/core";
-import { parseAgentSpec, V0_SCHEMA_VERSION } from "@anyagent/core";
+import { parseAgentSpec, resolveApprovers, SCHEMA_VERSION } from "@anyagent/core";
 import { assertSafeReadOnlyConfig, ConfigGuardError, descriptorFor } from "@anyagent/harness";
 import type { DoctorCheckResult } from "./types.js";
 
@@ -125,16 +125,24 @@ export async function checkD4(deps: DoctorDeps): Promise<DoctorCheckResult> {
       };
     }
     const ver = String(settings[0]?.fields.aa_schema_version ?? "");
-    if (ver && compareSemver(ver, V0_SCHEMA_VERSION) > 0) {
+    if (ver && compareSemver(ver, SCHEMA_VERSION) > 0) {
       return {
         id: "D4",
         severity: "fail",
-        message: `${orgId}: schema ${ver} newer than program ${V0_SCHEMA_VERSION}`,
+        message: `${orgId}: schema ${ver} newer than program ${SCHEMA_VERSION}`,
         fix: "upgrade anybot",
       };
     }
+    if (ver && compareSemver(ver, SCHEMA_VERSION) < 0) {
+      return {
+        id: "D4",
+        severity: "warn",
+        message: `${orgId}: schema ${ver} older than program ${SCHEMA_VERSION}`,
+        fix: "run anybot init to upgrade",
+      };
+    }
   }
-  return { id: "D4", severity: "pass", message: `schema ≤ ${V0_SCHEMA_VERSION}` };
+  return { id: "D4", severity: "pass", message: `schema ${SCHEMA_VERSION}` };
 }
 
 export async function checkD5(deps: DoctorDeps): Promise<DoctorCheckResult> {
@@ -396,6 +404,97 @@ function compareSemver(a: string, b: string): number {
   return 0;
 }
 
+/** Approvers present and not agent accounts. */
+export async function checkD13(deps: DoctorDeps): Promise<DoctorCheckResult> {
+  for (const orgId of deps.orgIds) {
+    const b = orgBackend(deps, orgId);
+    const settings = await b.org.list("aa_settings");
+    if (settings.length === 0) {
+      return {
+        id: "D13",
+        severity: "fail",
+        message: `${orgId}: no aa_settings`,
+        fix: "run anybot init",
+      };
+    }
+    const self = await b.identity.self();
+    const org = deps.config.orgs.find((o) => o.id === orgId);
+    const owners = org?.owners ?? [self.id];
+    const agentAccounts = [self.id];
+    const raw = String(settings[0]?.fields.aa_approvers ?? "");
+    const resolved = resolveApprovers({
+      settingsApprovers: raw,
+      owners,
+      agentAccounts,
+    });
+    if (resolved.refused.some((r) => r.reason === "agent-account")) {
+      return {
+        id: "D13",
+        severity: "fail",
+        message: `${orgId}: aa_approvers names agent account(s): ${resolved.refused
+          .filter((r) => r.reason === "agent-account")
+          .map((r) => r.id)
+          .join(", ")}`,
+        fix: "remove agent accounts from aa_approvers",
+      };
+    }
+    if (resolved.approvers.length === 0) {
+      return {
+        id: "D13",
+        severity: "fail",
+        message: `${orgId}: no eligible approvers`,
+        fix: "set aa_approvers to person participant ids, or ensure owners are people",
+      };
+    }
+  }
+  return { id: "D13", severity: "pass", message: "approvers ok (people only)" };
+}
+
+/** approvalTtlMinutes must be less than turnTimeoutMin. */
+export async function checkD14(deps: DoctorDeps): Promise<DoctorCheckResult> {
+  const ttl = deps.config.tuning.approvalTtlMinutes;
+  const turn = deps.config.tuning.turnTimeoutMin;
+  if (ttl >= turn) {
+    return {
+      id: "D14",
+      severity: "fail",
+      message: `approvalTtlMinutes (${ttl}) must be less than turnTimeoutMin (${turn})`,
+      fix: "lower tuning.approvalTtlMinutes or raise turnTimeoutMin",
+    };
+  }
+  return {
+    id: "D14",
+    severity: "pass",
+    message: `approval TTL ${ttl}m < turn timeout ${turn}m`,
+  };
+}
+
+/** Pending aa_approval past aa_expires_at (lost workflow). */
+export async function checkD15(deps: DoctorDeps): Promise<DoctorCheckResult> {
+  const stuck: string[] = [];
+  const now = Date.now();
+  for (const orgId of deps.orgIds) {
+    const b = orgBackend(deps, orgId);
+    const rows = await b.org.list("aa_approval", { aa_status: "pending" });
+    for (const row of rows) {
+      const expires = String(row.fields.aa_expires_at ?? "");
+      const t = Date.parse(expires);
+      if (!Number.isNaN(t) && t < now) {
+        stuck.push(`${orgId}:${row.id}`);
+      }
+    }
+  }
+  if (stuck.length) {
+    return {
+      id: "D15",
+      severity: "warn",
+      message: `pending approvals past expiry: ${stuck.join(", ")}`,
+      fix: "inspect the workflow; mark expired or re-decide manually if needed",
+    };
+  }
+  return { id: "D15", severity: "pass", message: "no stuck pending approvals" };
+}
+
 export const ALL_CHECKS = [
   checkD1,
   checkD2,
@@ -409,6 +508,9 @@ export const ALL_CHECKS = [
   checkD10,
   checkD11,
   checkD12,
+  checkD13,
+  checkD14,
+  checkD15,
 ] as const;
 
 /** Subset run must pass before starting (D1–D4, D6). */

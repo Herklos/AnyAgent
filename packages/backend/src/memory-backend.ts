@@ -255,6 +255,26 @@ export class MemoryBackend implements Backend, SchemaAdmin {
     return this.postMessage(chatId, authorId, input);
   }
 
+  /** Test helper: add/remove a reaction as a given participant. */
+  async reactAs(
+    chatId: string,
+    messageId: string,
+    authorId: string,
+    emoji: string,
+    on: boolean,
+  ): Promise<ChatMessage> {
+    const row = this.chatRows(chatId).get(messageId);
+    if (!row || row.deleted) throw new NotFound(`message ${messageId}`);
+    const who = new Set(row.m.reactions[emoji] ?? []);
+    if (who.has(authorId) === on) return this.msg(row);
+    if (on) who.add(authorId);
+    else who.delete(authorId);
+    if (who.size) row.m.reactions[emoji] = [...who];
+    else delete row.m.reactions[emoji];
+    this.touch(chatId, row, "updated");
+    return this.msg(row);
+  }
+
   /** Test helper: remove an object and emit `removed` for watchers. */
   deleteObject(id: string): void {
     if (!this.objs.has(id)) return;

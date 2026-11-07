@@ -1,13 +1,19 @@
 import type { TypeDef } from "@anyagent/backend";
 
-/** v0 schema as data in the port's TypeDef format. */
+/** Current schema version (v1 adds aa_approval + aa_approvers). */
 export const V0_SCHEMA_VERSION = "0.1.0";
+export const V1_SCHEMA_VERSION = "0.2.0";
+/** Alias used by init / doctor for "this program's schema". */
+export const SCHEMA_VERSION = V1_SCHEMA_VERSION;
 
 export const V0_SCHEMA: TypeDef[] = [
   {
     key: "aa_settings",
     label: "Settings",
-    fields: [{ key: "aa_schema_version", label: "Schema version", format: "text" }],
+    fields: [
+      { key: "aa_schema_version", label: "Schema version", format: "text" },
+      { key: "aa_approvers", label: "Approvers", format: "text" },
+    ],
   },
   {
     key: "aa_agent",
@@ -36,6 +42,31 @@ export const V0_SCHEMA: TypeDef[] = [
         format: "select",
         options: ["live", "paused"],
       },
+    ],
+  },
+  {
+    key: "aa_approval",
+    label: "Approval",
+    fields: [
+      { key: "aa_request_id", label: "Request id", format: "text" },
+      { key: "aa_requester", label: "Requester agent id", format: "text" },
+      { key: "aa_action", label: "Action summary", format: "text" },
+      {
+        key: "aa_risk",
+        label: "Risk",
+        format: "select",
+        options: ["low", "medium", "high"],
+      },
+      {
+        key: "aa_status",
+        label: "Status",
+        format: "select",
+        options: ["pending", "approved", "denied", "expired"],
+      },
+      { key: "aa_message", label: "Chat message ref", format: "text" },
+      { key: "aa_expires_at", label: "Expires at", format: "text" },
+      { key: "aa_decided_by", label: "Decided by", format: "text" },
+      { key: "aa_decided_at", label: "Decided at", format: "text" },
     ],
   },
 ];

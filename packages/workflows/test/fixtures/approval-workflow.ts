@@ -12,6 +12,7 @@ export interface ApprovalFixtureActs {
     toolName: string;
     summary: string;
     risk: string;
+    expiresInMs: number;
   }): Promise<void>;
   recordDecision(i: {
     requestId: string;

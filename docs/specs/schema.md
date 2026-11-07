@@ -162,6 +162,7 @@ Body: the prompt template; `{{payload}}` is replaced with the (truncated) event.
 
 | Key | Format | Writer | Notes |
 | --- | --- | --- | --- |
+| `aa_request_id` | text | node | Workflow request id; makes `createApproval` idempotent (v1) |
 | `aa_requester` | objects → `aa_agent` | node | |
 | `aa_task` | objects → `aa_task` | node | Optional |
 | `aa_action` | text | node | What will run (command, tool and arguments, summarised) |
@@ -181,15 +182,18 @@ Body: the prompt template; `{{payload}}` is replaced with the (truncated) event.
 
 Memory, skills, logs and suggestions (all present in the `anytype-agents` skill) come later, as additive types.
 
-## v0 fields (as built)
+## Fields as built
 
-Implemented in `packages/core/src/schema.ts` (WP2):
+Implemented in `packages/core/src/schema.ts` (schema version **`0.2.0`**, v1 WP3):
 
-- `aa_settings`: `aa_schema_version` text (`0.1.0`)
+- `aa_settings`: `aa_schema_version` text (`0.2.0`), `aa_approvers` (comma-separated person participant ids)
 - `aa_agent`: `aa_handle`, `aa_harness` (claude-code|codex|grok|vibe|fake), `aa_model`, `aa_chat` (text chat id),
-  `aa_workdir`, `aa_approval_mode` (read_only|full), `aa_allowed_authors`, `aa_lifecycle` (live|paused).
+  `aa_workdir`, `aa_approval_mode` (read_only|ask|full), `aa_allowed_authors`, `aa_lifecycle` (live|paused).
   Instructions are the object **body**.
+- `aa_approval`: `aa_request_id`, `aa_requester`, `aa_action`, `aa_risk` (low|medium|high), `aa_status`
+  (pending|approved|denied|expired), `aa_message`, `aa_expires_at`, `aa_decided_by`, `aa_decided_at`.
 
-Spike 005: last-modifier visibility is **not proven live** (spike 002 NOT RUN). `lastModifierAcceptable` is implemented
-for when the backend exposes `modifiedById`; doctor will warn otherwise (WP7).
+Spike 005: last-modifier visibility is **not proven live** (spike 002 NOT RUN). Status-edit approvals are
+implemented when `modifiedById` is present (MemoryBackend); ignored when missing. Spike 011: `resolveApprovers`
+table is in CI.
 

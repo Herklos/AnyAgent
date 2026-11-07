@@ -40,8 +40,20 @@ export async function AnyBot(init: AgentInit): Promise<void> {
   const core = createOwnCore({
     approvals: true,
     approvalActivities: {
-      createApproval: acts.createApproval,
-      recordDecision: acts.recordDecision,
+      createApproval: (i) =>
+        acts.createApproval({
+          ...i,
+          orgId: init.orgId,
+          spaceId: init.spaceId,
+          agentId: init.agentId,
+        }),
+      recordDecision: (i) =>
+        acts.recordDecision({
+          ...i,
+          orgId: init.orgId,
+          spaceId: init.spaceId,
+          agentId: init.agentId,
+        }),
     },
   });
   await core.run(async (input: ChatInput) => {
