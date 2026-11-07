@@ -233,12 +233,13 @@ export const coreContractCases: ContractCase[] = [
     async run(ctx, assert) {
       const h = await startHarness(ctx);
       try {
-        // Keep the run alive so close is observed as "closing" (not already completed).
+        // "slow" holds the turn ~2s so status=running is observable under CI load
+        // (a fast "hold" turn can finish before the first query sees running).
         const hold = h.handle.executeUpdate(chatUpdate, {
-          args: [baseInput("hold", "hold")],
+          args: [baseInput("hold", "slow")],
           updateId: "hold",
         });
-        await waitFor(async () => (await h.handle.query(statusQuery)).state === "running", 5_000);
+        await waitFor(async () => (await h.handle.query(statusQuery)).state === "running", 20_000);
         await h.handle.signal(closeSignal);
         await waitFor(async () => {
           try {
@@ -247,7 +248,7 @@ export const coreContractCases: ContractCase[] = [
             // Already completed — still a closed agent for the purpose of this check.
             return true;
           }
-        }, 5_000);
+        }, 10_000);
         let rejected = false;
         try {
           await h.handle.executeUpdate(chatUpdate, {

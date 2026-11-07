@@ -12,8 +12,8 @@ a bare "done". A package is `done` only when every achievement is ticked and eve
 | WP4 | done (live NOT RUN) | `cursor/v0-wp4-harness-permissions-d30c` | cloud agent | Michel@402865d; live harnesses NOT RUN; Grok+Vibe → v1 |
 | WP5 | done (spike 004 partial) | `cursor/v0-wp5-gateway-d30c` | cloud agent | Spike 004 on SDK test server; Cloud/self-hosted NOT RUN |
 | WP6 | done | `cursor/v0-wp6-node-and-turn-d30c` | cloud agent | Merged #7 |
-| WP7 | in progress | `cursor/v0-wp7-cli-run-doctor-d30c` | cloud agent | CLI init/agent/run/doctor |
-| WP8 | not started | | | |
+| WP7 | done | `cursor/v0-wp7-cli-run-doctor-d30c` | cloud agent | Merged #8 |
+| WP8 | done (live NOT RUN) | `cursor/v0-wp8-acceptance-release-d30c` | cloud agent | Fakes PASS; live Anytype / harness / spike 004 Cloud NOT RUN — see REPORT.md |
 
 Status values: `not started`, `in progress`, `blocked (reason)`, `done`.
 
@@ -60,7 +60,26 @@ No `@temporalio/agent-harness*`. CI action SHAs:
 
 ## Evidence
 
-### WP7: CLI, run, doctor, getting-started  (in progress, 2026-11-07)
+### WP8: acceptance and release  (done (live NOT RUN), 2026-11-07)
+
+Built:
+- `e2e/test/{acceptance,kill,rotation}.test.ts`, `e2e/support/{temporal,anybot-harness,processes,mock-heart-server}.ts`
+- `e2e/live/README.md`, `docs/roadmap/v0/REPORT.md`, `RELEASE.md`
+
+Checks:
+- `pnpm --filter @anyagent/e2e test` -> PASS (9 tests: T-WP8-01..07 fakes; kill -9 process-level documented NOT RUN)
+- Live Anytype / spike 002 / spike 004 Cloud / live Claude+Codex matrix -> **NOT RUN** (no throwaway serve / harness keys)
+- Harnesses Claude Code + Codex: code paths ready; **not live-shipped** until REPORT live PASS rows
+
+Achievements:
+- [x] Seven roadmap checks covered in automated suite on fakes (check 5 process kill = NOT RUN; 4 body-edit soft)
+- [ ] Live procedure twice per shipping harness — **NOT RUN**
+- [x] STATUS / REPORT / RELEASE honest about NOT RUN
+- [x] Measured numbers for ADR 0019 recorded (from WP3 spike 006)
+
+Deviations: in-process Temporal + MemoryBackend + fake harness instead of child `anybot run` + mock-heart process for CI; process helpers kept for later.
+
+### WP7: CLI, run, doctor, getting-started  (done, 2026-11-07)
 
 Built:
 - `apps/cli/src/{main,cli,config-discovery,logging,notice,backends,run}.ts`, `commands/*`, `doctor/*`

@@ -4,9 +4,10 @@
 [Anytype](https://anytype.io) objects and chats. Each agent runs on a machine of yours, with the harness or model API of
 your choice, and coordinates with the others through the same Anytype spaces you already use.
 
-> **Status: v0 in progress.** Packages WP0–WP6 are merged; the `anybot` CLI (WP7) brings `init` / `agent` / `run` /
-> `doctor`. Live Anytype and live harness checks remain NOT RUN. Read the [vision](docs/VISION.md), the
-> [architecture](docs/ARCHITECTURE.md), the [decisions](docs/adr/), and [Getting started](docs/GETTING-STARTED.md).
+> **Status: v0 fakes-proven (WP0–WP8).** Automated acceptance on Temporal test env + MemoryBackend + fake harness is green.
+> Live Anytype (spike 002), Temporal Cloud / self-hosted min version (spike 004), and live Claude Code / Codex matrices
+> remain **NOT RUN** — see [`docs/roadmap/v0/REPORT.md`](docs/roadmap/v0/REPORT.md). Read the [vision](docs/VISION.md),
+> the [architecture](docs/ARCHITECTURE.md), the [decisions](docs/adr/), and [Getting started](docs/GETTING-STARTED.md).
 
 ## The idea in one picture
 

@@ -51,5 +51,14 @@ jobs:
 
       # No setup-temporal action: TestWorkflowEnvironment.createLocal() downloads
       # its own server. The v0.1.0 action also broke (script not found in caller cwd).
-      - name: Temporal tests
+      - name: Build packages needed by Temporal workers
+        run: pnpm --filter @anyagent/harness --filter @anyagent/workflows --filter @anyagent/node --filter anyagent build
+
+      - name: Temporal workflow tests
         run: pnpm --filter @anyagent/workflows test
+
+      - name: Node AnyBot e2e (fakes)
+        run: pnpm --filter @anyagent/node test
+
+      - name: WP8 acceptance suite (fakes)
+        run: pnpm --filter @anyagent/e2e test
