@@ -6,7 +6,7 @@ a bare "done". A package is `done` only when every achievement is ticked and eve
 | WP | Status | Branch / last commit | Owner of the work | Notes |
 | --- | --- | --- | --- | --- |
 | WP0 | done | `cursor/v0-wp0-workspace-d30c` | cloud agent | |
-| WP1 | not started | | | |
+| WP1 | done (live NOT RUN) | `cursor/v0-wp1-backend-d30c` | cloud agent | Spike 002 not run; adapter `verified: false` |
 | WP2 | not started | | | |
 | WP3 | not started | | | |
 | WP4 | not started | | | |
@@ -87,3 +87,29 @@ Achievements:
 - [x] AGENTS.md and README describe the commands.
 
 Deviations: none material. Biome ignores `spikes/` and `docs/` so WP0 does not reformat pre-existing markdown/spike sources. Root package named `anyagent-workspace` so it does not collide with the CLI package name `anyagent`.
+
+### WP1: backend port, reference backend, conformance, Anytype adapter  (done (live NOT RUN), 2026-11-07)
+
+Built:
+- `packages/backend/src/{port,errors,queue,memory-backend,index}.ts`, `conformance/{suite,schema,index}.ts`
+- `packages/backend/test/{memory,mutations,smoke}.test.ts`
+- `packages/backend-anytype/src/{client,sse,mapping,adapter,index}.ts`
+- `packages/backend-anytype/test/{mock-heart,adapter,sse,errors,live,smoke}.test.ts`
+- `spikes/002-anytype-live/README.md`
+- Docs: `docs/research/anytype-api.md` (Verified live = NOT RUN), `docs/SPIKES.md` (002 not run)
+
+Checks:
+- `pnpm --filter @anyagent/backend test` -> PASS (T-WP1-01, 02, 06)
+- `pnpm --filter @anyagent/backend-anytype test` -> PASS (T-WP1-03, 04, 05; T-WP1-07 skipped with printed reason)
+- `ANYAGENT_LIVE_ANYTYPE=1 …` -> NOT RUN: no throwaway `anytype serve` in this environment
+- `pnpm check` -> PASS
+
+Achievements:
+- [x] One port, one reference backend and one conformance suite in `@anyagent/backend`, with the suite shown to fail on broken backends.
+- [x] `@anyagent/backend-anytype` passes the suite on the mock, and live if an instance was available. (live NOT RUN; `meta.verified: false`)
+- [ ] Spike 002's ten questions are answered in `docs/research/anytype-api.md` with sources — **NOT RUN**; procedure and gaps recorded in `spikes/002-anytype-live/README.md`.
+- [x] No secrets, space ids or names in fixtures. (no live fixtures captured)
+
+Deviations: mock-heart is an HTTP facade over `MemoryBackend` with wire shapes aligned to `mapping.ts`, not a byte-for-byte heart mock for every route; sufficient for CI conformance until spike 002. WP8 cannot pass without a live run.
+
+Questions for the owner: none beyond the recorded live NOT RUN (blocks WP8).
