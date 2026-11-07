@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "bin": {
+    "anybot": "./dist/main.js"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -15,10 +18,23 @@
   "scripts": {
     "build": "tsc -b",
     "typecheck": "tsc -b --pretty false",
-    "test": "vitest run --config ../../vitest.config.ts --project anyagent"
+    "test": "tsc -b && vitest run --config ../../vitest.config.ts --project anyagent"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@anyagent/admin": "workspace:*",
+    "@anyagent/backend": "workspace:*",
+    "@anyagent/backend-anytype": "workspace:*",
+    "@anyagent/core": "workspace:*",
+    "@anyagent/gateway": "workspace:*",
+    "@anyagent/harness": "workspace:*",
+    "@anyagent/node": "workspace:*",
+    "@anyagent/workflows": "workspace:*",
+    "@temporalio/client": "1.24.0",
+    "@temporalio/worker": "1.24.0",
+    "yaml": "2.9.1"
+  },
   "devDependencies": {
+    "@temporalio/testing": "1.24.0",
     "typescript": "5.9.3",
     "vitest": "5.1.0"
   }

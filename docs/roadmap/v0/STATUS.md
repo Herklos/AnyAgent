@@ -11,8 +11,8 @@ a bare "done". A package is `done` only when every achievement is ticked and eve
 | WP3 | done | `cursor/v0-wp3-agent-core-d30c` | cloud agent | Contract + spike 006 measurement + replay/budget |
 | WP4 | done (live NOT RUN) | `cursor/v0-wp4-harness-permissions-d30c` | cloud agent | Michel@402865d; live harnesses NOT RUN; Grok+Vibe → v1 |
 | WP5 | done (spike 004 partial) | `cursor/v0-wp5-gateway-d30c` | cloud agent | Spike 004 on SDK test server; Cloud/self-hosted NOT RUN |
-| WP6 | in progress | `cursor/v0-wp6-node-and-turn-d30c` | cloud agent | AnyBot + node activities + NodeStore |
-| WP7 | not started | | | |
+| WP6 | done | `cursor/v0-wp6-node-and-turn-d30c` | cloud agent | Merged #7 |
+| WP7 | in progress | `cursor/v0-wp7-cli-run-doctor-d30c` | cloud agent | CLI init/agent/run/doctor |
 | WP8 | not started | | | |
 
 Status values: `not started`, `in progress`, `blocked (reason)`, `done`.
@@ -60,7 +60,13 @@ No `@temporalio/agent-harness*`. CI action SHAs:
 
 ## Evidence
 
-### WP6: node activities and AnyBot workflow  (in progress, 2026-11-07)
+### WP7: CLI, run, doctor, getting-started  (in progress, 2026-11-07)
+
+Built:
+- `apps/cli/src/{main,cli,config-discovery,logging,notice,backends,run}.ts`, `commands/*`, `doctor/*`
+- Tests T-WP7-01..07, 09, 10; `docs/GETTING-STARTED.md`, `CHANGELOG.md`, `examples/anybot.config.yaml`
+
+### WP6: node activities and AnyBot workflow  (done, 2026-11-07)
 
 Built:
 - `packages/workflows/src/{contracts,anybot-workflow}.ts` — notices, `AnyBot` on AgentCore, activities on `init.nodeQueue`
