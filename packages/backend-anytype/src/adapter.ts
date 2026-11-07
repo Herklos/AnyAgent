@@ -500,12 +500,7 @@ export class AnytypeAdapter implements Backend, SchemaAdmin {
         const object = mapObject(data.object, false);
         mapped = {
           kind: "object",
-          op:
-            type === "object_updated"
-              ? "updated"
-              : ready
-                ? "added"
-                : "upsert",
+          op: type === "object_updated" ? "updated" : ready ? "added" : "upsert",
           id: object.id,
           object,
           cursor: object.cursor,

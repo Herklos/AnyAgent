@@ -310,10 +310,7 @@ export async function startMockHeart(
             if (ev.cursor) maxCursor = ev.cursor;
             if (pastReady) {
               liveCount++;
-              if (
-                mock.dropChatStreamAfter !== undefined &&
-                liveCount >= mock.dropChatStreamAfter
-              ) {
+              if (mock.dropChatStreamAfter !== undefined && liveCount >= mock.dropChatStreamAfter) {
                 res.destroy();
                 return;
               }
@@ -361,7 +358,11 @@ export async function startMockHeart(
               });
             } else if (ev.object) {
               const type =
-                ev.op === "updated" ? "object_updated" : ev.op === "upsert" ? "object_added" : "object_added";
+                ev.op === "updated"
+                  ? "object_updated"
+                  : ev.op === "upsert"
+                    ? "object_added"
+                    : "object_added";
               sse(res, type, {
                 type,
                 space_id: spaceId,

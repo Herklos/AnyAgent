@@ -30,7 +30,11 @@ export interface ObjectRecord {
   modifiedById: string;
   createdAt: string;
   modifiedAt: string;
-  /** Opaque position in the backend's change order; compare with `compareCursor`. */
+  /**
+   * Opaque position in the backend's change order. Only backends that promise
+   * integer cursors (e.g. MemoryBackend) may compare with `compareCursor`;
+   * Anytype resume ids are opaque and must not be BigInt-parsed.
+   */
   cursor: string;
   /**
    * Object markdown body. Filled by `org.get` when the object has one;

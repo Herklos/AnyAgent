@@ -80,7 +80,10 @@ describe("T-WP1-03 adapter vs mock: full suite", () => {
     const ac = new AbortController();
     const seen = new Map<string, number>();
     const collecting = (async () => {
-      for await (const ev of adapter.events.watch({ kind: "chat", chatId }, { signal: ac.signal })) {
+      for await (const ev of adapter.events.watch(
+        { kind: "chat", chatId },
+        { signal: ac.signal },
+      )) {
         if (ev.kind !== "chat" || !ev.message) continue;
         seen.set(ev.message.id, (seen.get(ev.message.id) ?? 0) + 1);
         if (seen.size >= 2) break;
