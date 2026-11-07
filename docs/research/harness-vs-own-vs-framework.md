@@ -188,6 +188,21 @@ Adopt `@temporalio/agent-harness` behind the seam when **all** hold:
 
 Stay on the own core when any of 1, 2 or 5 fails at v1. Revisit when upstream tags 1.0 or changes the criteria's status.
 
+### Evaluation at v1 (2026-11-07)
+
+Ran `node scripts/harness-criteria.mjs --latest` against `@temporalio/agent-harness@0.4.0` (scratch dir under `os.tmpdir()`, never into the repo). Results:
+
+| Criterion | Result |
+| --- | --- |
+| 1 deep import / SDK | **FAIL** — `@temporalio/common/lib/time.js` still present |
+| 2 public permission API | **FAIL** — no public host permission-request entry |
+| 3 continue-as-new | **FAIL** (informational) — absent |
+| 4 history ≤ 2× | **SKIP** — spike not built (early exit) |
+| 5 two-minor API stability | **FAIL** — still experimental `0.x` (0.1–0.4) |
+| 6 contract on harness core | **SKIP** — spike not built |
+
+**Recommendation:** own gate ([ADR 0021](../adr/0021-approval-gate-implementation.md), proposed). Harness-backed spike `021-harness-core` was **not** built.
+
 ## 10. What this analysis does not establish
 
 - History events per message and per turn for either implementation (needs spike 006 on a Temporal server).

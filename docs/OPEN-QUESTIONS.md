@@ -22,6 +22,7 @@ reused.
 | WP8 automated suite (fakes) PASS; live Anytype / spike 002 / spike 004 Cloud / live harness matrices **NOT RUN** in the cloud agent environment | [v0 REPORT](roadmap/v0/REPORT.md) (2026-11-07) |
 | Own AgentCore ~11.18 history events / ~4.9 KB per message (50 msgs) — input for ADR 0019 v1 harness decision | WP3 spike 006 / REPORT |
 | Claude Code and Codex are **not live-shipped** until a live PASS row exists; Grok + Vibe remain `shipping: v1` | REPORT + WP4 STATUS |
+| v1 WP1 recommends **own approval gate** (ADR 0021 proposed); criteria 1/2/5 failed on `@temporalio/agent-harness@0.4.0`; pin stays 1.24.0 until owner accepts ADR / pin move | [ADR 0021](adr/0021-approval-gate-implementation.md), `scripts/harness-criteria.mjs --latest` |
 
 ## Settled
 

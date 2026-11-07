@@ -25,3 +25,4 @@ commit as the behaviour it decides.
 | [0018](0018-one-or-more-orgs-per-deployment.md) | A deployment serves one or more orgs (spaces, on Anytype or later Anytwo) | accepted |
 | [0019](0019-own-workflow-core-behind-a-seam.md) | Own the small workflow core behind a seam; decide on the harness at v1; no agent framework | accepted |
 | [0020](0020-harness-adapter-kinds.md) | Harness adapter kinds: ACP, app-server and headless CLI; Mistral Vibe in v0; both login and API-key auth | accepted |
+| [0021](0021-approval-gate-implementation.md) | v1 approval gate on own AgentCore; do not adopt `@temporalio/agent-harness` until criteria 1/2/5 pass | **proposed** |

@@ -1,0 +1,6 @@
+{
+  "criterion1": true,
+  "criterion2": true,
+  "criterion5": false,
+  "criterion5Evidence": "FAIL: 0.x minors churn"
+}
