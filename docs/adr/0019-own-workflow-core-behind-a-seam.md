@@ -1,6 +1,6 @@
 # ADR 0019: Own the small workflow core behind a seam; no agent framework
 
-- Status: **proposed**. The owner decides ([Q20](../OPEN-QUESTIONS.md)). If accepted it replaces decision 3 and decision 5
+- Status: accepted (owner, 2026-11-07: option C, "own core now, decide on the harness at v1", [Q20](../OPEN-QUESTIONS.md)). It replaces decisions 3 and 5
   of [ADR 0010](0010-reuse-michel-adapters-and-the-npm-harness.md) and nothing else in it.
 - Date: 2026-11-07
 
@@ -20,7 +20,7 @@ agent framework. The evidence, the options and what could not be measured are in
 - Three of the four harnesses are external programs that own their loop, so an agent framework would only touch the
   OpenAI-compatible kind.
 
-## Decision (proposed)
+## Decision
 
 1. **An `AgentCore` seam.** The workflow code of an agent is written against one small interface in
    `packages/workflows`: admit a typed message (dedupe by update id, queue while a turn runs, ordered turns), run the handler,

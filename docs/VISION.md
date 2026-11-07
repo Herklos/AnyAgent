@@ -32,7 +32,7 @@ It grew out of two things that already exist:
    started it.
 5. **Live configuration.** An edited agent, prompt or schedule object applies at the next turn boundary, never in the
    middle of a turn. No copy of the configuration is pushed into another tool.
-6. **Any harness, any model.** CLI agents (Claude Code, Codex, OpenCode, Gemini, Copilot, any ACP agent) and model APIs
+6. **Any harness, any model.** CLI agents (Claude Code, Codex, Grok Build, Mistral Vibe, OpenCode, Gemini, Copilot, any ACP agent or headless CLI) and model APIs
    (OpenAI-compatible, local llama.cpp/Ollama/vLLM/LM Studio) sit behind one adapter interface. A new harness is a
    registry entry, not a branch.
 7. **Your machines, your accounts, your infrastructure.** Agents run on nodes you own (laptop, VPS, Raspberry Pi),

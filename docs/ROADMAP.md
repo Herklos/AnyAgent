@@ -26,14 +26,14 @@ Each feature was ranked by, in this order:
 
 | Release | Theme | The owner can… | Rough size |
 | --- | --- | --- | --- |
-| **v0** | One agent in a chat | …talk to an AI agent running on their machine from Anytype (desktop or phone); it keeps working across restarts. Read-only by default. | 5–6 engineer-weeks |
+| **v0** | One agent in a chat | …talk to an AI agent running on their machine from Anytype (desktop or phone); it keeps working across restarts. Read-only by default. | 6–7 engineer-weeks |
 | **v1** | A safe, proactive assistant | …let it do real work with approvals from the chat, schedule it, run it on local or cloud models, stop it, and serve more than one org. | 4–5 |
 | **v2** | A team | …run several agents in group chats on several machines, with hierarchy and tasks. | 5–6 |
 | **v3** | Autonomy | …let agents act within permissions, wake on webhooks, and approve routine calls with a decision model. | 4–5 |
 
 Sizes are my judgement from the component list, not measured; recalibrate after v0. Coding agents shorten the
-calendar (roughly by half, from the earlier estimate) but not the spikes. Together they come to about 18–22 engineer-weeks, more than the
-old single-v0 estimate (14–16) because every release is finished before the next and v0 now ships three harnesses. Computer use (cua) is a further 2–3.
+calendar (roughly by half, from the earlier estimate) but not the spikes. Together they come to about 19–23 engineer-weeks, more than the
+old single-v0 estimate (14–16) because every release is finished before the next and v0 now ships four harnesses. Computer use (cua) is a further 2–3.
 
 ## v0: one agent in a chat
 
@@ -54,20 +54,22 @@ It survives restarts without answering twice.
   allowed roots), `aa_approval_mode` (`read_only` or `full`), `aa_allowed_authors` and `aa_lifecycle` (`live` or `paused`). The agent's **instructions are the object's body**.
   The person-only fields are the ones in [ADR 0013](adr/0013-agent-permissions-over-the-org.md).
 - One workflow per live `aa_agent`, on a small `AgentCore` of our own behind a seam
-  ([ADR 0019](adr/0019-own-workflow-core-behind-a-seam.md), proposed, [Q20](OPEN-QUESTIONS.md); the harness from npm is the
-  alternative and the seam makes either cheap); one handler, `chat`. A turn: read the agent
+  ([ADR 0019](adr/0019-own-workflow-core-behind-a-seam.md), accepted, [Q20](OPEN-QUESTIONS.md); the harness from npm is reconsidered at v1
+  and the seam keeps that cheap); one handler, `chat`. A turn: read the agent
   object fresh → 👀 on the message → run the harness → post the reply. Messages that arrive during a turn queue.
-- Three harnesses, as registry entries ([Q17](OPEN-QUESTIONS.md), settled): **Claude Code** and **Grok Build** over
-  ACP, and **Codex** over its app-server, using Michel's adapters copied with provenance (Michel
-  `packages/harness/adapters`). `aa_harness` picks one per agent. In `read_only` every permission request is denied and
+- Four harnesses, as registry entries ([Q17](OPEN-QUESTIONS.md), settled): **Claude Code** and **Grok Build** over
+  ACP, **Codex** over its app-server (Michel's adapters, copied with provenance: Michel `packages/harness/adapters`), and
+  **Mistral Vibe** as a headless CLI, `vibe -p` (a new adapter kind, [ADR 0020](adr/0020-harness-adapter-kinds.md),
+  [research](research/mistral-vibe.md)). Each can run on a subscription login or an API key where it offers both
+  ([Q19](OPEN-QUESTIONS.md), settled). `aa_harness` picks one per agent. In `read_only` every permission request is denied and
   the reply says so; `full` allows everything and only a person can set it. **`read_only` must hold even when the
   harness's own configuration would approve a call itself** (the harness's own read-only mode is used as well as the host's
   denial: Codex sandbox `read-only`, Grok `--sandbox read-only`, Claude Code in its asking mode with refusal, per Michel's
   `docs/research/sandbox-spike.md`; `fetch` is not read-only in v0), so each harness runs with a controlled home and
   configuration (Michel audit G247 for Claude Code, G172 for Grok, whose `~/.grok/config.toml` can answer a tool call
-  before the host sees it), and the acceptance script proves it per harness. **Grok Build ships only if its live check
+  before the host sees it), and the acceptance script proves it per harness. **Grok Build and Vibe ship only if their live check
   passes**: Michel has run it against a fake agent only (G172), and the official page names headless `-p` and "full ACP
-  support" but not the ACP command or permission modes. If it does not pass, it moves to v1.
+  support" but not the ACP command or permission modes. If one does not pass, it moves to v1. Vibe's default agent auto-approves file edits, so its `read_only` run names the `ask` agent and a read-tool allowlist and uses a controlled `VIBE_HOME`.
 - **Org-aware from the start** ([ADR 0018](adr/0018-one-or-more-orgs-per-deployment.md)): the configuration is a list of
   orgs, state and task queues are keyed by space; v0 is accepted with one org, v1 with two.
 - **Owner only by default.** The agent answers messages from `aa_allowed_authors`; empty means the space owner. Anyone
@@ -98,7 +100,7 @@ the OpenAI-compatible harness and local-model endpoints, the decision model, per
 
 **Spikes first:** [002](SPIKES.md) live `anytype serve` (needs the `anytype-cli` binary and network access to a sync
 network, or a self-hosted any-sync); [004](SPIKES.md) update-with-start from the gateway; [006](SPIKES.md) the
-agent core on a Temporal server, with history events per message measured (ADR 0019); [007](SPIKES.md) the three CLI adapters, `read_only` with a hostile harness configuration;
+agent core on a Temporal server, with history events per message measured (ADR 0019); [007](SPIKES.md) the four harnesses (Vibe headless and, for later, `vibe-acp`), `read_only` with a hostile harness configuration;
 [009](SPIKES.md) schema bootstrap for these two types. [016](../spikes/016-backend-port-any/) (the port) is done.
 
 **Risks it retires:** that heart's v2 streams work in a headless `anytype serve`, that the npm harness and Temporal
@@ -106,13 +108,13 @@ pin holds up, that a turn is durable, and what the workflow core costs in histor
 (`StreamDisabled`, see [research](research/anytype-api.md)), the adapter polls the message list instead; the v2 route list has `POST /v2/spaces/{s}/chats`, but
 what it accepts is unverified, and if it cannot create a chat the person creates it in the app. Both are decided by spike 002.
 
-**Known risk, an owner decision ([Q19](OPEN-QUESTIONS.md)):** Michel's [provider-terms research](https://github.com/Herklos/Michel/blob/main/docs/research/provider-terms.md)
+**Known risk, accepted by the owner ([Q19](OPEN-QUESTIONS.md): both logins and API keys):** Michel's [provider-terms research](https://github.com/Herklos/Michel/blob/main/docs/research/provider-terms.md)
 rates driving a consumer Claude subscription from an orchestrator **high** risk, Codex and Grok **medium**, and says to
-prefer API keys or the official login on the owner's own machine. `anyagent init` shows the notice and keeps the API-key
-path open.
+prefer API keys or the official login on the owner's own machine. Some subscriptions offer no API key, so both are supported;
+`anyagent init` shows the notice and `doctor` says which one each agent uses. Vibe documents only an API key, so for it the answer may be API key only.
 
-**Settled by the owner:** [Q17](OPEN-QUESTIONS.md) (Claude Code, Codex and Grok Build) and
-[Q18](OPEN-QUESTIONS.md) (owner-only by default).
+**Settled by the owner:** [Q17](OPEN-QUESTIONS.md) (Claude Code, Codex, Grok Build and Vibe), [Q18](OPEN-QUESTIONS.md) (owner-only by default),
+[Q19](OPEN-QUESTIONS.md) (logins and API keys) and [Q20](OPEN-QUESTIONS.md) (own core now, the harness reconsidered at v1).
 
 ## v1: a safe, proactive assistant
 

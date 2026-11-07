@@ -25,7 +25,7 @@ Must not change: ADRs.
 ## The v0 schema (as data, `packages/core/src/schema.ts`, in the port's `TypeDef` format)
 
 - `aa_settings` (one per space): `aa_schema_version` text (semver, v0 writes `0.1.0`).
-- `aa_agent`: `aa_handle` text (`^[a-z][a-z0-9-]{1,30}$`, unique in the space); `aa_harness` select (`claude-code`, `codex`, `grok`); `aa_model` text (empty = harness default);
+- `aa_agent`: `aa_handle` text (`^[a-z][a-z0-9-]{1,30}$`, unique in the space); `aa_harness` select (`claude-code`, `codex`, `grok`, `vibe`); `aa_model` text (empty = harness default);
   `aa_chat` text (the chat object id; a text field, not a relation, to keep it simple; v2 adds groups); `aa_workdir` text (an absolute path on the node, inside `node.workdirRoots`; empty means a private directory under the state dir); `aa_approval_mode` select (`read_only` default, `full`);
   `aa_allowed_authors` text (comma-separated participant ids; empty means the space owner only); `aa_lifecycle` select (`live` default, `paused`).
   The **instructions are the object's body**.

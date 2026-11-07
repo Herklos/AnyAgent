@@ -1,6 +1,6 @@
 # ADR 0010: Reuse Michel's harness adapters; build the agent workflow on temporal-agent-harness from npm
 
-- Status: accepted. **Decisions 3 and 5 are under review:** [ADR 0019](0019-own-workflow-core-behind-a-seam.md) (proposed) recommends our own small core behind a seam, deciding on the harness at v1. (owner, 2026-11-06). Supersedes the proposed version ("own the workflow, no temporal-agent-harness").
+- Status: accepted. **Decisions 3 and 5 are replaced by [ADR 0019](0019-own-workflow-core-behind-a-seam.md)** (accepted 2026-11-07): our own small core behind a seam, deciding on the harness at v1. (owner, 2026-11-06). Supersedes the proposed version ("own the workflow, no temporal-agent-harness").
   The owner: "I didn't say not to depend on temporal-agent-harness but just not vendor it if possible but npm install it."
 - Date: 2026-11-06
 

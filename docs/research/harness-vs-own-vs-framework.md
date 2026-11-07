@@ -1,6 +1,6 @@
 # Own the workflow layer or use temporal-agent-harness? And a framework or not?
 
-Research for [ADR 0019](../adr/0019-own-workflow-core-behind-a-seam.md) (proposed). Read 2026-11-07. Claims are labelled
+Research for [ADR 0019](../adr/0019-own-workflow-core-behind-a-seam.md) (accepted: option C, 2026-11-07). Read 2026-11-07. Claims are labelled
 **measured** (counted or read in code), **reported** (a source says so), or **inferred** (my reasoning).
 
 ## The two questions and the short answers

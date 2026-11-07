@@ -25,7 +25,7 @@ Dependencies: a small argument parser (pin exactly; record which) or none (Node'
 | Command | Does |
 | --- | --- |
 | `anyagent init [--org <id>] [--check]` | for each org (or one): connect, `initOrg` (WP2), print what was created or already present; shows the terms notice once per org; `--check` validates the config and connects without writing |
-| `anyagent agent create <handle> --harness claude-code\|codex\|grok [--model m] [--mode read_only\|full] [--workdir path] [--allowed-authors id,id] [--org id]` | `createAgent` (WP2); prints the chat id and where to open it in Anytype |
+| `anyagent agent create <handle> --harness claude-code\|codex\|grok\|vibe [--model m] [--mode read_only\|full] [--workdir path] [--allowed-authors id,id] [--org id]` | `createAgent` (WP2); prints the chat id and where to open it in Anytype |
 | `anyagent agent list [--org id]` | handle, harness, mode, lifecycle, and any spec errors |
 | `anyagent run` | starts the workflow worker, the node worker for each org this node serves, and the gateway; logs JSON lines; stops on SIGINT or SIGTERM: stop watchers, stop accepting, let the worker drain for 30 s, then exit |
 | `anyagent doctor [--org id] [--json]` | the checks below; exit code 1 if any check fails, 0 if all pass or only warn |

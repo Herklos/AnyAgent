@@ -1,6 +1,6 @@
 # The agent workflow (v0 draft)
 
-> **Under review:** [ADR 0019](../adr/0019-own-workflow-core-behind-a-seam.md) proposes that v0 implements this behaviour with
+> **Decided:** [ADR 0019](../adr/0019-own-workflow-core-behind-a-seam.md) (accepted) has v0 implement this behaviour with
 > our own small `AgentCore` instead of `defineAgent`, and decides on the harness at v1. The behaviour below does not change; the
 > names (`defineAgent`, `handler`, `MidTurn`) describe the harness-based shape that the own core follows.
 

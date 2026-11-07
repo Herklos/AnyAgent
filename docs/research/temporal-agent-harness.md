@@ -90,5 +90,5 @@ registry metadata and the tarball (read-only; not installed or run):
 - There is still **no continue-as-new** anywhere in the package.
 - **Steering is now exported** (`ClaimedSteering`), so the earlier note that it is missing applies to `0.3.1` only.
 
-Whether to depend on it at all is analysed in [harness-vs-own-vs-framework.md](harness-vs-own-vs-framework.md) and proposed
-in [ADR 0019](../adr/0019-own-workflow-core-behind-a-seam.md).
+Whether to depend on it at all is analysed in [harness-vs-own-vs-framework.md](harness-vs-own-vs-framework.md) and decided
+in [ADR 0019](../adr/0019-own-workflow-core-behind-a-seam.md) (own core now, the harness reconsidered at v1).

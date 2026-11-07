@@ -67,7 +67,7 @@ The **`read_only` matrix** (one row per shipped harness; every cell must be PASS
 
 What shipped (harnesses, one or more orgs tested), the check table with PASS / FAIL / NOT RUN and evidence, the **measured numbers** (history events and bytes per message from WP3, event age at delivery from WP5, time to first reply on the live run),
 known limitations (anyone with write access can change agent settings if the modifier is not visible; `fetch` denied in `read_only`; replies are one final message; deliver can duplicate once in a crash window; which harness versions were tested), deviations from this pack, and
-the **questions for the owner**: accept ADR 0019 (Q20) with the measured numbers in hand; Q19; whether to ship a harness that only passed in `read_only`.
+the **questions for the owner**: the v1 decision on the harness (ADR 0019 is accepted; its criteria need these measured numbers); whether to ship a harness that only passed in `read_only`; which harnesses ran on a login and which on an API key.
 
 ## Checks
 
@@ -83,7 +83,7 @@ git diff --stat main...HEAD -- docs/adr   # expect: no ADR changed by implementa
 - [ ] The `read_only` matrix is all PASS for every shipped harness; any harness that is not all PASS is not shipped and the ROADMAP says so.
 - [ ] Every package's achievements are ticked in STATUS.md with evidence; nothing marked NOT RUN is hidden.
 - [ ] `REPORT.md`, `RELEASE.md`, `CHANGELOG.md` and the documents are consistent with the code.
-- [ ] The owner has the measured numbers needed to decide ADR 0019.
+- [ ] The owner has the measured numbers the v1 harness decision needs (ADR 0019, criteria in section 9 of the research).
 
 ## Stop and ask when
 

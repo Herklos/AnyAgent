@@ -17,10 +17,13 @@ a bare "done". A package is `done` only when every achievement is ticked and eve
 
 Status values: `not started`, `in progress`, `blocked (reason)`, `done`.
 
-## Defaults in force for open questions
+## Decisions in force
 
-- **Q19** (subscription logins vs API keys): the owner's choice per agent; `init` shows the terms notice; API keys always work.
-- **Q20** (workflow core): our own `AgentCore` behind the seam ([ADR 0019](../../adr/0019-own-workflow-core-behind-a-seam.md)).
+Settled by the owner (2026-11-07), no longer open:
+
+- **Q19**: both subscription logins and API keys, per agent, where the harness offers both ([ADR 0020](../../adr/0020-harness-adapter-kinds.md)).
+- **Q20**: our own `AgentCore` behind the seam; the harness is reconsidered at v1 ([ADR 0019](../../adr/0019-own-workflow-core-behind-a-seam.md)).
+- **Q17**: Claude Code, Codex, Grok Build and Mistral Vibe; Grok Build and Vibe ship only if their live check passes.
 
 ## Pins actually installed
 

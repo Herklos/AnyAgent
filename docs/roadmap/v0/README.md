@@ -5,8 +5,8 @@ person) to execute without the conversation that produced it. Read this page ful
 
 ## The product slice
 
-From Anytype on a laptop or a phone, the owner asks an agent that runs on their own machine (Claude Code, Codex or Grok
-Build) about what is on that machine, and gets the answer in the same chat. By default the agent can only read. It
+From Anytype on a laptop or a phone, the owner asks an agent that runs on their own machine (Claude Code, Codex, Grok
+Build or Mistral Vibe) about what is on that machine, and gets the answer in the same chat. By default the agent can only read. It
 survives restarts without answering twice. One process, `anyagent run`, does everything.
 
 **Out of scope for v0** (do not build, even if it looks easy): approvals, groups, @mentions, tasks, schedules, triggers and
@@ -58,9 +58,10 @@ WP1, WP3 and WP4 can run in parallel after WP0. Estimates are for one agent work
    every fact about Anytype cites its source or a live test; pinned engine (rule 8); copied code carries provenance.
 6. **Branches.** Work on `agent/v0-wp<N>-<slug>` and push it. Do not push to `main` and do not merge; the owner merges. Open a
    pull request only if the owner asks.
-7. **Open questions use their defaults** and the default is written into STATUS.md. Do not settle one: Q19 (subscription logins
-   or API keys) and Q20 ([ADR 0019](../../adr/0019-own-workflow-core-behind-a-seam.md), the workflow core) are open. For Q20 the
-   default is *our own core behind the seam*.
+7. **Open questions use their defaults** and the default is written into STATUS.md. Do not settle one. Settled by the owner:
+   Q17 (four harnesses), Q18 (owner only), Q19 (subscription logins and API keys, [ADR 0020](../../adr/0020-harness-adapter-kinds.md)) and Q20
+   (our own core behind the seam, [ADR 0019](../../adr/0019-own-workflow-core-behind-a-seam.md)). Anything else that is open in
+   [OPEN-QUESTIONS.md](../../OPEN-QUESTIONS.md) uses its default.
 8. **Stop and ask the owner** (write the question in STATUS.md and stop that package) when: a live service you need is
    unavailable and no fallback is named; a spike disproves an assumption in a document; a change would touch an ADR; a copied
    file's licence is unclear; a check cannot be made to pass without weakening a test.
@@ -93,6 +94,6 @@ WP1, WP3 and WP4 can run in parallel after WP0. Estimates are for one agent work
   ([ADR 0017](../../adr/0017-anytype-backend-behind-a-port.md)). **Port**: the `Backend` interface.
 - **Gateway**: reads the chat and starts or updates the agent's workflow. **Node**: runs turns through harnesses. In v0 they
   are one process.
-- **Turn**: one message handled by one harness run. **Harness**: Claude Code, Codex or Grok Build.
+- **Turn**: one message handled by one harness run. **Harness**: Claude Code, Codex, Grok Build or Mistral Vibe.
 - **Core**: `AgentCore`, the workflow-side message queue and loop ([ADR 0019](../../adr/0019-own-workflow-core-behind-a-seam.md)).
 - **Floor**: the hard rule that refuses credential files and dangerous commands in every mode.

@@ -15,8 +15,6 @@ reused.
 | Q13 | Agent replies: one final message, or a "working…" message edited as the turn streams? | one final message | Editing costs writes and sync traffic |
 | Q14 | Report upstream to `temporal-community/temporal-agent-harness`: 0.3.1 fails to import with Temporal SDK 1.25 (deep import of `@temporalio/common/lib/time.js`), and propose continue-as-new for the TypeScript agent workflow? | not reported; anyagent pins SDK 1.24.0 and rotates runs | [research/temporal-agent-harness.md](research/temporal-agent-harness.md). Posting to an outside repository is the owner's call |
 | Q15 | Computer use: which comes first after v0, cua sandboxes (Linux container, macOS VM) or cua-driver on a node's own desktop? | sandboxes first | [ADR 0016](adr/0016-computer-use-with-cua.md); Michel's plan also puts containers first |
-| Q19 | Use consumer subscription logins (Claude, Codex, Grok) to drive agents, or API keys? Michel rates the Claude subscription route high risk for an orchestrator | the owner's choice per agent; `init` shows a terms notice; API keys always work | [Michel provider-terms research](https://github.com/Herklos/Michel/blob/main/docs/research/provider-terms.md) |
-| Q20 | Workflow layer: write the small core ourselves behind an `AgentCore` seam and decide on the harness at v1 (recommended), adopt `@temporalio/agent-harness` now, or never adopt it? Also: no agent framework | own core for v0, behind the seam; the seam makes either answer cheap | [ADR 0019](adr/0019-own-workflow-core-behind-a-seam.md) (proposed), [research](research/harness-vs-own-vs-framework.md) |
 
 ## Settled
 
@@ -28,5 +26,7 @@ reused.
 | Q4 | Agents change the org according to their permissions | [ADR 0013](adr/0013-agent-permissions-over-the-org.md) |
 | Q10 | Depend on temporal-agent-harness from npm, not vendored | [ADR 0010](adr/0010-reuse-michel-adapters-and-the-npm-harness.md) |
 | Q16 | Anytype now behind a backend port, `any` as the second backend; Starfish and Notion far later as weak adapters | [ADR 0017](adr/0017-anytype-backend-behind-a-port.md) |
-| Q17 | v0 ships Claude Code, Codex and Grok Build (Grok only if its live check passes) | [ROADMAP.md](ROADMAP.md) |
+| Q17 | v0 ships Claude Code, Codex, Grok Build and Mistral Vibe; Grok Build and Vibe only if their live check passes | [ROADMAP.md](ROADMAP.md), [ADR 0020](adr/0020-harness-adapter-kinds.md) |
 | Q18 | An agent answers only the space owner by default (`aa_allowed_authors` empty = owner) | [ROADMAP.md](ROADMAP.md), [ADR 0013](adr/0013-agent-permissions-over-the-org.md) |
+| Q19 | Both subscription logins and API keys, per agent, where the harness offers both (some subscriptions give no way to create an API key); `init` shows a terms notice; the person signs the harness in beforehand | [ADR 0020](adr/0020-harness-adapter-kinds.md), [ROADMAP.md](ROADMAP.md) |
+| Q20 | Write the small workflow core ourselves behind an `AgentCore` seam and decide on `@temporalio/agent-harness` at v1 against stated criteria; no agent framework | [ADR 0019](adr/0019-own-workflow-core-behind-a-seam.md) |
