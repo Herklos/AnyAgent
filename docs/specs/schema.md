@@ -180,3 +180,16 @@ Body: the prompt template; `{{payload}}` is replaced with the (truncated) event.
 ## Not in v0
 
 Memory, skills, logs and suggestions (all present in the `anytype-agents` skill) come later, as additive types.
+
+## v0 fields (as built)
+
+Implemented in `packages/core/src/schema.ts` (WP2):
+
+- `aa_settings`: `aa_schema_version` text (`0.1.0`)
+- `aa_agent`: `aa_handle`, `aa_harness` (claude-code|codex|grok|vibe), `aa_model`, `aa_chat` (text chat id),
+  `aa_workdir`, `aa_approval_mode` (read_only|full), `aa_allowed_authors`, `aa_lifecycle` (live|paused).
+  Instructions are the object **body**.
+
+Spike 005: last-modifier visibility is **not proven live** (spike 002 NOT RUN). `lastModifierAcceptable` is implemented
+for when the backend exposes `modifiedById`; doctor will warn otherwise (WP7).
+

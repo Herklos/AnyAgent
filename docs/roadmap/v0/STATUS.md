@@ -7,9 +7,9 @@ a bare "done". A package is `done` only when every achievement is ticked and eve
 | --- | --- | --- | --- | --- |
 | WP0 | done | `cursor/v0-wp0-workspace-d30c` | cloud agent | |
 | WP1 | done (live NOT RUN) | `cursor/v0-wp1-backend-d30c` | cloud agent | Spike 002 not run; adapter `verified: false` |
-| WP2 | not started | | | |
+| WP2 | done | `cursor/v0-wp2-schema-config-d30c` | cloud agent | Fail-closed review fixes |
 | WP3 | done | `cursor/v0-wp3-agent-core-d30c` | cloud agent | Contract + spike 006 measurement + replay/budget |
-| WP4 | not started | | | |
+| WP4 | blocked (Michel@402865d not reachable: GitHub 404) | | | Needs owner access to Herklos/Michel for adapter copy |
 | WP5 | not started | | | |
 | WP6 | not started | | | |
 | WP7 | not started | | | |
@@ -134,3 +134,25 @@ Achievements:
 - [x] No `@temporalio/agent-harness*`.
 
 Deviations: none material after review fixes. Review briefly set status to in-progress while measurement was missing; now complete.
+
+## Questions for the owner
+
+- **WP4:** `Herklos/Michel@402865d` returns 404 from this environment. Please grant access or provide a mirror so adapters/floor can be copied with provenance.
+
+### WP2: schema, config, init, agent create  (done, 2026-11-07)
+
+Built: `packages/core/src/{schema,agent-spec,author-policy,config}.ts`, `packages/admin/src/{init,agent}.ts`, `examples/anyagent.config.yaml`
+
+Checks:
+- `pnpm --filter @anyagent/core test` -> PASS
+- `pnpm --filter @anyagent/admin test` -> PASS
+- live admin -> NOT RUN (placeholder test)
+
+Achievements:
+- [x] v0 schema as data
+- [x] config loader with defaults, bounds, absolute roots, errors together
+- [x] createAgent / listAgents (object-first; orphan chat cleaned up)
+- [x] author policy with required agentAccountId; lastModifierAcceptable fail-closed when capable
+- [x] schema.md updated
+
+Spikes 009/005: reference backend only; live Anytype NOT RUN; 005's last-modifier answer unknown.
