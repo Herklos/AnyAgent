@@ -1,6 +1,6 @@
 # WP1: backend port, reference backend, conformance suite, Anytype adapter
 
-**Goal.** Everything anyagent needs from a space goes through one tested interface, and an adapter for Anytype (anytype-heart through
+**Goal.** Everything anybot needs from a space goes through one tested interface, and an adapter for Anytype (anytype-heart through
 `anytype serve`) passes that interface's conformance suite against a live instance. This package includes **spike 002**.
 
 **Depends on:** WP0. **Unblocks:** WP2, WP5.
@@ -8,7 +8,7 @@
 ## Scope
 
 In: promote the port, reference backend and suite from [spike 016](../../../spikes/016-backend-port-any/README.md), extend them for v0, build
-`@anyagent/backend-anytype`, run spike 002 and record what it finds.
+`@anybot/backend-anytype`, run spike 002 and record what it finds.
 Out: `backend-any` (later), the object stream and `search` for anything but listing `aa_agent` objects, files, discussions, push.
 
 ## Read first
@@ -57,7 +57,7 @@ Must not change: `spikes/016-*` (copy from it, do not edit it; keep a provenance
    Chat `events.watch` resumes with the last event id; on `resync_required` it re-reads recent history and emits `upsert` for messages newer than the
    cursor. A chat watch with no cursor emits nothing before `ready`. Objects `watch` emits the current state as `upsert`, then live changes (no
    replay). `react(on)` reads then toggles. Capabilities: declare `resume-cursor` only if (c) passed; never declare `agent-envelope` unless (c)/(h) show it.
-6. **Conformance.** Run the suite against the adapter on the mock (CI) and live (opt-in `ANYAGENT_LIVE_ANYTYPE=1`). Checks that need a missing capability are
+6. **Conformance.** Run the suite against the adapter on the mock (CI) and live (opt-in `ANYBOT_LIVE_ANYTYPE=1`). Checks that need a missing capability are
    skipped with the reason; every check without a `needs` must pass.
 7. **If a live Anytype is not available:** build everything against the research document and the mock, mark the adapter `verified: false` in its
    exported metadata, make `doctor` (WP7) print that, and record in STATUS.md that WP1 is `done (live NOT RUN)`. WP8 cannot pass without a live run.
@@ -75,16 +75,16 @@ Must not change: `spikes/016-*` (copy from it, do not edit it; keep a provenance
 ## Checks
 
 ```bash
-pnpm --filter @anyagent/backend test                    # expect: all pass
-pnpm --filter @anyagent/backend-anytype test            # expect: all pass, live skipped with a printed reason
-ANYAGENT_LIVE_ANYTYPE=1 pnpm --filter @anyagent/backend-anytype test   # expect: live suite passes (or NOT RUN with reason)
+pnpm --filter @anybot/backend test                    # expect: all pass
+pnpm --filter @anybot/backend-anytype test            # expect: all pass, live skipped with a printed reason
+ANYBOT_LIVE_ANYTYPE=1 pnpm --filter @anybot/backend-anytype test   # expect: live suite passes (or NOT RUN with reason)
 pnpm check
 ```
 
 ## Achievements
 
-- [ ] One port, one reference backend and one conformance suite in `@anyagent/backend`, with the suite shown to fail on broken backends.
-- [ ] `@anyagent/backend-anytype` passes the suite on the mock, and live if an instance was available.
+- [ ] One port, one reference backend and one conformance suite in `@anybot/backend`, with the suite shown to fail on broken backends.
+- [ ] `@anybot/backend-anytype` passes the suite on the mock, and live if an instance was available.
 - [ ] Spike 002's ten questions are answered in `docs/research/anytype-api.md` with sources, and what was not proven is stated.
 - [ ] No secrets, space ids or names in fixtures.
 

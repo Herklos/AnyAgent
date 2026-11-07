@@ -1,6 +1,6 @@
 # temporal-agent-harness from npm, checked
 
-What anyagent would depend on, and what was checked on 2026-11-06. Decision: [ADR 0010](../adr/0010-reuse-michel-adapters-and-the-npm-harness.md).
+What anybot would depend on, and what was checked on 2026-11-06. Decision: [ADR 0010](../adr/0010-reuse-michel-adapters-and-the-npm-harness.md).
 
 ## Where it comes from
 
@@ -32,12 +32,12 @@ Run in a scratch directory with Node 22.23.4:
    `exports`. Upstream does not see this because its lockfile pins 1.24.0.
 2. With every `@temporalio/*` SDK package pinned to **1.24.0**, both packages import. Core exports `defineAgent`,
    `handler`, `MidTurn`, `ToolApprovalPolicy` and `ToolApprovalDenied`, and worker exports 22 names. `node_modules` is
-   about 270 MB, mostly optional AI SDK peers that anyagent does not install.
+   about 270 MB, mostly optional AI SDK peers that anybot does not install.
 
-So anyagent pins the harness **and** the Temporal SDK version the harness release is locked to, until upstream fixes the
+So anybot pins the harness **and** the Temporal SDK version the harness release is locked to, until upstream fixes the
 deep import (open question Q14).
 
-## The API anyagent builds on (0.3.1)
+## The API anybot builds on (0.3.1)
 
 Sources are upstream files under `typescript/packages/core/src/harness/`:
 
@@ -69,7 +69,7 @@ Sources are upstream files under `typescript/packages/core/src/harness/`:
 `MichelAgent = defineAgent({...})` with one `deliver` handler (`MidTurn.ENQUEUE`), the approval policy chosen from the
 agent's mode (`read_only` → allow inherently safe, `full` → skip all), plus a custom permission update and a rotation
 query registered with `setHandler` inside `create` (Michel `packages/temporal/workflows/src/agent.ts`, lines 1–60).
-anyagent follows the same shape.
+anybot follows the same shape.
 
 ## Temporal client features used by the gateway
 

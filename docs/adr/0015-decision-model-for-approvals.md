@@ -6,7 +6,7 @@
 ## Context
 
 [ADR 0008](0008-approvals-objects-and-reactions.md) defines approval modes `read_only`, `ask`, `auto` and `full`, and
-leaves `auto`'s judge unspecified. The harness anyagent builds on ([ADR 0010](0010-reuse-michel-adapters-and-the-npm-harness.md))
+leaves `auto`'s judge unspecified. The harness anybot builds on ([ADR 0010](0010-reuse-michel-adapters-and-the-npm-harness.md))
 has an **auto mode**: named criteria sets with `approve_when`, `deny_when`, `escalate_when`, `min_confidence` and
 `escalate_if_irreversible_above`, judged by a pluggable `AutoModeEvaluator` that returns `approve`, `deny` or
 `escalate`. The gate "races it against a human and cancels the loser" (`agent-protocol/agent-interface.ts`, lines
@@ -16,7 +16,7 @@ Jev", and "anything unclear goes to a human; nothing fails open" (Michel `docs/P
 
 ## Decision
 
-1. **anyagent's evaluator calls a decision model through an activity.** The workflow's `AutoModeEvaluator` runs the
+1. **anybot's evaluator calls a decision model through an activity.** The workflow's `AutoModeEvaluator` runs the
    activity `judgeApproval` on a node that has the configured endpoint. The activity sends the tool name, a summary of
    the input, the agent's role, the task and the criteria set to an `{endpoint, model}`
    ([ADR 0014](0014-model-endpoints-local-and-cloud.md)). It asks for a JSON verdict

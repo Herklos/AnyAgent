@@ -12,8 +12,8 @@ Go was chosen first, then reconsidered when the owner asked whether Go was requi
   `anyproto/anytype-mcp` is TypeScript.
 - anytype-heart is licensed under **Any Source Available License 1.0**, which grants use, modification and
   redistribution "only (a) for Non-Commercial Use, or (b) for Commercial Use in Allowed Networks" (heart `LICENSE.md`,
-  lines 7–9). Embedding heart would carry that clause into every anyagent build. Talking HTTP to a separately installed
-  `anytype serve` keeps heart out of anyagent's distribution. (A reading of the text, not legal advice.)
+  lines 7–9). Embedding heart would carry that clause into every anybot build. Talking HTTP to a separately installed
+  `anytype serve` keeps heart out of anybot's distribution. (A reading of the text, not legal advice.)
 - The realtime API is reachable from TypeScript exactly as from Go: [spike 001](../../spikes/001-ts-sse/) consumes both v2
   streams (chat and object search) with Node 22 `fetch`, including the POST stream that `EventSource` cannot open.
 - Temporal's TypeScript SDK is first class, and Michel's harness adapters are TypeScript
@@ -21,7 +21,7 @@ Go was chosen first, then reconsidered when the owner asked whether Go was requi
 
 ## Decision
 
-anyagent is written in **TypeScript** (Node 22+, pnpm workspace, Vitest, Biome as in Michel). It talks to Anytype only
+anybot is written in **TypeScript** (Node 22+, pnpm workspace, Vitest, Biome as in Michel). It talks to Anytype only
 through the public **JSON API v2 over HTTP and SSE**, to an `anytype serve` (headless CLI, port 31012) or the desktop
 app (port 31009) run separately.
 

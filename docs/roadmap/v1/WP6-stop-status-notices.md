@@ -1,4 +1,4 @@
-# v1 WP6: `/stop`, `anyagent status`, notices and usage
+# v1 WP6: `/stop`, `anybot status`, notices and usage
 
 **Goal.** The owner can stop a running turn by typing `/stop` in the agent's chat, can see with one command what every agent is doing, and every failure or stop produces one clear, non-spammy notice that says what happened and what it cost.
 
@@ -6,7 +6,7 @@
 
 ## Scope
 
-In: the `/stop` command in the gateway, cancellation in the core and the node, `anyagent status`, the notice catalogue and its rate limit, the per-turn usage record.
+In: the `/stop` command in the gateway, cancellation in the core and the node, `anybot status`, the notice catalogue and its rate limit, the per-turn usage record.
 Out: other chat commands, a "pause" command (the `aa_lifecycle` field is the switch), mid-turn steering, editing a "working…" message (Q13).
 
 ## Read first
@@ -16,18 +16,18 @@ Out: other chat commands, a "pause" command (the `aa_lifecycle` field is the swi
 ## Files
 
 Create: `packages/gateway/src/commands.ts`, `packages/workflows/src/core/stop.ts`, `packages/node/src/turn-log.ts`, `apps/cli/src/status.ts`, `packages/core/src/notices.ts` (the catalogue), tests.
-Change: `packages/gateway/src/pipeline.ts`, `packages/workflows/src/core/own-core.ts` (cancel scope, new update), `packages/workflows/src/{contracts.ts,anyagent-workflow.ts}`, `packages/node/src/activities/{run-turn,deliver}.ts`, `docs/specs/agent-core.md`, `docs/specs/agent-workflow.md`.
+Change: `packages/gateway/src/pipeline.ts`, `packages/workflows/src/core/own-core.ts` (cancel scope, new update), `packages/workflows/src/{contracts.ts,anybot-workflow.ts}`, `packages/node/src/activities/{run-turn,deliver}.ts`, `docs/specs/agent-core.md`, `docs/specs/agent-workflow.md`.
 
 ## Behaviour
 
 1. **Command parsing (gateway, pure):** a message from an **allowed author** whose trimmed text equals `/stop` (case-insensitive, optionally followed by a handle that must match the agent) is a command, not input. Anything else that starts with `/` is a normal message. Commands from disallowed authors are ignored like any message.
 2. **Stop semantics:** `/stop` ends the turn in flight, **drops every queued message**, denies every pending approval with reason `stopped`, and posts one notice: `Stopped.` or `Stopped. <n> queued messages dropped.` If nothing is running, the reply is `Nothing is running.` The `/stop` message itself is never a turn.
-3. **Core:** a new update `anyagent.stop` `{ key, by }` (deduped by key like chat). The core runs each turn inside a cancellable scope; the update cancels the scope, clears the queue, and tells the approval book to deny everything. Add the behaviours to `docs/specs/agent-core.md` and to `runCoreContract`.
+3. **Core:** a new update `anybot.stop` `{ key, by }` (deduped by key like chat). The core runs each turn inside a cancellable scope; the update cancels the scope, clears the queue, and tells the approval book to deny everything. Add the behaviours to `docs/specs/agent-core.md` and to `runCoreContract`.
 4. **Node:** the cancelled `runTurn` activity (cancellation type "wait for cancellation completed") sees the cancellation through its heartbeat, calls `session.cancel()`, then `close()`, then `kill()` after a 10 s grace, and returns; the node store records outcome `stopped`.
    The harness's partial output is discarded, never posted.
 5. **Gateway, no workflow running:** `/stop` does not start a workflow; the gateway asks the node to post `Nothing is running.`
 6. **Turn log (node store):** table `turns(workflow_id, key, started_at, ended_at, outcome, harness, model, input_tokens, output_tokens)` with outcome `replied`, `failed`, `interrupted`, `stopped`, `refused`; a retention of 30 days. Usage comes from the harness when it reports it.
-7. **`anyagent status [--org id] [--json]`:** for each agent of each org: handle, harness and mode, lifecycle, state (`idle`, `running` with how long, `waiting approval` with the count and the oldest request's age, `offline` if no workflow and not paused), queued count, last outcome and time from the local turn log, tokens in the last 24 hours. Temporal fields come from the `anyagent.status` query and `describe`
+7. **`anybot status [--org id] [--json]`:** for each agent of each org: handle, harness and mode, lifecycle, state (`idle`, `running` with how long, `waiting approval` with the count and the oldest request's age, `offline` if no workflow and not paused), queued count, last outcome and time from the local turn log, tokens in the last 24 hours. Temporal fields come from the `anybot.status` query and `describe`
    and work from any machine; the turn-log fields are read from this machine's store and are shown as `n/a (other node)` when the agent runs elsewhere. Exit code 0 always, unless the backend or Temporal is unreachable (then 1 with the reason).
 8. **Notice catalogue** (`notices.ts`): one function per notice with the exact text, in one place: cannot run (config), interrupted, harness unavailable, harness error, empty reply, stopped, nothing running, mode unsupported, model cannot call tools, node offline (v2 reuses it), approval service unavailable. Each notice ends with a short usage tail when known: `(3m 12s, 14.2k tokens)`.
 9. **Rate limit:** at most one notice per agent per minute for the same reason; the next ones are logged and counted (`suppressed_notices` in the turn log), and the first notice after the minute says `(+n similar notices suppressed)`. A notice is never posted for a notice (the loop guard already drops the agent's own messages).
@@ -56,14 +56,14 @@ Change: `packages/gateway/src/pipeline.ts`, `packages/workflows/src/core/own-cor
 ## Checks
 
 ```bash
-pnpm --filter @anyagent/gateway test && pnpm --filter @anyagent/workflows test && pnpm --filter @anyagent/node test && pnpm --filter @anyagent/core test && pnpm --filter anyagent test
+pnpm --filter @anybot/gateway test && pnpm --filter @anybot/workflows test && pnpm --filter @anybot/node test && pnpm --filter @anybot/core test && pnpm --filter anybot test
 pnpm check
 ```
 
 ## Achievements
 
 - [ ] `/stop` ends a running turn within seconds on every shipped harness (fake and live), with one notice and no stray output.
-- [ ] `anyagent status` answers "what is each agent doing" in one command.
+- [ ] `anybot status` answers "what is each agent doing" in one command.
 - [ ] Every notice text lives in the catalogue, is tested, and cannot spam.
 
 ## Stop and ask when

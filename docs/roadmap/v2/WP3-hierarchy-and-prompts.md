@@ -51,7 +51,7 @@ Change: `packages/core/src/agent-spec.ts` (new fields), `packages/node/src/activ
 ## Checks
 
 ```bash
-pnpm --filter @anyagent/core test && pnpm --filter @anyagent/node test
+pnpm --filter @anybot/core test && pnpm --filter @anybot/node test
 pnpm check
 ```
 

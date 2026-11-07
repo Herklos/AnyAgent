@@ -8,7 +8,7 @@
 
 Until now the documents assumed one space per deployment ([ARCHITECTURE.md](../ARCHITECTURE.md) section 10). People
 have more than one space: a personal one, a work one, a community one, and later spaces on Anytwo
-([ADR 0017](0017-anytype-backend-behind-a-port.md)). Running a second anyagent for each means a second Temporal, a second
+([ADR 0017](0017-anytype-backend-behind-a-port.md)). Running a second anybot for each means a second Temporal, a second
 gateway and a second set of nodes for what is one person's team of machines.
 
 An **org** is one space on one backend: the unit that holds agents, groups, schedules, tasks and approvals
@@ -31,7 +31,7 @@ An **org** is one space on one backend: the unit that holds agents, groups, sche
      an org, not across orgs: two orgs can each have a node called `mac-studio` on different machines, and with the old
      name both would poll one queue and run each other's turns.
 4. **Failure isolation.** The gateway runs one supervisor per org: its streams, cursor, reconcile and backoff. An org whose
-   backend is down or whose key is revoked stops waking its own agents and nothing else. `anyagent doctor` reports per
+   backend is down or whose key is revoked stops waking its own agents and nothing else. `anybot doctor` reports per
    org.
 5. **Each org is a trust boundary, and a node is not.** A node lists the orgs it serves (`serves: [orgId, …]`, by
    default one). Every activity checks that the org of its work is on that list. But a node runs all its harnesses as
@@ -47,8 +47,8 @@ An **org** is one space on one backend: the unit that holds agents, groups, sche
 - A little more configuration, and an `org` argument through the gateway, activities and CLI.
 - One Temporal serves all orgs. A Temporal namespace per org is still possible later
   ([ADR 0003](0003-one-shared-temporal-one-workflow-per-agent.md)).
-- Two anyagent deployments must not serve the same space against the same Temporal namespace: they would both wake the
-  agents. `anyagent doctor` looks for a workflow's other starter and warns.
+- Two anybot deployments must not serve the same space against the same Temporal namespace: they would both wake the
+  agents. `anybot doctor` looks for a workflow's other starter and warns.
 - Mixed backends, such as one Anytype org and one Anytwo org, need nothing beyond the adapters.
 
 ## Extension points

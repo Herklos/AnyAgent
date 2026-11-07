@@ -45,7 +45,7 @@ Change: `docs/SPIKES.md` (013 and 015), `docs/specs/permissions.md` (the full ta
 ## Checks
 
 ```bash
-pnpm --filter @anyagent/core test                # expect: pass, with the pending row count printed
+pnpm --filter @anybot/core test                # expect: pass, with the pending row count printed
 node scripts/eval-decision.mjs --fixture eval/decision/fixtures/fake-always-approve.json   # expect: gate FAIL
 node scripts/eval-decision.mjs --endpoint llama-local --model <m> --runs 5                  # real: a report, or NOT RUN with reason
 pnpm check

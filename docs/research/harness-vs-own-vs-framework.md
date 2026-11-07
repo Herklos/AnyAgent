@@ -5,14 +5,14 @@ Research for [ADR 0019](../adr/0019-own-workflow-core-behind-a-seam.md) (accepte
 
 ## The two questions and the short answers
 
-1. **Is `@temporalio/agent-harness` a valuable addition, or should anyagent write that layer itself?**
+1. **Is `@temporalio/agent-harness` a valuable addition, or should anybot write that layer itself?**
    For **v0** it is not worth its costs: v0 needs about 200 lines of workflow code that the harness would replace, and the
    harness brings a pinned SDK, a second experimental package, `@internal` calls, and about 4,800 lines in the workflow bundle
    where v0 needs about 200. From **v1** (the approval gate) and **v3** (auto mode) the harness has real value, so the recommendation is to
    build the small core **behind a seam**, and decide again at v1 against measurable criteria (section 9) instead of
    committing for ever either way.
-2. **Should we create our own framework, or use one like Pydantic AI?** Neither. Pydantic AI is Python and anyagent is
-   TypeScript. And a framework owns the agent loop, but in anyagent three of the four harnesses are external programs that
+2. **Should we create our own framework, or use one like Pydantic AI?** Neither. Pydantic AI is Python and anybot is
+   TypeScript. And a framework owns the agent loop, but in anybot three of the four harnesses are external programs that
    own their own loop (Claude Code, Codex, Grok Build). What we need is a small **library** (the adapters and a model
    client), not a framework. A TypeScript framework such as the Vercel AI SDK is only a candidate for the one
    OpenAI-compatible kind, later.
@@ -28,7 +28,7 @@ discarded unextracted, because running a downloaded binary was refused), so [spi
 number that matters most, history events per message in our shape, is inferred, not measured. `0.4.0` was read, not
 installed. Own-implementation sizes are estimates.
 
-## 1. What anyagent needs from a workflow layer
+## 1. What anybot needs from a workflow layer
 
 | Need | Release | Notes |
 | --- | --- | --- |
@@ -78,7 +78,7 @@ installed. Own-implementation sizes are estimates.
 - **Measured history cost** (Michel `docs/research/spikes-v0.md`, section 0.7): about **160 events and 90 KB per turn**, and
   468 accepted updates for 25 turns, "mostly caused by the hub's stream polling (an update per poll)". At that rate an agent
   reaches Temporal's 51,200-event limit in roughly 300 turns. Michel rotates an idle agent's workflow past 20,000 events.
-  Two things limit how far this transfers: Michel streams reply deltas and polls the harness stream, which anyagent would not.
+  Two things limit how far this transfers: Michel streams reply deltas and polls the harness stream, which anybot would not.
 - **Rotation is outside the harness.** Michel's note: the agent workflow "cannot continue-as-new"; the hub rotates between
   turns; a message sent between runs reaches a closed workflow and the sender must retry or start the workflow.
 - **Provenance.** Michel started on a pinned submodule of a fork and was "decided: own fork" (audit G36) because the packages
@@ -86,7 +86,7 @@ installed. Own-implementation sizes are estimates.
 
 ## 4. Fit: what the harness gives us, feature by feature
 
-| Harness feature | Used by anyagent? | Value to us |
+| Harness feature | Used by anybot? | Value to us |
 | --- | --- | --- |
 | Update-based message admission, `MidTurn` queue, `AgentClosed` rejection, dispositions | yes, v0 | medium: about 250 upstream lines, a pattern we could write in about 150 |
 | Approval gate with parked gates, `remember`, expiry | yes, v1 | **high**: the concurrency-sensitive part |
@@ -95,10 +95,10 @@ installed. Own-implementation sizes are estimates.
 | Steering (`0.4.0`) | later | medium |
 | Event stream (`workflow-streams`), `turn_events`, replay, merge | no | none, and it costs history events |
 | Subagents, Code Mode, observable state, React and Svelte clients, console | no | none |
-| OpenAI Agents SDK and Gemini integrations | no | none: anyagent runs harnesses in activities |
+| OpenAI Agents SDK and Gemini integrations | no | none: anybot runs harnesses in activities |
 | Standard interface for a fleet behind one UI | no | none: one product, Anytype is the UI |
 
-The pattern is clear: what anyagent can use is about 550 of the runner's 1,061 lines, and almost all of the value is in the
+The pattern is clear: what anybot can use is about 550 of the runner's 1,061 lines, and almost all of the value is in the
 approval gate and auto mode, which arrive in v1 and v3. v0 uses the least valuable slice.
 
 ## 5. What owning the layer would cost (estimates)
@@ -153,7 +153,7 @@ vocabulary (`OPENED`, `QUEUED`, dispositions, a status shape) is worth following
 
 ## 8. The framework question
 
-A framework owns the agent loop (calls the model, runs tools, loops). anyagent's loops:
+A framework owns the agent loop (calls the model, runs tools, loops). anybot's loops:
 
 | Harness kind | Who owns the loop | Would a framework help? |
 | --- | --- | --- |

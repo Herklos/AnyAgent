@@ -1,7 +1,7 @@
-# What anyagent reuses from Michel
+# What anybot reuses from Michel
 
 Source: [Herklos/Michel](https://github.com/Herklos/Michel) at `402865d` (2026-11-06), Apache-2.0, the same licence as
-anyagent. Decision: [ADR 0010](../adr/0010-reuse-michel-adapters-and-the-npm-harness.md) (accepted).
+anybot. Decision: [ADR 0010](../adr/0010-reuse-michel-adapters-and-the-npm-harness.md) (accepted).
 
 ## Code to copy
 
@@ -32,15 +32,15 @@ verified on a real Codex (audit G176)"; live tests need opt-in variables and rea
 
 ## Reused as a dependency, not copied
 
-| Michel path | anyagent |
+| Michel path | anybot |
 | --- | --- |
 | `vendor/temporal-agent-harness` (a submodule pinning upstream `ce68611`; the fork has no patches of its own) | `@temporalio/agent-harness` from npm, pinned with the Temporal SDK it is locked to ([research](temporal-agent-harness.md)) |
-| `MichelAgent` on `defineAgent` (`packages/temporal/workflows/src/agent.ts`) | The pattern: handlers, a custom permission update, policy from the approval mode, a rotation query. anyagent's `AnyAgent` follows it ([spec](../specs/agent-workflow.md)) |
-| Hub rotation of agent runs before 1,500 updates, never with a turn in flight | Done by anyagent's gateway ([ADR 0011](../adr/0011-event-gateway.md)) |
+| `MichelAgent` on `defineAgent` (`packages/temporal/workflows/src/agent.ts`) | The pattern: handlers, a custom permission update, policy from the approval mode, a rotation query. anybot's `AnyBot` follows it ([spec](../specs/agent-workflow.md)) |
+| Hub rotation of agent runs before 1,500 updates, never with a turn in flight | Done by anybot's gateway ([ADR 0011](../adr/0011-event-gateway.md)) |
 
-## Michel's plans anyagent follows
+## Michel's plans anybot follows
 
-| Michel source | Plan | anyagent |
+| Michel source | Plan | anybot |
 | --- | --- | --- |
 | `docs/PLAN.md` line 429; `docs/adr/0003-harness-adapters.md` line 12 | `openai_compatible` providers incl. llama.cpp, model discovery | [ADR 0014](../adr/0014-model-endpoints-local-and-cloud.md) |
 | `docs/PLAN.md` lines 313 and 574 | `auto` approvals by a pluggable evaluator using any configured model; nothing fails open | [ADR 0015](../adr/0015-decision-model-for-approvals.md) |
@@ -48,7 +48,7 @@ verified on a real Codex (audit G176)"; live tests need opt-in variables and rea
 
 ## Ideas to reuse (no code)
 
-| Michel ADR | Idea | Where in anyagent |
+| Michel ADR | Idea | Where in anybot |
 | --- | --- | --- |
 | 0014 Agent messaging and delivery | Inbox with cursors, coalescing into one turn, delivery modes, receipts 👀 ⏳ ✅, a messaging-conventions skill | [agent-workflow.md](../specs/agent-workflow.md) main loop |
 | 0018 Harness profiles | Primary + ordered fallbacks, never a sign-in the person did not choose, per-token billing confirmation | later: `aa_harness_profile` |
@@ -60,5 +60,5 @@ verified on a real Codex (audit G176)"; live tests need opt-in variables and rea
 
 ## Open
 
-- Share instead of copy? A published `@herklos/harness-adapters` package used by both Michel and anyagent would avoid
+- Share instead of copy? A published `@herklos/harness-adapters` package used by both Michel and anybot would avoid
   drift. Q9.

@@ -51,7 +51,7 @@ Change: `docs/ROADMAP.md`, `README.md`, `CHANGELOG.md`, specs, `docs/SPIKES.md`,
 
 `e2e/live/README-v3.md`, run **twice from a clean space**: v2's procedure first (regression), then:
 
-1. **Decision model:** run `anyagent decision eval` on a real local `llama-server` model and, if a key exists, a cloud model (WP1's gate). With a passing model, a real `auto` specialist has a routine call approved by it and a risky call escalated to a real approver. Record the evaluation report in `REPORT.md`.
+1. **Decision model:** run `anybot decision eval` on a real local `llama-server` model and, if a key exists, a cloud model (WP1's gate). With a passing model, a real `auto` specialist has a routine call approved by it and a risky call escalated to a real approver. Record the evaluation report in `REPORT.md`.
 2. **Permissions** with a real harness: the group-edit refusal, a draft agent created and completed, an `ask` org change approved by a real second account.
 3. **Webhook:** a real signed request (a GitHub test delivery or `curl` with an `openssl` HMAC) wakes the chief; a tampered one does not.
 4. **Claims:** two real agents race.
@@ -74,7 +74,7 @@ deviations, and the questions for the owner (what to do next from "After v3": co
 
 ```bash
 pnpm check
-pnpm --filter @anyagent/e2e test
+pnpm --filter @anybot/e2e test
 git diff --stat main...HEAD -- docs/adr    # expect: only ADRs this release meant to change (0015 thresholds, others named in STATUS)
 ```
 

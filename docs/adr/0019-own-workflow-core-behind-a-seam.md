@@ -15,7 +15,7 @@ agent framework. The evidence, the options and what could not be measured are in
   rotation query. The harness brings a pinned Temporal SDK (its deep import is still there in `0.4.0`), a second experimental
   package, `@internal` calls for the approval bridge (Michel's audit G37), no continue-as-new, and about 4,800 lines in the
   workflow bundle.
-- The harness's real value for anyagent is the approval gate (v1) and auto mode (v3), roughly 250 and 100 upstream lines of
+- The harness's real value for anybot is the approval gate (v1) and auto mode (v3), roughly 250 and 100 upstream lines of
   concurrency-sensitive code, plus steering later.
 - Three of the four harnesses are external programs that own their loop, so an agent framework would only touch the
   OpenAI-compatible kind.
@@ -36,7 +36,7 @@ agent framework. The evidence, the options and what could not be measured are in
 4. **Pins.** Until the owner decides, every `@temporalio/*` package stays at the exact version in
    [AGENTS.md](../../AGENTS.md) rule 8 (1.24.0) so that adopting the harness remains possible. If this ADR is accepted and the
    harness is not adopted, the pin may move to the current SDK in its own commit.
-5. **No agent framework.** anyagent builds a small library: the harness-adapter registry (Michel's, copied with provenance),
+5. **No agent framework.** anybot builds a small library: the harness-adapter registry (Michel's, copied with provenance),
    an OpenAI-compatible model client, and the seams `Backend`, `HarnessSession` and `AgentCore`. Pydantic AI is Python and is
    rejected for that reason. The Vercel AI SDK, with Temporal's `@temporalio/vercel-ai-sdk`, is a candidate **as a library
    inside an activity** for the OpenAI-compatible kind only, to be evaluated after v1 if provider breadth (Anthropic and

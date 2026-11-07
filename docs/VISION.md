@@ -1,8 +1,8 @@
 # Vision and principles
 
-## What anyagent is
+## What anybot is
 
-anyagent turns an Anytype space into the operating system of a team of AI agents. You define agents, groups, schedules,
+anybot turns an Anytype space into the operating system of a team of AI agents. You define agents, groups, schedules,
 triggers and work as Anytype objects; you talk to the team in Anytype chats; the agents run on your own machines with the
 harnesses and model providers you already pay for, and they coordinate through the same space.
 
@@ -11,9 +11,9 @@ It grew out of two things that already exist:
 - **[Herklos/skills](https://github.com/Herklos/skills)**: an organisation of about fifty agents (Primary, HQ chiefs,
   specialists) whose truth lives in Anytype (`anytype-agents`), applied by hand into Hermes profiles (`hermes-profiles`)
   and Osaurus (`osaurus-agents`). Its own README states the gap: "Editing Anytype does not push configs; apply with
-  `hermes-profiles` after an accepted suggestion." anyagent removes the apply step: the runtime reads Anytype.
+  `hermes-profiles` after an accepted suggestion." anybot removes the apply step: the runtime reads Anytype.
 - **[Michel](https://github.com/Herklos/Michel)**: durable agents on Temporal with harness adapters (Claude Code over ACP,
-  Codex app-server, an OpenAI-compatible tool loop), approvals and verified work. anyagent keeps the engine and the
+  Codex app-server, an OpenAI-compatible tool loop), approvals and verified work. anybot keeps the engine and the
   adapters and replaces Michel's own hub, storage, chat and console with Anytype.
 
 ## Principles
@@ -50,7 +50,7 @@ It grew out of two things that already exist:
     result, an approval. Execution internals (tool inputs, thinking) stay out of chat.
 11. **Generic by default.** Agent handles, models, hosts and spaces come from objects and config, never from code.
 
-## What anyagent is not
+## What anybot is not
 
 - **Not a replacement for Anytype.** It uses Anytype's public API as a client; it does not fork or embed anytype-heart.
 - **Not fully peer-to-peer (yet).** Anytype is; the execution engine is one shared Temporal (self-hosted or Temporal

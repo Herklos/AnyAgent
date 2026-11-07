@@ -16,7 +16,7 @@ Out: agents creating schedules (v2 and v3 permissions), delivery to groups (v2 a
 ## Files
 
 Create: `packages/core/src/schedule.ts` (parse and validate), `packages/gateway/src/schedules.ts` (reconciler), `packages/workflows/src/{schedule-kick.ts,schedule-projection.ts}`, `packages/node/src/activities/{resolve-schedule,write-schedule-projection}.ts`, tests.
-Change: `packages/core/src/schema.ts` (`aa_schedule`), `packages/workflows/src/{contracts.ts,anyagent-workflow.ts}` (`scheduleFired`), `packages/workflows/src/workflows.ts` (export the new workflows), `docs/specs/{schema.md,agent-workflow.md}`, `apps/cli` doctor.
+Change: `packages/core/src/schema.ts` (`aa_schedule`), `packages/workflows/src/{contracts.ts,anybot-workflow.ts}` (`scheduleFired`), `packages/workflows/src/workflows.ts` (export the new workflows), `docs/specs/{schema.md,agent-workflow.md}`, `apps/cli` doctor.
 
 ## Schema (additive, schema version `0.2.0`)
 
@@ -25,10 +25,10 @@ Change: `packages/core/src/schema.ts` (`aa_schedule`), `packages/workflows/src/{
 ## Behaviour
 
 1. **Reconciler** (gateway, per org): list `aa_schedule` objects and watch changes. Desired Temporal Schedule for each, id `schedule:<spaceId>:<scheduleObjectId>`: spec = the cron and time zone (`timezoneName`); **paused** unless `aa_enabled` is true and the owner agent exists and is `live`;
-   action = start `ScheduleKick` on task queue `anyagent` with `{ orgId, spaceId, scheduleId, agentId }`; overlap policy `SKIP`; catch-up window 10 minutes. Diff against `list()` of Temporal Schedules with the `schedule:<spaceId>:` prefix: create what is missing, update what differs
+   action = start `ScheduleKick` on task queue `anybot` with `{ orgId, spaceId, scheduleId, agentId }`; overlap policy `SKIP`; catch-up window 10 minutes. Diff against `list()` of Temporal Schedules with the `schedule:<spaceId>:` prefix: create what is missing, update what differs
    (pause, unpause, spec), **delete** what no longer has an object. Idempotent and safe to run repeatedly. An invalid cron or zone is not created and is reported (log and `doctor`), and does not break the others.
 2. **`ScheduleKick`** (tiny workflow): sends `scheduleFired` `{ key: "<scheduleId>:<scheduled time>", scheduleId }` to the owner's workflow with update-with-start, waits for acceptance, then ends. The key is stable per occurrence, so a retried kick does not duplicate the run.
-3. **`scheduleFired` handler** in `AnyAgent`: admitted like a chat message (through the core's queue, so it runs after earlier turns, in order); the turn's prompt is the schedule's body, read fresh by activity `resolveSchedule` (it also returns the agent's own chat id as the delivery chat in v1);
+3. **`scheduleFired` handler** in `AnyBot`: admitted like a chat message (through the core's queue, so it runs after earlier turns, in order); the turn's prompt is the schedule's body, read fresh by activity `resolveSchedule` (it also returns the agent's own chat id as the delivery chat in v1);
    author is treated as the owner for `read_only`/`ask`/`full` purposes (the schedule is the person's standing instruction); the reply is posted in the agent's own chat with a first line `🕘 <schedule name>`. Paused agent: no turn, `aa_last_run` not updated, one log line.
 4. **Projection:** after each fire and on a change, workflow `ScheduleProjection` runs activity `writeScheduleProjection` on the node queue to set `aa_next_run` (from the Temporal Schedule's next action time) and `aa_last_run`. The gateway never writes to Anytype.
 5. **Deleting or archiving** a schedule object deletes its Temporal Schedule; disabling pauses it; changing the cron updates it without losing the "last run".
@@ -61,7 +61,7 @@ Change: `packages/core/src/schema.ts` (`aa_schedule`), `packages/workflows/src/{
 ## Checks
 
 ```bash
-pnpm --filter @anyagent/core test && pnpm --filter @anyagent/gateway test && pnpm --filter @anyagent/workflows test && pnpm --filter @anyagent/node test
+pnpm --filter @anybot/core test && pnpm --filter @anybot/gateway test && pnpm --filter @anybot/workflows test && pnpm --filter @anybot/node test
 pnpm check
 ```
 

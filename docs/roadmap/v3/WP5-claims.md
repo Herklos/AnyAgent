@@ -6,7 +6,7 @@
 
 ## Scope
 
-In: `aa_claims` use, the `anyagent.claim` update on the lead's workflow, a serialised handler, the assignment activity, the `task_claim` tool, waking eligible agents, the deadline, notices, the core's definition of idle.
+In: `aa_claims` use, the `anybot.claim` update on the lead's workflow, a serialised handler, the assignment activity, the `task_claim` tool, waking eligible agents, the deadline, notices, the core's definition of idle.
 Out: auctions, bidding or load balancing ([ADR 0006](../../adr/0006-coordination-hierarchy-with-opt-in-claims.md) says none), claims across groups, claiming by people (a person assigns directly), preferring one claimant over another.
 
 ## Read first
@@ -16,12 +16,12 @@ Out: auctions, bidding or load balancing ([ADR 0006](../../adr/0006-coordination
 ## Files
 
 Create: `packages/workflows/src/claims.ts` (the serialised handler), `packages/node/src/activities/assign-if-free.ts`, `packages/mcp/src/claim-tool.ts`, tests, `docs/specs/claims.md`.
-Change: `packages/workflows/src/{contracts.ts,anyagent-workflow.ts}` (the `claim` update), `packages/workflows/src/core/own-core.ts` (idle accounts for running update handlers), `packages/gateway/src/tasks.ts` (claimable wake), `packages/core/src/task-rules.ts` (the claim exception), `packages/node/src/tool-api.ts`, `docs/specs/{agent-workflow.md,agent-core.md,org-tools.md}`.
+Change: `packages/workflows/src/{contracts.ts,anybot-workflow.ts}` (the `claim` update), `packages/workflows/src/core/own-core.ts` (idle accounts for running update handlers), `packages/gateway/src/tasks.ts` (claimable wake), `packages/core/src/task-rules.ts` (the claim exception), `packages/node/src/tool-api.ts`, `docs/specs/{agent-workflow.md,agent-core.md,org-tools.md}`.
 
 ## Behaviour
 
 1. **Opt-in:** only groups with `aa_claims` true (person-only). A claim must name a task in that group, in status `ready`, with no assignee.
-2. **The claim:** tool `task_claim { taskId }` on the claimant's node sends the Temporal update **`anyagent.claim`** `{ taskId, claimant, groupId, key }` to **the lead's workflow** by update-with-start (so the lead's workflow exists), `updateId = claim:<taskId>:<claimant>`, and returns the answer `{ granted: boolean, assignee, reason? }` to the harness. The same claim sent twice returns the same answer.
+2. **The claim:** tool `task_claim { taskId }` on the claimant's node sends the Temporal update **`anybot.claim`** `{ taskId, claimant, groupId, key }` to **the lead's workflow** by update-with-start (so the lead's workflow exists), `updateId = claim:<taskId>:<claimant>`, and returns the answer `{ granted: boolean, assignee, reason? }` to the harness. The same claim sent twice returns the same answer.
 3. **Serialised handling:** in the lead's workflow the claim handler runs under a **workflow-level mutex** (a promise chain), because update handlers interleave at every `await` and the handler awaits the assignment activity. Inside the mutex: call activity `assignIfFree` on the **lead's node queue**, which reads the task fresh from Anytype and, only if status is `ready`, the assignee is empty, the claimant is a member of the group, the group has claims on, and the claimant is not the lead,
    writes `aa_assignee` (as the lead's account, with `expect` on the assignee version) and `aa_op_key`, sets status `in_progress`? **No:** status stays `ready`; the assignee moves it to `in_progress` itself (the writer rules of v2 WP4 are unchanged). It returns `{ granted, assignee }`. The refusal reasons are exact strings: `not-ready`, `already-assigned:<handle>`, `not-a-member`, `claims-off`, `lead-cannot-claim`.
 4. **Why Anytype is the truth:** the mutex serialises claims within one run, but a rotation or a second run starts with an empty mutex. The only authority is the `assignIfFree` read-and-write against Anytype's current `aa_assignee`; a second claimant after a rotation reads the winner and is refused.
@@ -57,7 +57,7 @@ Change: `packages/workflows/src/{contracts.ts,anyagent-workflow.ts}` (the `claim
 ## Checks
 
 ```bash
-pnpm --filter @anyagent/workflows test && pnpm --filter @anyagent/node test && pnpm --filter @anyagent/mcp test && pnpm --filter @anyagent/gateway test
+pnpm --filter @anybot/workflows test && pnpm --filter @anybot/node test && pnpm --filter @anybot/mcp test && pnpm --filter @anybot/gateway test
 pnpm check
 ```
 

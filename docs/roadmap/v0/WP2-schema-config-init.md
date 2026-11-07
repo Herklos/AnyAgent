@@ -8,7 +8,7 @@ with its own chat; and the program can read an agent back as a typed, validated 
 ## Scope
 
 In: configuration schema and loader, the v0 schema as data, agent spec parsing, the author policy, the `admin` library (`initOrg`, `createAgent`, `listAgents`).
-Out: CLI wiring and help text (WP7), `aa_node`, `aa_account`, `aa_group`, `aa_prompt`, approvals (later releases), `anyagent migrate` beyond a version check.
+Out: CLI wiring and help text (WP7), `aa_node`, `aa_account`, `aa_group`, `aa_prompt`, approvals (later releases), `anybot migrate` beyond a version check.
 
 ## Read first
 
@@ -18,7 +18,7 @@ Out: CLI wiring and help text (WP7), `aa_node`, `aa_account`, `aa_group`, `aa_pr
 ## Files
 
 Create: `packages/core/src/{schema.ts,config.ts,agent-spec.ts,author-policy.ts,index.ts}`, `packages/core/test/*.test.ts`, `packages/admin/src/{init.ts,agent.ts,index.ts}`,
-`packages/admin/test/*.test.ts`, `examples/anyagent.config.yaml`.
+`packages/admin/test/*.test.ts`, `examples/anybot.config.yaml`.
 Change: `docs/specs/schema.md` (v0 field list, `aa_chat` as text), `docs/SPIKES.md` (009, 005).
 Must not change: ADRs.
 
@@ -30,17 +30,17 @@ Must not change: ADRs.
   `aa_allowed_authors` text (comma-separated participant ids; empty means the space owner only); `aa_lifecycle` select (`live` default, `paused`).
   The **instructions are the object's body**.
 
-## Configuration (`anyagent.config.yaml`, validated with zod; secrets only by environment variable name)
+## Configuration (`anybot.config.yaml`, validated with zod; secrets only by environment variable name)
 
 ```yaml
 version: 1
 temporal: { address: "localhost:7233", namespace: "default" }    # tls, apiKeyEnv optional (ADR 0003)
-state: { dir: "~/.anyagent" }                                    # SQLite files and per-agent homes
+state: { dir: "~/.anybot" }                                    # SQLite files and per-agent homes
 node: { handle: "my-laptop", workdirRoots: ["~"] }               # handle: lowercase, unique inside an org; roots bound each agent's aa_workdir
 tuning: { turnTimeoutMin: 60, rotateAfterAccepted: 1500, maxMessageChars: 8000 }   # all optional
 orgs:                                                            # a list from day one (ADR 0018); v0 is accepted with one
   - id: personal                                                 # a label for logs and the CLI
-    backend: { kind: anytype, url: "http://127.0.0.1:31012", readKeyEnv: ANYAGENT_PERSONAL_KEY, writeKeyEnv: ANYAGENT_PERSONAL_KEY }
+    backend: { kind: anytype, url: "http://127.0.0.1:31012", readKeyEnv: ANYBOT_PERSONAL_KEY, writeKeyEnv: ANYBOT_PERSONAL_KEY }
     space: "<space id>"
 harnesses: {}                                                    # optional command overrides per harness id
 ```
@@ -84,9 +84,9 @@ Rules: unique org ids; `backend.kind` is `anytype` (an unknown kind is a clear e
 ## Checks
 
 ```bash
-pnpm --filter @anyagent/core test && pnpm --filter @anyagent/admin test
-ANYAGENT_LIVE_ANYTYPE=1 pnpm --filter @anyagent/admin test    # or NOT RUN with reason
-node -e "import('@anyagent/core').then(m => console.log(m.loadConfig('examples/anyagent.config.yaml').orgs.length))"   # expect: 1
+pnpm --filter @anybot/core test && pnpm --filter @anybot/admin test
+ANYBOT_LIVE_ANYTYPE=1 pnpm --filter @anybot/admin test    # or NOT RUN with reason
+node -e "import('@anybot/core').then(m => console.log(m.loadConfig('examples/anybot.config.yaml').orgs.length))"   # expect: 1
 pnpm check
 ```
 

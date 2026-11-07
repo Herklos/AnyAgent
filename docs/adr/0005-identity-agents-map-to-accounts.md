@@ -11,7 +11,7 @@ From the anytype-cli README: the headless server "requires a dedicated bot accou
 spaces and to read-only or read-write ("there is no default"). One `anytype serve` process is logged in to one account.
 A chat message's author, and a reaction's participant id, are accounts.
 
-The owner wants anyagent to work with:
+The owner wants anybot to work with:
 
 1. **one Anytype account for all agents**;
 2. **one or more accounts shared by the agents** (a pool: per node, per team, any mapping);
@@ -79,5 +79,5 @@ Building three modes would be three code paths. The three setups differ only in 
 ## Not generalised
 
 - No automatic creation of Anytype accounts or invites: a person runs `anytype auth create` and `anytype space join`,
-  then registers the account with `anyagent account add`.
+  then registers the account with `anybot account add`.
 - No per-agent avatars on a shared account.

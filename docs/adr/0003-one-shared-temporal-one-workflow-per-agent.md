@@ -22,7 +22,7 @@ Anytype alone cannot serialise decisions across machines: any-sync merges concur
    block: `temporal: {address, namespace, tls?: {cert, key, ca}, apiKeyEnv?}`. Self-hosted means the dev server or a
    cluster on a private network such as Tailscale. Temporal Cloud uses mTLS or an API key (the TypeScript connection
    takes `apiKey`, `@temporalio/client` 1.24.0 `lib/connection.d.ts`, line 100). No code path depends on which one is
-   used. anyagent uses only features both offer: workflow updates, update-with-start, queries, signals and Schedules.
+   used. anybot uses only features both offer: workflow updates, update-with-start, queries, signals and Schedules.
    The minimum self-hosted server version is still unverified (spike 004).
 3. Each `aa_agent` is exactly one workflow with id `agent:<spaceId>:<agentObjectId>`. The event gateway
    ([ADR 0011](0011-event-gateway.md)) starts it with **update-with-start** when it has the first event for it. While
@@ -41,7 +41,7 @@ Anytype alone cannot serialise decisions across machines: any-sync merges concur
   ([ADR 0002](0002-anytype-is-the-source-of-truth.md)).
 - Nodes need network reach to Temporal (gRPC 7233 self-hosted, or the Cloud endpoint) and to the `anytype serve` of
   their agents' accounts.
-- Moving between self-hosted and Cloud loses execution history only; `anyagent rebuild` recreates the workflows and
+- Moving between self-hosted and Cloud loses execution history only; `anybot rebuild` recreates the workflows and
   schedules from Anytype ([ADR 0002](0002-anytype-is-the-source-of-truth.md)).
 - A Raspberry Pi node runs only a worker, not a Temporal server.
 

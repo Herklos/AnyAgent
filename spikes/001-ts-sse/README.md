@@ -3,7 +3,7 @@
 **Question.** Can a TypeScript process receive Anytype's realtime events the same way a Go process can?
 
 **Answer.** Yes. The realtime API is Server-Sent Events over HTTP. Go has no privileged access unless it embeds
-anytype-heart in-process, which anyagent does not do ([ADR 0004](../../docs/adr/0004-typescript-over-the-http-api.md)).
+anytype-heart in-process, which anybot does not do ([ADR 0004](../../docs/adr/0004-typescript-over-the-http-api.md)).
 
 ## Run
 
@@ -17,7 +17,7 @@ Node 22.18+ (type stripping). No dependencies.
 
 - `sse.ts`: a dependency-free SSE client on `fetch` (GET and POST, `Authorization`, `Last-Event-ID`, reconnect with
   backoff, fatal on 400/401/403/404).
-- `mock-heart.ts`: a mock of the two v2 streams anyagent uses, emitting heart's exact framing as read at
+- `mock-heart.ts`: a mock of the two v2 streams anybot uses, emitting heart's exact framing as read at
   `anyproto/anytype-heart@09bd4b5` ([research](../../docs/research/anytype-api.md)).
 - `run.ts`: the checks.
 

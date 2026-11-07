@@ -7,7 +7,7 @@ person) to execute without the conversation that produced it. Read this page ful
 
 From Anytype on a laptop or a phone, the owner asks an agent that runs on their own machine (Claude Code, Codex, Grok
 Build or Mistral Vibe) about what is on that machine, and gets the answer in the same chat. By default the agent can only read. It
-survives restarts without answering twice. One process, `anyagent run`, does everything.
+survives restarts without answering twice. One process, `anybot run`, does everything.
 
 **Out of scope for v0** (do not build, even if it looks easy): approvals, groups, @mentions, tasks, schedules, triggers and
 webhooks, more than one node, the OpenAI-compatible harness, local-model endpoints, the decision model, org permissions,
@@ -29,8 +29,8 @@ evidence recorded. A check that was not run is reported as **NOT RUN** with the 
 | [WP3](WP3-agent-core.md) | `AgentCore` seam and our own core (spike 006) | WP0 | 3–4 days |
 | [WP4](WP4-harness-and-permissions.md) | Harness adapters, permission rules, `read_only` that holds (spike 007) | WP0 | 1–1.5 weeks |
 | [WP5](WP5-gateway.md) | Event gateway: chat to workflow, cursors, rotation (spike 004) | WP1, WP3 | 1 week |
-| [WP6](WP6-node-and-turn.md) | Node activities and the `AnyAgent` workflow | WP2, WP3, WP4, WP5 | 4–5 days |
-| [WP7](WP7-cli-run-doctor.md) | `anyagent` CLI, `run`, `doctor`, getting-started guide | WP2, WP5, WP6 | 3–4 days |
+| [WP6](WP6-node-and-turn.md) | Node activities and the `AnyBot` workflow | WP2, WP3, WP4, WP5 | 4–5 days |
+| [WP7](WP7-cli-run-doctor.md) | `anybot` CLI, `run`, `doctor`, getting-started guide | WP2, WP5, WP6 | 3–4 days |
 | [WP8](WP8-acceptance-and-release.md) | End-to-end acceptance and release | all | 3–4 days |
 
 ```
@@ -73,16 +73,16 @@ WP1, WP3 and WP4 can run in parallel after WP0. Estimates are for one agent work
 ## Conventions
 
 - **Layout** (created by WP0): `packages/{core,backend,backend-anytype,admin,workflows,harness,gateway,node}`, `apps/cli`, `e2e/`.
-  Names: `@anyagent/<dir>`; the CLI is `anyagent` (Q11, as written).
+  Names: `@anybot/<dir>`; the CLI is `anybot` (Q11, as written).
 - **Language and tooling:** TypeScript strict, ESM, Node `>=22.18`, pnpm 10, vitest, `tsc --noEmit` for types. No `@ts-ignore`;
   `any` only with a comment saying why.
 - **Test layers:** unit (always run), contract (the conformance suites), integration with Temporal (`TestWorkflowEnvironment`;
   skipped with a printed reason if the dev server cannot be started), live (opt-in by env var:
-  `ANYAGENT_LIVE_ANYTYPE=1`, `ANYAGENT_LIVE_CLAUDE=1`, `ANYAGENT_LIVE_CODEX=1`, `ANYAGENT_LIVE_GROK=1`).
+  `ANYBOT_LIVE_ANYTYPE=1`, `ANYBOT_LIVE_CLAUDE=1`, `ANYBOT_LIVE_CODEX=1`, `ANYBOT_LIVE_GROK=1`).
 - **Pins** (verified on npm 2026-11-07): every `@temporalio/*` package exactly `1.24.0` (AGENTS.md rule 8);
   `@agentclientprotocol/claude-agent-acp` `0.99.1`; `zod` `4.6.7`; `yaml` `2.9.1`; `better-sqlite3` `13.0.3`; `vitest` `5.1.0`.
   Pin everything else exactly too and list it in STATUS.md. Do not add `@temporalio/agent-harness` (Q20).
-- **Ids and queues:** workflow id `agent:<spaceId>:<agentObjectId>`; workflow task queue `anyagent`; node task queue
+- **Ids and queues:** workflow id `agent:<spaceId>:<agentObjectId>`; workflow task queue `anybot`; node task queue
   `node:<spaceId>:<handle>` ([ADR 0018](../../adr/0018-one-or-more-orgs-per-deployment.md)). Configuration is a list of orgs from
   the first line of code, and v0 is accepted with one.
 - **Report format** at the end of each work package (in STATUS.md): what was built (paths), the checks with their output

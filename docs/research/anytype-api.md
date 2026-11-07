@@ -1,4 +1,4 @@
-# The Anytype API, as anyagent uses it
+# The Anytype API, as anybot uses it
 
 Every fact below cites its source. Heart sources are read at commit
 [`anyproto/anytype-heart@09bd4b5`](https://github.com/anyproto/anytype-heart/tree/09bd4b5) (2026-11-05). The
@@ -30,7 +30,7 @@ live `anytype serve` yet ([SPIKES.md](../SPIKES.md) 002).
 - "On v2, a key can only delete objects created under its name" (same section).
 - `anytype auth apikey create <name> --space <id|name> --read-only` gives the gateway its least-privilege key.
 
-## v2 routes anyagent needs
+## v2 routes anybot needs
 
 From `core/api/v2/router.go` (route registrations, lines 139–485):
 
@@ -52,7 +52,7 @@ From `core/api/v2/router.go` (route registrations, lines 139–485):
 | Read marks | `POST …/chats/{chat_id}/read` |
 
 **Streams can be switched off** in a build: the stream routes are registered only `if !deps.StreamDisabled` and the
-search stream only `if !deps.SearchStreamDisabled` (`core/api/v2/router.go`, lines 231 and 292). anyagent must probe for
+search stream only `if !deps.SearchStreamDisabled` (`core/api/v2/router.go`, lines 231 and 292). anybot must probe for
 them at start.
 
 ## Chat message stream (resumable)
@@ -106,13 +106,13 @@ Source: `core/api/v2/handler/search_stream.go` (line 21) and `core/api/v2/servic
 
 ## MCP
 
-Heart also serves MCP at `POST /mcp/{tier}` (`core/api/server/mcp.go`), request/response only. anyagent does not need
+Heart also serves MCP at `POST /mcp/{tier}` (`core/api/server/mcp.go`), request/response only. anybot does not need
 it for events. Agents may still use Anytype's MCP or HTTP API as a tool during their turns.
 
 ## Licence
 
 anytype-heart: **Any Source Available License 1.0**, which grants use, modification and redistribution "only (a) for
-Non-Commercial Use, or (b) for Commercial Use in Allowed Networks" (`LICENSE.md`, lines 7–9). anyagent calls the API
+Non-Commercial Use, or (b) for Commercial Use in Allowed Networks" (`LICENSE.md`, lines 7–9). anybot calls the API
 of a separately installed server and does not distribute heart ([ADR 0004](../adr/0004-typescript-over-the-http-api.md)).
 
 ## Not yet verified

@@ -20,7 +20,7 @@ Change: `docs/ROADMAP.md` (v0 status and date), `README.md` (status), `docs/spec
 
 ## The automated suite (fakes; needs a Temporal dev server)
 
-`e2e/support` starts: the mock Anytype server of WP1 **as a separate process**, a Temporal dev server with a database file, and `anyagent run` as a **child process** with the fake harness (`fake-agent-main`) set through the
+`e2e/support` starts: the mock Anytype server of WP1 **as a separate process**, a Temporal dev server with a database file, and `anybot run` as a **child process** with the fake harness (`fake-agent-main`) set through the
 `harnesses` override. Messages are posted through the mock's HTTP API as the owner, and as a second member.
 
 | Test | Roadmap check | What it asserts |
@@ -39,7 +39,7 @@ Change: `docs/ROADMAP.md` (v0 status and date), `README.md` (status), `docs/spec
 `e2e/live/README.md` is a checklist the implementing agent or the owner runs **twice from a clean space**, once per harness installed:
 
 1. Fresh throwaway space; an owner account and a second member account; `anytype serve` for the bot account with a read-write key; a Temporal dev server with a database file.
-2. `anyagent init`, `anyagent agent create`, `anyagent run`.
+2. `anybot init`, `anybot agent create`, `anybot run`.
 3. Roadmap checks 1 to 7 exactly as written, with the real harness.
 4. The `read_only` matrix below for each harness.
 5. Write the record (date, versions of Anytype, `anytype-cli`, each harness, Temporal; pass or fail per check; anything odd) into `docs/roadmap/v0/REPORT.md`.
@@ -73,7 +73,7 @@ the **questions for the owner**: the v1 decision on the harness (ADR 0019 is acc
 
 ```bash
 pnpm check
-pnpm --filter @anyagent/e2e test          # expect: all pass with a Temporal dev server; skipped tests listed with reasons otherwise
+pnpm --filter @anybot/e2e test          # expect: all pass with a Temporal dev server; skipped tests listed with reasons otherwise
 git diff --stat main...HEAD -- docs/adr   # expect: no ADR changed by implementation work
 ```
 

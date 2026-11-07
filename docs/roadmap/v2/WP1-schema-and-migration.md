@@ -1,4 +1,4 @@
-# v2 WP1: schema delta and `anyagent migrate`
+# v2 WP1: schema delta and `anybot migrate`
 
 **Goal.** The `aa_*` schema grows to what a team needs (groups, nodes, accounts, prompts, tasks and the new agent fields), a space created by v0 or v1 upgrades in place without losing anything, and the program refuses to run against a schema it does not understand.
 
@@ -6,7 +6,7 @@
 
 ## Scope
 
-In: the new types and fields as data, version `0.3.0`, a real `anyagent migrate` (plan, apply, verify), the queries bootstrap creates, the compatibility rule between program and space.
+In: the new types and fields as data, version `0.3.0`, a real `anybot migrate` (plan, apply, verify), the queries bootstrap creates, the compatibility rule between program and space.
 Out: moving existing data between types, deleting or renaming anything, the permission fields' enforcement (WP7 and v3), memory and skills types.
 
 ## Read first
@@ -29,14 +29,14 @@ Change: `packages/core/src/schema.ts`, `packages/admin/src/init.ts` (calls migra
 - **Queries (saved views) created by migrate:** `Agents`, `Tasks – Board` (kanban on `aa_status`), `Nodes`; `Approvals – Pending` and `Schedules – Calendar` from v1 are kept. If the backend cannot create a saved query, `migrate` says so and continues.
 - **Not added yet:** `aa_trigger` (v3), `aa_permissions` and `aa_permissions_ask` on `aa_agent` (WP7 adds them, because the defaults need them), `aa_decision_model`, `aa_approval_criteria`, `aa_tools`, `aa_effort`.
 
-## `anyagent migrate`
+## `anybot migrate`
 
-1. **Version rule:** the program supports schema versions up to its own. A space with a **newer** version than the program makes every command except `doctor` refuse with `The space uses schema <v>; this anyagent supports up to <v>. Upgrade anyagent.`
+1. **Version rule:** the program supports schema versions up to its own. A space with a **newer** version than the program makes every command except `doctor` refuse with `The space uses schema <v>; this anybot supports up to <v>. Upgrade anybot.`
 2. **Plan** (`migrate --plan`, the default for `init --check`): compare the space's types and fields with the target; list exactly what would be created; change nothing.
 3. **Apply** (`migrate`): `ensureSchema` for the missing types, fields and options; create the queries; set `aa_schema_version` to the target in one final write (so a failed run leaves the old version and can be rerun). Idempotent: a second run reports nothing to do.
 4. **Verify:** read every type back and assert the expected fields and options exist; report mismatches (a field with the wrong format is an error, never auto-fixed).
 5. **Ordering:** migrate steps are a list of versioned steps (`0.1.0` to `0.2.0`, `0.2.0` to `0.3.0`), each pure data plus a small function, so later releases add steps and never edit old ones.
-6. **Safety:** `migrate` never deletes or renames; it refuses to run if another anyagent holds the space (the deployment memo check from v1 WP7) unless `--force`.
+6. **Safety:** `migrate` never deletes or renames; it refuses to run if another anybot holds the space (the deployment memo check from v1 WP7) unless `--force`.
 
 ## Steps
 
@@ -60,8 +60,8 @@ Change: `packages/core/src/schema.ts`, `packages/admin/src/init.ts` (calls migra
 ## Checks
 
 ```bash
-pnpm --filter @anyagent/core test && pnpm --filter @anyagent/admin test
-ANYAGENT_LIVE_ANYTYPE=1 pnpm --filter @anyagent/admin test    # or NOT RUN with reason
+pnpm --filter @anybot/core test && pnpm --filter @anybot/admin test
+ANYBOT_LIVE_ANYTYPE=1 pnpm --filter @anybot/admin test    # or NOT RUN with reason
 pnpm check
 ```
 

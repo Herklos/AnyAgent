@@ -35,7 +35,7 @@ A v0 or v1 file with `orgs[].backend` keeps working: it is read as one account `
 
 ## Behaviour
 
-1. **Accounts are objects:** `aa_account` (`aa_handle`, `aa_participant_id`, `aa_tag_always`, `aa_lifecycle`). Each `aa_agent` links exactly one (`aa_account`). `anyagent account add <handle> [--org id]` reads the participant id through that account's own key (`members/me`) and creates or updates the object. `account list` shows accounts, their participant ids and the agents using them.
+1. **Accounts are objects:** `aa_account` (`aa_handle`, `aa_participant_id`, `aa_tag_always`, `aa_lifecycle`). Each `aa_agent` links exactly one (`aa_account`). `anybot account add <handle> [--org id]` reads the participant id through that account's own key (`members/me`) and creates or updates the object. `account list` shows accounts, their participant ids and the agents using them.
 2. **Endpoints are node configuration** (above). A turn on a node that has no endpoint for the agent's account is refused with the notice `This node has no endpoint for account <handle>.`; no write is attempted. Keys only by environment variable name.
 3. **Identity function** `resolveAuthor({ authorId, text, accounts, agents })` (pure, spike 011), per [ADR 0005](../../adr/0005-identity-agents-map-to-accounts.md) decision 3:
    - the author id is not any `aa_account`'s participant id → `{ kind: "person" }`;
@@ -75,7 +75,7 @@ A v0 or v1 file with `orgs[].backend` keeps working: it is read as one account `
 ## Checks
 
 ```bash
-pnpm --filter @anyagent/core test && pnpm --filter @anyagent/node test && pnpm --filter @anyagent/gateway test && pnpm --filter @anyagent/admin test
+pnpm --filter @anybot/core test && pnpm --filter @anybot/node test && pnpm --filter @anybot/gateway test && pnpm --filter @anybot/admin test
 pnpm check
 ```
 

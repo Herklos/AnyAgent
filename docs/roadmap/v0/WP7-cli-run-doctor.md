@@ -1,6 +1,6 @@
-# WP7: the `anyagent` command, `run`, `doctor`, and the getting-started guide
+# WP7: the `anybot` command, `run`, `doctor`, and the getting-started guide
 
-**Goal.** A person who has Anytype, Temporal and one harness installed can follow one page, run four commands, and be talking to an agent. When something is wrong, `anyagent doctor` says what and how to fix it.
+**Goal.** A person who has Anytype, Temporal and one harness installed can follow one page, run four commands, and be talking to an agent. When something is wrong, `anybot doctor` says what and how to fix it.
 
 **Depends on:** WP2 (admin library), WP5 (gateway), WP6 (node). **Unblocks:** WP8.
 
@@ -24,14 +24,14 @@ Dependencies: a small argument parser (pin exactly; record which) or none (Node'
 
 | Command | Does |
 | --- | --- |
-| `anyagent init [--org <id>] [--check]` | for each org (or one): connect, `initOrg` (WP2), print what was created or already present; shows the terms notice once per org; `--check` validates the config and connects without writing |
-| `anyagent agent create <handle> --harness claude-code\|codex\|grok\|vibe [--model m] [--mode read_only\|full] [--workdir path] [--allowed-authors id,id] [--org id]` | `createAgent` (WP2); prints the chat id and where to open it in Anytype |
-| `anyagent agent list [--org id]` | handle, harness, mode, lifecycle, and any spec errors |
-| `anyagent run` | starts the workflow worker, the node worker for each org this node serves, and the gateway; logs JSON lines; stops on SIGINT or SIGTERM: stop watchers, stop accepting, let the worker drain for 30 s, then exit |
-| `anyagent doctor [--org id] [--json]` | the checks below; exit code 1 if any check fails, 0 if all pass or only warn |
-| `anyagent version` | version, Node, pinned Temporal SDK version |
+| `anybot init [--org <id>] [--check]` | for each org (or one): connect, `initOrg` (WP2), print what was created or already present; shows the terms notice once per org; `--check` validates the config and connects without writing |
+| `anybot agent create <handle> --harness claude-code\|codex\|grok\|vibe [--model m] [--mode read_only\|full] [--workdir path] [--allowed-authors id,id] [--org id]` | `createAgent` (WP2); prints the chat id and where to open it in Anytype |
+| `anybot agent list [--org id]` | handle, harness, mode, lifecycle, and any spec errors |
+| `anybot run` | starts the workflow worker, the node worker for each org this node serves, and the gateway; logs JSON lines; stops on SIGINT or SIGTERM: stop watchers, stop accepting, let the worker drain for 30 s, then exit |
+| `anybot doctor [--org id] [--json]` | the checks below; exit code 1 if any check fails, 0 if all pass or only warn |
+| `anybot version` | version, Node, pinned Temporal SDK version |
 
-Configuration is found, in order: `--config`, `ANYAGENT_CONFIG`, `./anyagent.config.yaml`, `~/.config/anyagent/config.yaml`. Secrets only from the environment variables the config names.
+Configuration is found, in order: `--config`, `ANYBOT_CONFIG`, `./anybot.config.yaml`, `~/.config/anybot/config.yaml`. Secrets only from the environment variables the config names.
 
 ## `doctor` checks (each has an id, a one-line result, and on failure the fix)
 
@@ -40,7 +40,7 @@ Configuration is found, in order: `--config`, `ANYAGENT_CONFIG`, `./anyagent.con
 | D1 | the config loads and validates | print every error |
 | D2 | each org's backend answers; the key works (`whoami`); the adapter's `verified` flag (WP1) | key wrong or server down; warn if unverified |
 | D3 | the account is a member of the space and has the role needed (write for the node key) | not joined, or read-only |
-| D4 | the schema exists and its version is supported (not newer than the program) | run `init`, or upgrade anyagent |
+| D4 | the schema exists and its version is supported (not newer than the program) | run `init`, or upgrade anybot |
 | D5 | the chat stream is enabled (a short probe), or polling is in use and says so | streams disabled in `anytype serve` |
 | D6 | Temporal is reachable and the namespace exists | start Temporal or fix `temporal.address` |
 | D7 | each harness used by an agent is installed (`--version`) and signed in or has its API key variable | missing or not signed in |
@@ -52,13 +52,13 @@ Configuration is found, in order: `--config`, `ANYAGENT_CONFIG`, `./anyagent.con
 
 ## The terms notice (Q19)
 
-Shown by `init` once per org (remember it in the state directory; it never blocks): "anyagent drives the harness you installed (Claude Code, Codex, Grok Build) with your own login or API key. Each provider's terms apply, and some
-providers restrict automated use of consumer subscriptions; an API key is the safest option. See <link>." The link is Michel's provider-terms research until anyagent has its own.
+Shown by `init` once per org (remember it in the state directory; it never blocks): "anybot drives the harness you installed (Claude Code, Codex, Grok Build) with your own login or API key. Each provider's terms apply, and some
+providers restrict automated use of consumer subscriptions; an API key is the safest option. See <link>." The link is Michel's provider-terms research until anybot has its own.
 
 ## Steps
 
 1. Argument parsing, config discovery, logging (JSON lines, `LOG_LEVEL`, no message text at the default level, never a secret).
-2. `init`, `agent create`, `agent list` as thin wrappers over `@anyagent/admin`, with human-readable output and non-zero exit codes on failure.
+2. `init`, `agent create`, `agent list` as thin wrappers over `@anybot/admin`, with human-readable output and non-zero exit codes on failure.
 3. `doctor` with one module per check, each a pure function over injected dependencies (so each failure is tested without a live service).
 4. `run`: build the backends, the gateway, the workers; wire shutdown; refuse to start if `doctor`'s D1 to D4 and D6 fail (print them).
 5. `docs/GETTING-STARTED.md`: prerequisites (Node, pnpm or the packaged binary, Anytype and `anytype serve` with a bot account and keys, a Temporal dev server with a persistent database file, one harness), the four commands, what to expect, three
@@ -81,8 +81,8 @@ providers restrict automated use of consumer subscriptions; an API key is the sa
 ## Checks
 
 ```bash
-pnpm --filter anyagent test
-pnpm --filter anyagent exec node dist/main.js doctor --config examples/anyagent.config.yaml --json | head
+pnpm --filter anybot test
+pnpm --filter anybot exec node dist/main.js doctor --config examples/anybot.config.yaml --json | head
 pnpm check
 ```
 

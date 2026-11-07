@@ -1,4 +1,4 @@
-# WP6: node activities and the `AnyAgent` workflow
+# WP6: node activities and the `AnyBot` workflow
 
 **Goal.** A message that reaches the workflow becomes a turn on the right harness, with a reply posted in the agent's chat, a clear notice when something fails, and the harness session kept across turns and
 across workflow rotations. After this package, everything between "the gateway accepted a message" and "the reply is in the chat" exists.
@@ -7,7 +7,7 @@ across workflow rotations. After this package, everything between "the gateway a
 
 ## Scope
 
-In: the `AnyAgent` workflow (on `AgentCore`), four activities (`resolveConfig`, `markReceived`, `runTurn`, `deliver`), the node-side store (sessions, delivered operations), worker wiring.
+In: the `AnyBot` workflow (on `AgentCore`), four activities (`resolveConfig`, `markReceived`, `runTurn`, `deliver`), the node-side store (sessions, delivered operations), worker wiring.
 Out: approvals, schedules, streaming replies (Q13: one final message), an editable "working…" message, more than one node, notices beyond the five listed below.
 
 ## Read first
@@ -17,7 +17,7 @@ Out: approvals, schedules, streaming replies (Q13: one final message), an editab
 
 ## Files
 
-Create: `packages/workflows/src/{contracts.ts,anyagent-workflow.ts,workflows.ts}`, `packages/workflows/test/anyagent-workflow.test.ts`, `packages/node/src/{store.ts,activities/{resolve-config,mark-received,run-turn,deliver}.ts,worker.ts,index.ts}`,
+Create: `packages/workflows/src/{contracts.ts,anybot-workflow.ts,workflows.ts}`, `packages/workflows/test/anybot-workflow.test.ts`, `packages/node/src/{store.ts,activities/{resolve-config,mark-received,run-turn,deliver}.ts,worker.ts,index.ts}`,
 `packages/node/test/*.test.ts`.
 Change: `docs/specs/agent-workflow.md` (the v0 behaviour as built: names, notices, timeouts), `docs/specs/schema.md` if a field is added below.
 Dependencies: none new beyond WP0 to WP5.
@@ -25,7 +25,7 @@ Dependencies: none new beyond WP0 to WP5.
 ## Contracts (`contracts.ts`; types and constants only, imported by both sides, no Node imports)
 
 ```ts
-export const AGENT_WORKFLOW_TYPE = "AnyAgent";  export const WORKFLOW_TASK_QUEUE = "anyagent";
+export const AGENT_WORKFLOW_TYPE = "AnyBot";  export const WORKFLOW_TASK_QUEUE = "anybot";
 export const workflowIdFor = (spaceId: string, agentId: string) => `agent:${spaceId}:${agentId}`;
 export const nodeQueueFor  = (spaceId: string, handle: string) => `node:${spaceId}:${handle}`;
 export interface AgentInit { orgId: string; spaceId: string; agentId: string; nodeQueue: string }
@@ -48,7 +48,7 @@ export type ResolvedConfig =
 1. `resolveConfig` reads the agent fresh through the org's backend (object, body, owners) and returns data. It refuses with `invalid` (the spec does not parse), `unacceptable-editor` (WP2 step 7, only if the backend exposes the modifier),
    or `workdir-outside-roots`. **New field:** the agent's working directory is `aa_workdir` (text, an absolute path on the node; defined in WP2). The node's `node.workdirRoots` (default: the user's home) bounds it;
    empty `aa_workdir` means a private empty directory under the state dir.
-2. If not `ok`: post **one** notice (`I cannot run right now: <detail>. See anyagent doctor.`) and end the turn.
+2. If not `ok`: post **one** notice (`I cannot run right now: <detail>. See anybot doctor.`) and end the turn.
 3. If `lifecycle` is `paused`: end the turn silently (no reply, no reaction).
 4. Defence in depth: if the author is not allowed by `isAllowedAuthor` (WP2), end the turn silently (the gateway already filtered; this guards a bug or a hand-sent update).
 5. `markReceived`: 👀 on the message, best effort (a failure is logged and ignored).
@@ -57,7 +57,7 @@ export type ResolvedConfig =
 7. `deliver` posts the reply in the agent's chat as a reply to the message, then swaps 👀 for ✅. Long replies are split on paragraph boundaries into messages of at most `tuning.maxMessageChars` (default 8000), in order.
 8. **Failures** end in exactly one notice, from this table, and the loop moves on:
    - activity timeout or heartbeat timeout, or the process died: `That turn was interrupted before it finished. Send the message again.`
-   - the harness is missing or not logged in (`HarnessUnavailable`): `<harness> is not installed or not signed in on this machine. Run anyagent doctor.`
+   - the harness is missing or not logged in (`HarnessUnavailable`): `<harness> is not installed or not signed in on this machine. Run anybot doctor.`
    - the harness reported an error (`HarnessError`): `The harness reported an error: <first line, at most 200 characters>.`
    - the reply was empty: `The agent finished without writing a reply.`
    - the post failed after retries: log only (the chat is the channel; do not loop).
@@ -71,7 +71,7 @@ export type ResolvedConfig =
 1. Contracts and the node store (`better-sqlite3`), with tests.
 2. Activities one at a time against the reference backend (WP1) and the fake harness (WP4): `deliver`, `markReceived`, `resolveConfig`, then `runTurn`.
 3. The workflow: compose `createOwnCore()` with `proxyActivities` (queue from the init data; per-activity timeouts as above; `runTurn` retries `maximumAttempts: 1`, the others a short retry). Failure to notice mapping in one function with a test per row.
-4. Worker wiring (`worker.ts`): `startWorkflowWorker({ temporal })` on `anyagent` with the bundled workflow code; `startNodeWorker({ config, backends })` on `node:<spaceId>:<handle>` for each org the node serves, checking the org is on the node's list.
+4. Worker wiring (`worker.ts`): `startWorkflowWorker({ temporal })` on `anybot` with the bundled workflow code; `startNodeWorker({ config, backends })` on `node:<spaceId>:<handle>` for each org the node serves, checking the org is on the node's list.
 5. End-to-end inside the package with Temporal's test environment, the reference backend and the fake harness (no gateway): send updates directly.
 6. Update the workflow spec.
 
@@ -95,8 +95,8 @@ export type ResolvedConfig =
 ## Checks
 
 ```bash
-pnpm --filter @anyagent/workflows test && pnpm --filter @anyagent/node test
-pnpm --filter @anyagent/workflows exec tsc --noEmit
+pnpm --filter @anybot/workflows test && pnpm --filter @anybot/node test
+pnpm --filter @anybot/workflows exec tsc --noEmit
 grep -rn "Date\.\|Math\.random\|from \"node:" packages/workflows/src   # expect: no output (workflow determinism)
 pnpm check
 ```

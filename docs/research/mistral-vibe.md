@@ -71,7 +71,7 @@ What a headless run gives and costs:
 | Cancellation | signal the process | a protocol call, then close |
 | Session continuity | the CLI's own resume flag | the protocol's session calls |
 
-## Conclusions for anyagent
+## Conclusions for anybot
 
 1. **v0 can use headless CLIs.** v0 has only `read_only` and `full`; neither needs a per-call decision by the host. A static policy by flags fits, and for Vibe it is stronger than an ACP deny: `--enabled-tools` is a hard allowlist and
    the `ask` agent denies the rest.

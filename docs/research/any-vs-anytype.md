@@ -12,7 +12,7 @@ almost the whole team to it. Anytwo is a different app, and moving to it is a **
 come. Anytype (anytype-heart) stays available "forever" but gets less development: the team says one person keeps
 working on it. It still receives API v2 and moves to the MIT licence.
 
-For anyagent this means:
+For anybot this means:
 - Anytype is the only backend people can use today, and its apps are where people work now.
 - Anytwo is where the platform's investment is going.
 
@@ -49,24 +49,24 @@ Not found (searched 2026-11-07 in our clones, a web search and pages 1–4 of th
 [Spike 016](../../spikes/016-backend-port-any/README.md) ran a 17-check suite against `any@0b73c01` on a throwaway
 network: all passed. What it adds to the table above (observed, high confidence for one account, none for sync):
 
-- the API is enough for anyagent's backend port: org reads, chat, agent envelope, reactions, live streams, and
+- the API is enough for anybot's backend port: org reads, chat, agent envelope, reactions, live streams, and
   resume by a per-peer cursor (`_applySeq`) that also catches edits and reactions;
 - it has no server-side compare-and-set on property writes, and no authentication on its loopback API;
 - an `any` build needs Go 1.26.2 and about 70 s; it is a developer preview, so all of this can change.
 
-## What this means for anyagent
+## What this means for anybot
 
 - **Anytype today.**
   - It is the only backend people can use with released apps, and the one spike 002 tests.
   - Its API keeps getting work (claim 7). Its maintenance is thin (claim 6), so a bug in the API or the streams that
-    anyagent depends on may stay unfixed for a long time.
+    anybot depends on may stay unfixed for a long time.
   - The move to MIT (claim 8) removes the licence question for anything that embeds or patches it.
 - **`any` later.**
   - It is the platform's direction (claims 2, 6, 16), and its API is already shaped for agents (windowed subscriptions,
     roles, an agent envelope in chat, vector search).
   - It does not share accounts with Anytype (claim 12). Without a bridge it does not share spaces either (claim 4).
   - So an org cannot run half on each: an org lives on one backend.
-- **The seam.** Everything anyagent needs from the backend fits one port:
+- **The seam.** Everything anybot needs from the backend fits one port:
   - reading the org;
   - streaming events;
   - posting to chats and reacting;

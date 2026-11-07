@@ -66,14 +66,14 @@ node:
 - T-V1-WP5-08 a key in the environment never appears in the request logs, the model's input, or any other harness's environment.
 - T-V1-WP5-09 an agent with `tools: false` on its endpoint gets the one notice and nothing runs.
 - T-V1-WP5-10 `doctor` reports each endpoint condition with the exact message.
-- T-V1-WP5-11 (live, `ANYAGENT_LIVE_LLAMA=1`) the llama-server scenario above.
-- T-V1-WP5-12 (live, `ANYAGENT_LIVE_OPENAI_COMPAT=1`) the cloud scenario.
+- T-V1-WP5-11 (live, `ANYBOT_LIVE_LLAMA=1`) the llama-server scenario above.
+- T-V1-WP5-12 (live, `ANYBOT_LIVE_OPENAI_COMPAT=1`) the cloud scenario.
 
 ## Checks
 
 ```bash
-pnpm --filter @anyagent/harness test && pnpm --filter @anyagent/node test && pnpm --filter @anyagent/core test
-ANYAGENT_LIVE_LLAMA=1 pnpm --filter @anyagent/harness test      # or NOT RUN with reason
+pnpm --filter @anybot/harness test && pnpm --filter @anybot/node test && pnpm --filter @anybot/core test
+ANYBOT_LIVE_LLAMA=1 pnpm --filter @anybot/harness test      # or NOT RUN with reason
 grep -rL "Copied from" packages/harness/src/openai                # expect: no output
 pnpm check
 ```

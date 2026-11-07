@@ -1,4 +1,4 @@
-// A mock of the two anytype-heart v2 streams anyagent depends on, emitting
+// A mock of the two anytype-heart v2 streams anybot depends on, emitting
 // heart's exact framing as read at anyproto/anytype-heart@09bd4b5:
 //   GET  /v2/spaces/{space}/chats/{chat}/messages/stream  (core/api/v2/handler/chat_stream.go)
 //   POST /v2/spaces/{space}/search/stream                 (core/api/v2/handler/search_stream.go)

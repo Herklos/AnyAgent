@@ -7,7 +7,7 @@
 ## Context
 
 Agents run either a CLI harness that brings its own model access (Claude Code, Codex, OpenCode, any ACP agent) or a
-model API driven by anyagent's own tool loop. Michel's `openai` adapter is that loop: an OpenAI-compatible client with
+model API driven by anybot's own tool loop. Michel's `openai` adapter is that loop: an OpenAI-compatible client with
 built-in tools and an MCP bridge ([research/michel-reuse.md](../research/michel-reuse.md)). Michel already lists
 llama.cpp among its targets (Michel `docs/adr/0003-harness-adapters.md`, line 12; `docs/PLAN.md`, line 429:
 "`openai_compatible` | `baseURL` + key + model discovery (`GET /v1/models`) | … Ollama, vLLM, LM Studio, llama.cpp,
@@ -44,7 +44,7 @@ and later summaries and routing.
 ## Consequences
 
 - An all-local deployment works: self-hosted Temporal and any-sync, `llama-server` on a node, no cloud account.
-- Tool calling with local models depends on the model and its chat template. anyagent reports what it found instead of
+- Tool calling with local models depends on the model and its chat template. anybot reports what it found instead of
   failing mid-turn.
 - CLI harnesses that can themselves point at an OpenAI-compatible endpoint (for example OpenCode) may later receive the
   endpoint through their own config. That is not verified and not in v0.

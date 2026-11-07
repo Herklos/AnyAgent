@@ -28,8 +28,8 @@ Must not change: ADRs (if the numbers argue against ADR 0019, write that in STAT
 ## The interface (workflow-safe: no Node imports, no `zod`, no `Date`, no `Math.random`)
 
 ```ts
-export const CHAT_UPDATE = "anyagent.chat";        export const CLOSE_SIGNAL = "anyagent.close";
-export const STATUS_QUERY = "anyagent.status";     export const ROTATION_QUERY = "anyagent.rotation";
+export const CHAT_UPDATE = "anybot.chat";        export const CLOSE_SIGNAL = "anybot.close";
+export const STATUS_QUERY = "anybot.status";     export const ROTATION_QUERY = "anybot.rotation";
 
 export interface ChatInput { key: string; chatId: string; messageId: string; authorId: string; text: string; replyTo?: string }
 export type Disposition = "opened" | "queued" | "duplicate";
@@ -43,14 +43,14 @@ export function createOwnCore(opts?: { rotateAfterAccepted?: number }): AgentCor
 
 ## Behaviour (the contract; `docs/specs/agent-core.md` states it in prose)
 
-1. **Update `anyagent.chat`.** The validator rejects malformed input (not an object, `key` or `text` missing or not a string) with a non-retryable `BadInput` failure, and rejects
+1. **Update `anybot.chat`.** The validator rejects malformed input (not an object, `key` or `text` missing or not a string) with a non-retryable `BadInput` failure, and rejects
    everything once close was requested with a non-retryable `AgentClosed` failure. The handler admits the message and **returns at once** with an `Admission`; it does not wait for the turn.
 2. **Dedupe by `key`.** A key already admitted in this run returns `duplicate` with the original turn number and queues nothing. (Temporal itself drops a repeated update id.)
 3. **Order.** Turns run one at a time, in admission order. `disposition` is `opened` when the core was idle with an empty queue, else `queued`. Turn numbers increase by one per admitted message.
 4. **A failing turn does not stop the loop.** The handler's rejection is caught, counted, and the next message runs.
-5. **Close.** The signal `anyagent.close` sets "closing": new messages are rejected (item 1), the turn in flight finishes, **messages already queued still run**, then `run` returns.
+5. **Close.** The signal `anybot.close` sets "closing": new messages are rejected (item 1), the turn in flight finishes, **messages already queued still run**, then `run` returns.
    The workflow does not end while an update handler is still running (`allHandlersFinished`).
-6. **Queries.** `anyagent.status` returns `CoreStatus`. `anyagent.rotation` returns a `RotationHint` whose `continueAsNewSuggested` is true when Temporal suggests it or `accepted >= rotateAfterAccepted`;
+6. **Queries.** `anybot.status` returns `CoreStatus`. `anybot.rotation` returns a `RotationHint` whose `continueAsNewSuggested` is true when Temporal suggests it or `accepted >= rotateAfterAccepted`;
    `idle` is true when nothing is running or queued. Queries never change state.
 7. **Determinism.** No clock, randomness or I/O in this module; ids come from the sequence of admission, not from `uuid4` unless needed, and then only from `@temporalio/workflow`.
 
@@ -88,8 +88,8 @@ export function createOwnCore(opts?: { rotateAfterAccepted?: number }): AgentCor
 ## Checks
 
 ```bash
-pnpm --filter @anyagent/workflows test            # expect: unit tests pass; Temporal tests pass or are reported skipped with the reason
-pnpm --filter @anyagent/workflows exec tsc --noEmit
+pnpm --filter @anybot/workflows test            # expect: unit tests pass; Temporal tests pass or are reported skipped with the reason
+pnpm --filter @anybot/workflows exec tsc --noEmit
 node scripts/check-pins.mjs
 pnpm check
 ```

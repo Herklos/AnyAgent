@@ -1,5 +1,5 @@
 // Runs the TypeScript SSE client against the mock heart and checks every
-// behaviour anyagent needs from a realtime Anytype feed. Exit code 0 = all pass.
+// behaviour anybot needs from a realtime Anytype feed. Exit code 0 = all pass.
 //   node spikes/001-ts-sse/run.ts
 
 import assert from "node:assert/strict";

@@ -43,13 +43,13 @@ It survives restarts without answering twice.
 
 **Ships**
 
-- One process, `anyagent run`, containing the gateway, the Temporal worker and the node. The components are the same as in
+- One process, `anybot run`, containing the gateway, the Temporal worker and the node. The components are the same as in
   [ARCHITECTURE.md](ARCHITECTURE.md); they are only deployed together. Temporal is a local server with a persistent
   database file (`temporal server start-dev --db-filename …`, to be verified); a self-hosted or Cloud address is just
   configuration ([ADR 0003](adr/0003-one-shared-temporal-one-workflow-per-agent.md)).
 - One backend, Anytype through `anytype serve` and one bot account that joined the space, behind the backend port
   ([ADR 0017](adr/0017-anytype-backend-behind-a-port.md)): identity, chat, events, and reading the agent object.
-- Schema, created by `anyagent init`: `aa_settings` (the schema version only) and `aa_agent` with `aa_handle`,
+- Schema, created by `anybot init`: `aa_settings` (the schema version only) and `aa_agent` with `aa_handle`,
   `aa_harness`, `aa_model`, `aa_chat` (the agent's own chat), `aa_workdir` (where the harness works, inside the node's
   allowed roots), `aa_approval_mode` (`read_only` or `full`), `aa_allowed_authors` and `aa_lifecycle` (`live` or `paused`). The agent's **instructions are the object's body**.
   The person-only fields are the ones in [ADR 0013](adr/0013-agent-permissions-over-the-org.md).
@@ -76,8 +76,8 @@ It survives restarts without answering twice.
   else is ignored. Without this, any space member could run commands on your machine.
 - Loop guard (its own messages are never input), idempotent delivery by message id, and rotation of an idle workflow before
   its history gets long ([ADR 0011](adr/0011-event-gateway.md), decision 7).
-- `anyagent init`, `anyagent agent create <handle>` (creates the object and its chat, or takes the id of a chat you
-  made in the app), `anyagent run`, and `anyagent doctor` (Anytype key and scope, space joined, Temporal reachable,
+- `anybot init`, `anybot agent create <handle>` (creates the object and its chat, or takes the id of a chat you
+  made in the app), `anybot run`, and `anybot doctor` (Anytype key and scope, space joined, Temporal reachable,
   `claude` installed).
 
 **Does not ship:** approvals, groups, @mentions, tasks, schedules, triggers, webhooks, more than one node,
@@ -86,7 +86,7 @@ the OpenAI-compatible harness and local-model endpoints, the decision model, per
 
 **Done when** (an acceptance script, run twice from a clean space):
 
-1. `anyagent init`, `agent create` and `run` on a fresh space; a message from the owner in the agent's chat gets a reply.
+1. `anybot init`, `agent create` and `run` on a fresh space; a message from the owner in the agent's chat gets a reply.
 2. A message from another member gets no reply and nothing runs.
 3. For each harness installed on the node (Claude Code, Codex, and Grok Build if it ships): asked to create a file, the
    agent in `read_only` refuses and no file exists, **including with a harness configuration that tries to auto-approve**;
@@ -95,7 +95,7 @@ the OpenAI-compatible harness and local-model endpoints, the decision model, per
 5. `kill -9` the process mid-turn and restart: earlier messages are not answered again, and the interrupted one gets a
    "interrupted, send it again" notice.
 6. With the rotation threshold lowered in a test, an agent rotates and keeps answering with its session intact.
-7. `anyagent doctor` names each failure it is meant to catch (key without write scope, space not joined, Temporal down,
+7. `anybot doctor` names each failure it is meant to catch (key without write scope, space not joined, Temporal down,
    harness missing).
 
 **Spikes first:** [002](SPIKES.md) live `anytype serve` (needs the `anytype-cli` binary and network access to a sync
@@ -111,7 +111,7 @@ what it accepts is unverified, and if it cannot create a chat the person creates
 **Known risk, accepted by the owner ([Q19](OPEN-QUESTIONS.md): both logins and API keys):** Michel's [provider-terms research](https://github.com/Herklos/Michel/blob/main/docs/research/provider-terms.md)
 rates driving a consumer Claude subscription from an orchestrator **high** risk, Codex and Grok **medium**, and says to
 prefer API keys or the official login on the owner's own machine. Some subscriptions offer no API key, so both are supported;
-`anyagent init` shows the notice and `doctor` says which one each agent uses. Vibe documents only an API key, so for it the answer may be API key only.
+`anybot init` shows the notice and `doctor` says which one each agent uses. Vibe documents only an API key, so for it the answer may be API key only.
 
 **Settled by the owner:** [Q17](OPEN-QUESTIONS.md) (Claude Code, Codex, Grok Build and Vibe), [Q18](OPEN-QUESTIONS.md) (owner-only by default),
 [Q19](OPEN-QUESTIONS.md) (logins and API keys) and [Q20](OPEN-QUESTIONS.md) (own core now, the harness reconsidered at v1).
@@ -136,7 +136,7 @@ the models you choose.
    with an agent in each; replies, cursors, queues and approvals do not cross, and an org whose backend is down does
    not stop the other.
 5. **`/stop`**: the owner stops a running turn from the chat.
-6. **Status and notices**: `anyagent status`, a readable notice for every failed turn, usage in the notice.
+6. **Status and notices**: `anybot status`, a readable notice for every failed turn, usage in the notice.
 7. **Variants by configuration only**: Temporal Cloud, and a self-hosted any-sync
    ([ADR 0012](adr/0012-any-anytype-sync-network.md)); the v0 acceptance script passes on both.
 
@@ -210,13 +210,13 @@ without `group.edit` is refused with a notice; two agents never take the same ta
 - Migration from the `anytype-agents` schema; a Hermes or Osaurus delegating harness if still useful.
 
 **Much later**, weak adapters behind the backend port ([ADR 0017](adr/0017-anytype-backend-behind-a-port.md)), which
-lack capabilities and which anyagent works without: a Starfish backend (to assess) and a Notion backend (no spike until
+lack capabilities and which anybot works without: a Starfish backend (to assess) and a Notion backend (no spike until
 there is a stated need).
 
 ## Rules for every release
 
 - It is usable on its own and its acceptance script passes from a clean space, twice.
-- The schema changes only additively and is versioned; `anyagent migrate` upgrades an existing space
+- The schema changes only additively and is versioned; `anybot migrate` upgrades an existing space
   ([ADR 0009](adr/0009-new-minimal-versioned-schema.md)).
 - Specs and ADRs are updated in the same change as the behaviour; every spike's README says what it did not prove.
 - The conformance suite for the backend port is green ([ADR 0017](adr/0017-anytype-backend-behind-a-port.md)).

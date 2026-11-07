@@ -25,7 +25,7 @@ The roadmap's v1 "Done when" and [WP8](WP8-acceptance-and-release.md) pass, ever
 | [WP3](WP3-approvals-in-anytype.md) | Approvals in Anytype: objects, reactions, approvers, expiry (spike 011 for approvers) | WP2 | 1 week |
 | [WP4](WP4-schedules.md) | Schedules: `aa_schedule`, Temporal Schedules, `ScheduleKick` | v0 | 4–5 days |
 | [WP5](WP5-endpoints-and-openai-harness.md) | Model endpoints and the OpenAI-compatible harness (spike 007, second half) | v0 | 1 week |
-| [WP6](WP6-stop-status-notices.md) | `/stop`, `anyagent status`, notices and usage | v0 (WP2 for pending approvals) | 4–5 days |
+| [WP6](WP6-stop-status-notices.md) | `/stop`, `anybot status`, notices and usage | v0 (WP2 for pending approvals) | 4–5 days |
 | [WP7](WP7-multi-org-and-variants.md) | Two orgs, Temporal Cloud, self-hosted any-sync (spike 012) | v0 | 1 week |
 | [WP8](WP8-acceptance-and-release.md) | End-to-end acceptance and release | all | 4–5 days |
 
@@ -42,8 +42,8 @@ WP4, WP5 and WP7 are independent of the approval chain and can run in parallel w
 ## What is different from v0
 
 - **Baseline.** The v0 pack's names (`Backend`, `AgentCore`, `HarnessSession`, `decidePermission`, the packages under `packages/`) are the contract. If the built code differs, follow the code and list each difference in [STATUS.md](STATUS.md).
-- **Schema changes are additive and versioned** ([ADR 0009](../../adr/0009-new-minimal-versioned-schema.md)): v1 writes schema version `0.2.0`; `anyagent init` upgrades a v0 space in place and `doctor` reports the version. Never remove or rename a v0 field.
+- **Schema changes are additive and versioned** ([ADR 0009](../../adr/0009-new-minimal-versioned-schema.md)): v1 writes schema version `0.2.0`; `anybot init` upgrades a v0 space in place and `doctor` reports the version. Never remove or rename a v0 field.
 - **Approval modes:** `aa_approval_mode` gains `ask`. A harness without a permission callback ([ADR 0020](../../adr/0020-harness-adapter-kinds.md): Mistral Vibe in headless mode) is refused `ask` at `agent create`, by `doctor`, and at run time.
-- **New live-test variables:** `ANYAGENT_LIVE_LLAMA=1` (a `llama-server` on the node), `ANYAGENT_LIVE_OPENAI_COMPAT=1` (a cloud endpoint with a key in the environment), `ANYAGENT_LIVE_TEMPORAL_CLOUD=1`, `ANYAGENT_LIVE_SELFHOSTED_NET=1`.
+- **New live-test variables:** `ANYBOT_LIVE_LLAMA=1` (a `llama-server` on the node), `ANYBOT_LIVE_OPENAI_COMPAT=1` (a cloud endpoint with a key in the environment), `ANYBOT_LIVE_TEMPORAL_CLOUD=1`, `ANYBOT_LIVE_SELFHOSTED_NET=1`.
 - **Open questions that touch v1:** none are open; [Q13](../../OPEN-QUESTIONS.md) (one final message, no streaming) stays as decided.
 - **Pins.** Engine pins follow the outcome of WP1 ([ADR 0019](../../adr/0019-own-workflow-core-behind-a-seam.md)); until then they are unchanged.

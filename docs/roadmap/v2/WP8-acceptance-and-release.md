@@ -20,7 +20,7 @@ Change: `docs/ROADMAP.md`, `README.md`, `CHANGELOG.md`, specs, `docs/SPIKES.md`,
 
 ## The automated suite (fakes)
 
-Processes: the mock Anytype server (one per account endpoint), a Temporal dev server with a database file, **`anyagent gateway` and two `anyagent node` processes** (node-a and node-b), the fake harness with scripts per agent. Three agents: **primary** (group lead), **chief**, **specialist**.
+Processes: the mock Anytype server (one per account endpoint), a Temporal dev server with a database file, **`anybot gateway` and two `anybot node` processes** (node-a and node-b), the fake harness with scripts per agent. Three agents: **primary** (group lead), **chief**, **specialist**.
 
 | Test | Roadmap v2 check | What it asserts |
 | --- | --- | --- |
@@ -40,7 +40,7 @@ Processes: the mock Anytype server (one per account endpoint), a Temporal dev se
 
 `e2e/live/README-v2.md`, run **twice from a clean space**: v1's procedure first (regression), then:
 
-1. Machine A runs Temporal and `anyagent gateway`; machines A and B each run `anyagent node` (`node register` first); real `anytype serve` endpoints as the config says.
+1. Machine A runs Temporal and `anybot gateway`; machines A and B each run `anybot node` (`node register` first); real `anytype serve` endpoints as the config says.
 2. The story with real harnesses: primary and chief on one harness, the specialist on another, on B. The specialist's approval is decided by a second real account.
 3. Each account setup, once (the shared one is the cheapest to set up; record how long each takes).
 4. Stop B mid-turn; observe the notice and recovery.
@@ -65,7 +65,7 @@ the `aa_permissions_ask` list is refused until v3), deviations, and the question
 
 ```bash
 pnpm check
-pnpm --filter @anyagent/e2e test
+pnpm --filter @anybot/e2e test
 git diff --stat main...HEAD -- docs/adr    # expect: only ADRs this release meant to change
 ```
 

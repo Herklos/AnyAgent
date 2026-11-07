@@ -18,19 +18,19 @@ Out: a high-availability gateway (Q12), Temporal namespaces per org, automatic a
 ## Files
 
 Create: `apps/cli/src/{gateway.ts,node.ts}` (commands), `packages/node/src/{registration.ts,heartbeat.ts,protocol.ts}`, `packages/workflows/src/queues.ts`, `docs/PLACEMENT.md`, `spikes/{003-serve-cost,008-two-nodes,010-one-account-two-machines}/README.md`, tests, `e2e/test/two-nodes.test.ts`.
-Change: `packages/workflows/src/{anyagent-workflow.ts,contracts.ts}` (control queue, per-turn node queue, protocol version), `packages/node/src/{worker.ts,activities/*}`, `apps/cli/src/run.ts` (starts both), `docs/ARCHITECTURE.md` (placement), `docs/GETTING-STARTED.md` (two machines), `docs/specs/agent-workflow.md`, `docs/SPIKES.md`.
+Change: `packages/workflows/src/{anybot-workflow.ts,contracts.ts}` (control queue, per-turn node queue, protocol version), `packages/node/src/{worker.ts,activities/*}`, `apps/cli/src/run.ts` (starts both), `docs/ARCHITECTURE.md` (placement), `docs/GETTING-STARTED.md` (two machines), `docs/specs/agent-workflow.md`, `docs/SPIKES.md`.
 
 ## Behaviour
 
-1. **Commands:** `anyagent gateway` (watchers, delivery, reconciler, rotation, the control-queue worker), `anyagent node` (the node worker for each org it serves, registration, heartbeat), `anyagent run` (both, for one machine). A shared config file may hold `gateway` and `node` sections; each command reads what it needs and `doctor` checks only that part.
-2. **Queues:** workflow task queue `anyagent` (served by the process that serves workflows: the gateway process); **control queue `anyagent-control`** for read-only activities that must run before the agent's node is known: `resolveConfig`, `resolveSchedule`; **node queues** `node:<spaceId>:<handle>` for everything that writes or runs a harness: `markReceived`, `runTurn`, `deliver`, `createApproval`, `recordDecision`, `taskWrite`,
+1. **Commands:** `anybot gateway` (watchers, delivery, reconciler, rotation, the control-queue worker), `anybot node` (the node worker for each org it serves, registration, heartbeat), `anybot run` (both, for one machine). A shared config file may hold `gateway` and `node` sections; each command reads what it needs and `doctor` checks only that part.
+2. **Queues:** workflow task queue `anybot` (served by the process that serves workflows: the gateway process); **control queue `anybot-control`** for read-only activities that must run before the agent's node is known: `resolveConfig`, `resolveSchedule`; **node queues** `node:<spaceId>:<handle>` for everything that writes or runs a harness: `markReceived`, `runTurn`, `deliver`, `createApproval`, `recordDecision`, `taskWrite`,
    `writeScheduleProjection`. `resolveConfig` returns the agent's node handle from `aa_node`; the workflow then creates its node-queue activity proxy for that turn. A node also serves the control queue if it has a read key (optional).
-3. **`aa_node`:** `anyagent node register <handle> [--org id]` creates the object (person-owned `aa_handle`, `aa_lifecycle` live). The node's heartbeat (activity-free, a plain loop writing as its first account) updates `aa_last_seen` at most every 5 minutes and `aa_harnesses` (names and versions found on the machine) and `aa_accounts` (handles it has endpoints for) when they change.
+3. **`aa_node`:** `anybot node register <handle> [--org id]` creates the object (person-owned `aa_handle`, `aa_lifecycle` live). The node's heartbeat (activity-free, a plain loop writing as its first account) updates `aa_last_seen` at most every 5 minutes and `aa_harnesses` (names and versions found on the machine) and `aa_accounts` (handles it has endpoints for) when they change.
    A node refuses to start for an org whose `aa_node` for its handle does not exist (clear message with the register command) or is `retired`.
 4. **Moving an agent:** edit `aa_node`. The next turn runs on the new node. The harness session is kept per node (the id lives in that node's store), so the first turn on the new node starts a new session; the node posts no notice for that, but the turn log records `session: new (node changed)`.
 5. **Offline node:** `runTurn` and the other node activities have a **schedule-to-start timeout** `tuning.nodeStartTimeoutSec` (default 120). On that timeout the workflow posts, through the control path, one notice `Node <handle> is not responding.` The posting uses a node that can write as the agent's account if any other node has that endpoint, else the gateway posts nothing and logs
    (the gateway does not write, [ADR 0011](../../adr/0011-event-gateway.md) decision 4); `doctor` and `status` show the node offline when `aa_last_seen` is older than 15 minutes. The message is not retried automatically; the person resends or the node returns and a resend works.
-6. **Protocol version:** `contracts.PROTOCOL_VERSION` (2). Every activity input carries it; a node refuses a different major with a non-retryable `VersionSkew` failure, and the workflow posts `Node <handle> runs an incompatible anyagent version.` The gateway refuses to start workers against a namespace whose registered nodes report a different version (read from `aa_node`'s heartbeat field `aa_protocol`, added to the schema here as a node-written text).
+6. **Protocol version:** `contracts.PROTOCOL_VERSION` (2). Every activity input carries it; a node refuses a different major with a non-retryable `VersionSkew` failure, and the workflow posts `Node <handle> runs an incompatible anybot version.` The gateway refuses to start workers against a namespace whose registered nodes report a different version (read from `aa_node`'s heartbeat field `aa_protocol`, added to the schema here as a node-written text).
 7. **Trust:** every node holds a Temporal credential for the namespace and can in principle read other agents' workflow inputs (Michel G39). Print this in `doctor` once and in `docs/PLACEMENT.md`: **nodes of one deployment trust each other.**
 8. **Placement guide** (`docs/PLACEMENT.md`): where to run what (gateway next to Temporal; nodes anywhere that can reach Temporal and their Anytype endpoints), which ports, which keys live where, the two-machine recipe, what breaks if a machine is down.
 
@@ -56,16 +56,16 @@ Change: `packages/workflows/src/{anyagent-workflow.ts,contracts.ts}` (control qu
 - T-V2-WP6-03 registration: `node register` creates the object; a node with no object refuses to start with the message; a retired node refuses; the heartbeat updates at most every 5 minutes and survives a backend outage.
 - T-V2-WP6-04 offline: stop the node process; a message gets one `not responding` notice after the timeout and no duplicate; restart the node and a resend works.
 - T-V2-WP6-05 version skew: a node with a different protocol major refuses with `VersionSkew` and the workflow posts the notice.
-- T-V2-WP6-06 `anyagent run` still starts both and passes v1's suite unchanged.
+- T-V2-WP6-06 `anybot run` still starts both and passes v1's suite unchanged.
 - T-V2-WP6-07 secrets: a node's process never needs another node's keys; the gateway's process never has any account's write key (inspect the config sections each command loads).
 - T-V2-WP6-08 `status` and `doctor` show a node offline after 15 minutes without a heartbeat and print the trust sentence once.
-- T-V2-WP6-09 (live, `ANYAGENT_LIVE_TWO_MACHINES=1`) spike 008 on two machines.
+- T-V2-WP6-09 (live, `ANYBOT_LIVE_TWO_MACHINES=1`) spike 008 on two machines.
 
 ## Checks
 
 ```bash
-pnpm --filter @anyagent/node test && pnpm --filter @anyagent/workflows test && pnpm --filter anyagent test && pnpm --filter @anyagent/e2e test
-ANYAGENT_LIVE_TWO_MACHINES=1 pnpm --filter @anyagent/e2e test      # or NOT RUN with reason
+pnpm --filter @anybot/node test && pnpm --filter @anybot/workflows test && pnpm --filter anybot test && pnpm --filter @anybot/e2e test
+ANYBOT_LIVE_TWO_MACHINES=1 pnpm --filter @anybot/e2e test      # or NOT RUN with reason
 pnpm check
 ```
 

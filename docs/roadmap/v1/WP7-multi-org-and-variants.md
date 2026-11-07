@@ -38,7 +38,7 @@ Keys and certificate paths only by environment variable name. `tls: false` is al
 
 1. **Isolation** (ADR 0018 decision 3 to 5), each proved by a test: workflow ids use the space id; node queues are `node:<spaceId>:<handle>`; gateway cursors, delivered keys and loop counts are keyed by space id; an activity refuses work for an org not in `node.serves` with the notice `This node does not serve org <id>`;
    secrets (keys) are looked up per org; approvals, approvers and reactions of org A never affect org B; stopping, rotating or failing one org's supervisor leaves the other running.
-2. **Deployment id:** a UUID created once in the state directory; every workflow the gateway starts carries it as a memo (`deployment`). `doctor` lists running `agent:<spaceId>:*` workflows for each org and **warns** when one has a different or missing deployment memo (another anyagent is waking the same agents).
+2. **Deployment id:** a UUID created once in the state directory; every workflow the gateway starts carries it as a memo (`deployment`). `doctor` lists running `agent:<spaceId>:*` workflows for each org and **warns** when one has a different or missing deployment memo (another anybot is waking the same agents).
    Workflows started by v0 have no memo and are reported as `unknown`, not as an error.
 3. **Temporal connection** (`temporal-connection.ts`): builds the `Connection` options from the config (address, TLS, API key, namespace) once, for the gateway, the workflow worker, the node worker and the CLI. It never logs the key. Connection failure messages name the setting that is likely wrong (address, namespace, key, TLS).
 4. **Temporal Cloud variant:** v0's automated and live acceptance, unchanged, run against a Cloud namespace. Note any behaviour that differs (limits, latency, update-with-start support) in `docs/research/self-hosted-any-sync.md`'s sibling section "Temporal Cloud" or a new research note; do not change workflow code to suit it without writing why.
@@ -65,16 +65,16 @@ Keys and certificate paths only by environment variable name. `tls: false` is al
 - T-V1-WP7-05 an org whose backend is down for a minute does not delay the other; it catches up afterwards (no loss, no duplicate).
 - T-V1-WP7-06 an activity for an org not in `serves` is refused with the notice.
 - T-V1-WP7-07 deployment memo: workflows started by this deployment carry it; `doctor` warns for a different memo, reports `unknown` for none.
-- T-V1-WP7-08 (live, `ANYAGENT_LIVE_TEMPORAL_CLOUD=1`) v0's acceptance on a Cloud namespace.
-- T-V1-WP7-09 (live, `ANYAGENT_LIVE_SELFHOSTED_NET=1`) v0's acceptance on the self-hosted network, and an account from another network cannot join.
+- T-V1-WP7-08 (live, `ANYBOT_LIVE_TEMPORAL_CLOUD=1`) v0's acceptance on a Cloud namespace.
+- T-V1-WP7-09 (live, `ANYBOT_LIVE_SELFHOSTED_NET=1`) v0's acceptance on the self-hosted network, and an account from another network cannot join.
 - T-V1-WP7-10 `doctor` per org: each check is prefixed with the org id and one org's failure does not hide the other's results.
 
 ## Checks
 
 ```bash
-pnpm --filter @anyagent/core test && pnpm --filter @anyagent/gateway test && pnpm --filter @anyagent/node test && pnpm --filter @anyagent/e2e test
-ANYAGENT_LIVE_TEMPORAL_CLOUD=1 pnpm --filter @anyagent/e2e test       # or NOT RUN with reason
-ANYAGENT_LIVE_SELFHOSTED_NET=1 pnpm --filter @anyagent/e2e test       # or NOT RUN with reason
+pnpm --filter @anybot/core test && pnpm --filter @anybot/gateway test && pnpm --filter @anybot/node test && pnpm --filter @anybot/e2e test
+ANYBOT_LIVE_TEMPORAL_CLOUD=1 pnpm --filter @anybot/e2e test       # or NOT RUN with reason
+ANYBOT_LIVE_SELFHOSTED_NET=1 pnpm --filter @anybot/e2e test       # or NOT RUN with reason
 pnpm check
 ```
 

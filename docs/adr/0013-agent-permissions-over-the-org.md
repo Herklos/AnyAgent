@@ -14,8 +14,8 @@ Three layers can limit what an agent writes:
    read-only or read-write ("Every key is limited to the spaces and permission you choose", anytype-cli README, "API
    Keys"). Per-member roles in a space are believed to exist but are not yet checked through the API (spike 002).
    These limits are enforced by Anytype, but they apply per account, not per agent.
-2. **anyagent's write path on the node.** All agent writes go through node code: the egress activity and the Anytype
-   tool anyagent gives the harness. This can check each write per agent, but agents sharing an account share its key
+2. **anybot's write path on the node.** All agent writes go through node code: the egress activity and the Anytype
+   tool anybot gives the harness. This can check each write per agent, but agents sharing an account share its key
    ([ADR 0005](0005-identity-agents-map-to-accounts.md)).
 3. **The gateway**, which decides whether an edit takes effect (routing, schedule reconciling), can ignore edits by an
    unauthorised author, if it can tell who edited an object (spike 005).
@@ -45,10 +45,10 @@ Three layers can limit what an agent writes:
    account it writes as.
 3. **Enforcement, in order:**
    - **Account and key** (Anytype). An agent that must never write runs on an account with a read-only key.
-   - **Node write path** (anyagent). The node's Anytype tool and egress activity check the permission before each
+   - **Node write path** (anybot). The node's Anytype tool and egress activity check the permission before each
      write. The harness never receives the read-write key: it stays in the node's environment and is stripped from the
      environment of harness processes.
-   - **Gateway** (anyagent, when spike 005 shows the author of an edit). An org change made by an agent account
+   - **Gateway** (anybot, when spike 005 shows the author of an edit). An org change made by an agent account
      without the permission is not routed and not reconciled, and a node posts a notice. Without author information,
      this layer is absent and the node layer stands alone.
 4. Changes to the org by agents are visible like any other change: Anytype history, a chat notice from the node, and
@@ -57,7 +57,7 @@ Three layers can limit what an agent writes:
 ## Consequences
 
 - An org can let its leads hire and tune their own reports while people keep control of rights, approvals and accounts.
-- On a shared account, permissions are enforced by anyagent's code, not by Anytype. A harness that escapes its sandbox
+- On a shared account, permissions are enforced by anybot's code, not by Anytype. A harness that escapes its sandbox
   could write with the account's rights. The trust boundary stays the account ([ADR 0005](0005-identity-agents-map-to-accounts.md)):
   put agents with different rights on different accounts when that matters.
 - Each permission check is a pure function of (agent, permissions, object, change), tested from a table (spike 013).

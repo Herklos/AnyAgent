@@ -21,7 +21,7 @@ Status: **proposed** (specification stage). Decisions are in [adr/](adr/); open 
          │ updates                         └───▲──────────────────────┘  └───▲──────────┘
          ▼                                     │ activities                   │
 ┌──────────────────────────── one shared Temporal ──────────────────────────────┐
-│ AnyAgent (defineAgent, npm harness) per agent · Temporal Schedules            │
+│ AnyBot (defineAgent, npm harness) per agent · Temporal Schedules            │
 └───────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -164,7 +164,7 @@ another tool's config.
 | `anytype serve` down (node) | That node cannot read config or write | Activities retry with backoff |
 | Temporal down | No turns, no schedule fires, no deliveries (gateway buffers by not committing cursors) | Resume where they were |
 | Decision model down | `auto` mode escalates every gated call to people | Approvals wait for a person |
-| Temporal wiped | Execution history lost, nothing about the org | `anyagent rebuild`: one workflow per live agent, schedules reconciled |
+| Temporal wiped | Execution history lost, nothing about the org | `anybot rebuild`: one workflow per live agent, schedules reconciled |
 | Concurrent object edits | any-sync merges | One writer per field; claims through a Temporal update |
 
 ## 9. Extension points

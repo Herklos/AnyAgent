@@ -1,6 +1,6 @@
 # Spike 016: the backend port against `any`
 
-**Question.** Can everything anyagent needs from its backend sit behind one small port
+**Question.** Can everything anybot needs from its backend sit behind one small port
 ([ADR 0017](../../docs/adr/0017-anytype-backend-behind-a-port.md)), and does a local `any` server
 ([anyproto/any](https://github.com/anyproto/any) @`0b73c01`, developer preview) satisfy that port?
 

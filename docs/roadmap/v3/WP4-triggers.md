@@ -16,7 +16,7 @@ Out: other sources (email, RSS, a GitHub App: later, as registry entries), outbo
 ## Files
 
 Create: `packages/core/src/trigger.ts` (spec, template, kinds), `packages/gateway/src/sources/{registry.ts,webhook.ts,object-change.ts,chat-pattern.ts}`, `packages/gateway/src/{secrets.ts,rate-limit.ts}`, `packages/node/src/activities/write-trigger-projection.ts`, tests, `docs/specs/triggers.md`, `docs/WEBHOOKS.md` (how to expose the endpoint safely).
-Change: `packages/core/src/{schema.ts,schema-versions.ts,config.ts}` (`aa_trigger`; `gateway.webhooks`, `gateway.secrets`), `packages/workflows/src/{contracts.ts,anyagent-workflow.ts}` (`triggerFired`), `packages/gateway/src/{supervisor.ts,pipeline.ts}`, `apps/cli` (`trigger list`, doctor), `docs/specs/agent-workflow.md`.
+Change: `packages/core/src/{schema.ts,schema-versions.ts,config.ts}` (`aa_trigger`; `gateway.webhooks`, `gateway.secrets`), `packages/workflows/src/{contracts.ts,anybot-workflow.ts}` (`triggerFired`), `packages/gateway/src/{supervisor.ts,pipeline.ts}`, `apps/cli` (`trigger list`, doctor), `docs/specs/agent-workflow.md`.
 Dependency: `re2` (a linear-time regular-expression engine), pinned exactly, for `chat_pattern`; if it cannot be installed on a target platform, fall back to running the match in a worker thread with a 50 ms limit and say so.
 
 ## Schema (additive, `0.4.0`)
@@ -71,12 +71,12 @@ gateway:
 - T-V3-WP4-09 permissions: an agent with `trigger.self` creates a disabled trigger; it cannot set `aa_secret_ref` or `aa_enabled`; without the permission the tool refuses.
 - T-V3-WP4-10 `doctor` lists inert, disabled, invalid and non-loopback cases.
 - T-V3-WP4-11 secrets never appear in logs, errors, responses or the agent's input (scan a full run for the test secrets).
-- T-V3-WP4-12 (live, `ANYAGENT_LIVE_WEBHOOK=1`) a real signed request (for example `curl` with an `openssl` HMAC, or a GitHub test delivery) wakes the owner agent, once, and a tampered one does not.
+- T-V3-WP4-12 (live, `ANYBOT_LIVE_WEBHOOK=1`) a real signed request (for example `curl` with an `openssl` HMAC, or a GitHub test delivery) wakes the owner agent, once, and a tampered one does not.
 
 ## Checks
 
 ```bash
-pnpm --filter @anyagent/core test && pnpm --filter @anyagent/gateway test && pnpm --filter @anyagent/node test && pnpm --filter @anyagent/workflows test
+pnpm --filter @anybot/core test && pnpm --filter @anybot/gateway test && pnpm --filter @anybot/node test && pnpm --filter @anybot/workflows test
 pnpm check
 ```
 

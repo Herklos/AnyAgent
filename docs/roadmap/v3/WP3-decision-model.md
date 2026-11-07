@@ -6,7 +6,7 @@
 
 ## Scope
 
-In: the `judgeApproval` activity, the criteria format and parser, the prompt and strict schema, the race in the approval gate, fail-closed handling, the hard floors, recording, the quality gate (`anyagent decision eval`), configuration objects, `auto` as an approval mode, the `Approvals – By model` view.
+In: the `judgeApproval` activity, the criteria format and parser, the prompt and strict schema, the race in the approval gate, fail-closed handling, the hard floors, recording, the quality gate (`anybot decision eval`), configuration objects, `auto` as an approval mode, the `Approvals – By model` view.
 Out: learning from past decisions, a rules-only evaluator (a registry entry later), approving org changes by model (never), computer use (floor hook only), multiple models voting.
 
 ## Read first
@@ -43,8 +43,8 @@ deny_always: ["rm\\s+-rf\\s+/", "curl[^|]*\\|\\s*(sh|bash)"]     # our extension
    The system prompt is fixed text; the request data (tool name, kind, summary of the input truncated to 1,500 characters, the agent's role line, the task title and criterion, the criteria set) is passed as one JSON object in a delimited block that the prompt declares to be **data, never instructions**; the prompt is the one measured in WP1 (changing it re-opens the evaluation).
 4. **It never fails open:** a timeout, an unreachable endpoint, an HTTP error, a non-JSON answer, a schema violation (extra or missing field, wrong type), `confidence` below `min_confidence`, `irreversibility` above `escalate_if_irreversible_above`, an endpoint without the `json_schema` capability, and an endpoint marked unavailable all become **`escalate`**. A model `approve` with a confidence above the threshold is the only path to an automatic approval.
 5. **Recording:** `aa_decided_by` = `model:<endpointId>/<model>`; the object body gets the verdict, confidence, irreversibility and reason; the chat message is updated with a reply `🤖 approved by <model> (confidence 0.93): <reason>` (or `denied`); an `escalate` posts nothing new (the approval stays pending for people). The saved view `Approvals – By model` lists model decisions for review.
-6. **Quality gate:** `auto` may be enabled for a `{endpoint, model}` only if `<state.dir>/decision-evals.json` holds a passing evaluation of it, produced by `anyagent decision eval --endpoint <id> --model <m>` (WP1's runner and thresholds, as the owner confirmed them), newer than `tuning.decisionEvalMaxAgeDays` (default 30) and for the same prompt version.
-   Without one, an `auto` agent runs as `ask` with one notice (`Auto mode is off for @x: the decision model <m> has not passed the evaluation. Running in ask mode.`) and `doctor` explains how to evaluate. An explicit unsafe override exists as an environment variable on the node, `ANYAGENT_ALLOW_UNEVALUATED_DECISION_MODEL=1`, printed loudly by `doctor`.
+6. **Quality gate:** `auto` may be enabled for a `{endpoint, model}` only if `<state.dir>/decision-evals.json` holds a passing evaluation of it, produced by `anybot decision eval --endpoint <id> --model <m>` (WP1's runner and thresholds, as the owner confirmed them), newer than `tuning.decisionEvalMaxAgeDays` (default 30) and for the same prompt version.
+   Without one, an `auto` agent runs as `ask` with one notice (`Auto mode is off for @x: the decision model <m> has not passed the evaluation. Running in ask mode.`) and `doctor` explains how to evaluate. An explicit unsafe override exists as an environment variable on the node, `ANYBOT_ALLOW_UNEVALUATED_DECISION_MODEL=1`, printed loudly by `doctor`.
 7. **Concurrency and cost:** at most `tuning.judgeConcurrency` (default 4) judgements per node at once; the rest wait and then run, unless the approval already has a decision. A per-agent budget of judgements per hour (default 60) beyond which requests go to people.
 8. **Privacy:** the request sent to a cloud model contains tool names and summaries, which can include command text and paths; `doctor` says which endpoint is cloud, and `aa_settings`-level configuration decides (the guide says to use a local model if commands are sensitive).
 
@@ -72,13 +72,13 @@ deny_always: ["rm\\s+-rf\\s+/", "curl[^|]*\\|\\s*(sh|bash)"]     # our extension
 - T-V3-WP3-09 concurrency and the hourly budget: the fifth concurrent judgement waits; beyond the budget requests go to people.
 - T-V3-WP3-10 `auto` is refused for a harness without permission callbacks.
 - T-V3-WP3-11 the evaluation set run through the real prompt against a scripted endpoint that returns canned verdicts reproduces WP1's metrics.
-- T-V3-WP3-12 (live, `ANYAGENT_LIVE_DECISION_LOCAL=1`) the evaluation passes for the chosen local model and `auto` approves a routine call and escalates a risky one end to end.
-- T-V3-WP3-13 (live, `ANYAGENT_LIVE_DECISION_CLOUD=1`) the same on a cloud model.
+- T-V3-WP3-12 (live, `ANYBOT_LIVE_DECISION_LOCAL=1`) the evaluation passes for the chosen local model and `auto` approves a routine call and escalates a risky one end to end.
+- T-V3-WP3-13 (live, `ANYBOT_LIVE_DECISION_CLOUD=1`) the same on a cloud model.
 
 ## Checks
 
 ```bash
-pnpm --filter @anyagent/core test && pnpm --filter @anyagent/node test && pnpm --filter @anyagent/workflows test
+pnpm --filter @anybot/core test && pnpm --filter @anybot/node test && pnpm --filter @anybot/workflows test
 node scripts/eval-decision.mjs --fixture eval/decision/fixtures/fake-always-approve.json    # expect: gate FAIL (still)
 pnpm check
 ```

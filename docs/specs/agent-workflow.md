@@ -10,11 +10,11 @@ One workflow per `aa_agent` ([ADR 0003](../adr/0003-one-shared-temporal-one-work
 [research/temporal-agent-harness.md](../research/temporal-agent-harness.md)). Workflow code is deterministic: no clock,
 randomness or I/O. Everything that touches the world is an activity on the agent's node.
 
-- Workflow type: `AnyAgent`, exported as `AnyAgent = defineAgent({ name: "AnyAgent", … })`
+- Workflow type: `AnyBot`, exported as `AnyBot = defineAgent({ name: "AnyBot", … })`
 - Workflow id: `agent:<spaceId>:<agentObjectId>`, stable across node moves, renames and rotations
 - Init data (required): `{spaceId, agentId}`. Everything else is read from Anytype at each turn.
 - Started by: the event gateway with **update-with-start** ([ADR 0011](../adr/0011-event-gateway.md)), by the
-  `ScheduleKick` workflow, or by `anyagent rebuild`
+  `ScheduleKick` workflow, or by `anybot rebuild`
 - Ends: when the gateway closes it, either for **rotation** (idle and the history is long; the next event starts a new
   run) or because the agent was archived
 

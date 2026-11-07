@@ -5,7 +5,7 @@
 
 ## Context
 
-The owner wants anyagent to "completely rely on Anytype" to run decentralised agents, with Anytype specifying workflows,
+The owner wants anybot to "completely rely on Anytype" to run decentralised agents, with Anytype specifying workflows,
 schedules and the rest. The owner also chose one shared Temporal for durable execution
 ([ADR 0003](0003-one-shared-temporal-one-workflow-per-agent.md)). Two stores invite drift: which one wins?
 
@@ -18,7 +18,7 @@ schedules and the rest. The owner also chose one shared Temporal for durable exe
 3. **Every cross-agent message goes through Anytype first** (a chat message or an object), and the event gateway ([ADR 0011](0011-event-gateway.md)) turns it into a
    Temporal signal. The single exception is a claim ([ADR 0006](0006-coordination-hierarchy-with-opt-in-claims.md)),
    whose outcome is written to Anytype immediately.
-4. **Rebuild is a supported operation**: from an empty Temporal, `anyagent rebuild` starts one workflow per live
+4. **Rebuild is a supported operation**: from an empty Temporal, `anybot rebuild` starts one workflow per live
    `aa_agent` and reconciles every `aa_schedule`. Lost: in-flight turns and session ids (agents start fresh sessions).
 
 ## Consequences

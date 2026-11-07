@@ -66,7 +66,7 @@ Change: `packages/core/src/{permissions.ts,schema.ts,schema-versions.ts}` (WP2 a
 ## Checks
 
 ```bash
-pnpm --filter @anyagent/core test && pnpm --filter @anyagent/node test && pnpm --filter @anyagent/mcp test && pnpm --filter @anyagent/gateway test && pnpm --filter @anyagent/workflows test
+pnpm --filter @anybot/core test && pnpm --filter @anybot/node test && pnpm --filter @anybot/mcp test && pnpm --filter @anybot/gateway test && pnpm --filter @anybot/workflows test
 pnpm check
 ```
 

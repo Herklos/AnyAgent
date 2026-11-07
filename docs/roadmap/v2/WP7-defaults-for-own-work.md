@@ -54,7 +54,7 @@ Change: `packages/core/src/{schema.ts,schema-versions.ts}` (a `0.3.1` step), `pa
 ## Checks
 
 ```bash
-pnpm --filter @anyagent/core test && pnpm --filter @anyagent/node test && pnpm --filter @anyagent/mcp test
+pnpm --filter @anybot/core test && pnpm --filter @anybot/node test && pnpm --filter @anybot/mcp test
 grep -rn "readWriteKey\|WRITE_KEY" packages/harness packages/mcp   # expect: no matches (keys never reach harness-side code)
 pnpm check
 ```

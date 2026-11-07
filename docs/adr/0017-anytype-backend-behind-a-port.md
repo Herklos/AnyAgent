@@ -31,7 +31,7 @@ The options:
 
    The gateway, the workflows' activities and the node use only the port. The adapter for Anytype is `backend-anytype`.
 3. **One backend per org.** An org (one space) runs on one backend. Accounts and spaces are not shared between the two
-   products ([research](../research/any-vs-anytype.md), claims 4 and 12), so anyagent never bridges them. Moving an org
+   products ([research](../research/any-vs-anytype.md), claims 4 and 12), so anybot never bridges them. Moving an org
    is a migration: rebuild from the new space, with the same object ids where the bridge keeps them.
 4. **Proving the seam** (rule 6): a conformance suite for the port runs against every adapter and against an
    in-memory reference. [Spike 016](../../spikes/016-backend-port-any/) wrote the first version and ran it against a
@@ -40,7 +40,7 @@ The options:
    is written when a signal in the research note fires: `any` leaves developer preview, Anytwo ships publicly, or
    the bridge ships.
 5. **Other backends are possible, none are planned for v0.** The port is not limited to Anytype's two products.
-   Two are on the far roadmap, as **weak adapters** (they will lack capabilities, and anyagent must work without
+   Two are on the far roadmap, as **weak adapters** (they will lack capabilities, and anybot must work without
    them):
    - **Starfish** (Drakkar's sync library, which Michel is moving to, Michel ADR 0029): to assess later.
    - **Notion**: very late. Its API offers no live stream or resume cursor that we found, and no reactions or
@@ -66,7 +66,7 @@ Source: [spike 016](../../spikes/016-backend-port-any/README.md), one account on
   `_applySeq`, which also covers edits and reactions. On Anytype it is whatever heart's resume offers (spike 002).
 - **Optimistic writes** are a per-field version token plus a read-compare-write check, not a server-side
   compare-and-set. `any` has none for property writes, so the port does not offer `atomic-update` and nothing in
-  anyagent may rely on it ([ADR 0006](0006-coordination-hierarchy-with-opt-in-claims.md) already serialises claims).
+  anybot may rely on it ([ADR 0006](0006-coordination-hierarchy-with-opt-in-claims.md) already serialises claims).
 - **A group and its chat** are the same object on `any` (a type with a `chat` part) and two linked objects on
   Anytype. The port keeps them as a group id and a chat id.
 - **Not proven:** a second author or approver, sync, object removals during a gap, anything on heart. See the spike.

@@ -1,6 +1,6 @@
 # Working in this repository (for agents and people)
 
-anyagent runs a team of AI agents from Anytype: Anytype is the source of truth and the message bus, one shared Temporal
+anybot runs a team of AI agents from Anytype: Anytype is the source of truth and the message bus, one shared Temporal
 runs one durable workflow per agent, and nodes (your machines) run the harnesses. The repository is at the
 **specification** stage: documents and spikes, no product code yet.
 

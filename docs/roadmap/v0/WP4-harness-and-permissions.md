@@ -26,7 +26,7 @@ Must not change: the OpenAI adapter files are **not** copied; do not copy `openc
 
 ## Provenance rule
 
-Every copied file starts with a header: source repository, path, commit (`402865d`), licence (Apache-2.0, same as anyagent), and a one-line list of changes. `THIRD_PARTY_NOTICES.md` lists them. Copy, then change
+Every copied file starts with a header: source repository, path, commit (`402865d`), licence (Apache-2.0, same as anybot), and a one-line list of changes. `THIRD_PARTY_NOTICES.md` lists them. Copy, then change
 as little as possible: import paths, removal of unused harnesses, the v0 permission modes. Keep Michel's tests that still apply and add ours. Dependencies: `@agentclientprotocol/claude-agent-acp` exactly `0.99.1`; nothing else new.
 
 ## The permission rules (pure, `packages/core/src/permission.ts`)
@@ -88,13 +88,13 @@ Michel has run **none of Codex's mapping and Grok for real** (audit G176, G172),
 - T-WP4-13a headless kind with a fake `vibe` script: JSON and streaming parsed from recorded fixtures; each exit code (0, 1, 2, 3) maps to the right result; an unparsable line raises a `HarnessError` naming it; `--resume` is passed on the second turn; cancel sends SIGTERM and then SIGKILL; no orphan remains.
 - T-WP4-13b the registry refuses `ask` and `auto` for a harness without `permissionCallbacks` and builds the Vibe `read_only` and `full` arguments exactly as in the table (assert on the spawn arguments and the environment: `VIBE_HOME` set, no `--auto-approve`, `--agent ask`).
 - T-WP4-13c auth: for each harness the descriptor reports whether `login`, `api_key` or both are supported; with an API key in the environment and an empty controlled home the fake peer sees the key; with a copied login it sees the credential file at mode 0600.
-- T-WP4-10..13 (live, opt-in: `ANYAGENT_LIVE_CLAUDE`, `ANYAGENT_LIVE_CODEX`, `ANYAGENT_LIVE_GROK`, `ANYAGENT_LIVE_VIBE`) per harness: reads a file and answers; refuses to create a file in `read_only`; refuses to read a credential file; creates the file in `full`.
+- T-WP4-10..13 (live, opt-in: `ANYBOT_LIVE_CLAUDE`, `ANYBOT_LIVE_CODEX`, `ANYBOT_LIVE_GROK`, `ANYBOT_LIVE_VIBE`) per harness: reads a file and answers; refuses to create a file in `read_only`; refuses to read a credential file; creates the file in `full`.
 
 ## Checks
 
 ```bash
-pnpm --filter @anyagent/harness test && pnpm --filter @anyagent/core test
-ANYAGENT_LIVE_CLAUDE=1 pnpm --filter @anyagent/harness test   # per harness you can run; otherwise NOT RUN with reason
+pnpm --filter @anybot/harness test && pnpm --filter @anybot/core test
+ANYBOT_LIVE_CLAUDE=1 pnpm --filter @anybot/harness test   # per harness you can run; otherwise NOT RUN with reason
 grep -rL "Copied from" packages/harness/src packages/core/src/floor   # expect: no output (every copied file has a header)
 pnpm check
 ```

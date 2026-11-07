@@ -1,4 +1,4 @@
-# anyagent
+# AnyBot
 
 **A team of AI agents that lives in Anytype.** Agents are defined, organised, scheduled and talked to through
 [Anytype](https://anytype.io) objects and chats. Each agent runs on a machine of yours, with the harness or model API of
@@ -49,13 +49,13 @@ your choice, and coordinates with the others through the same Anytype spaces you
 
 | Document | What it holds |
 | --- | --- |
-| [docs/VISION.md](docs/VISION.md) | Philosophy, principles, what anyagent is not |
+| [docs/VISION.md](docs/VISION.md) | Philosophy, principles, what anybot is not |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Components, data flow, lifecycles, failure modes |
-| [docs/specs/schema.md](docs/specs/schema.md) | The Anytype schema anyagent reads and writes (v0 draft) |
+| [docs/specs/schema.md](docs/specs/schema.md) | The Anytype schema anybot reads and writes (v0 draft) |
 | [docs/specs/agent-workflow.md](docs/specs/agent-workflow.md) | The one workflow per agent: handlers, updates, approvals, rotation, activities |
 | [docs/adr/](docs/adr/) | Decisions and why |
 | [docs/research/anytype-api.md](docs/research/anytype-api.md) | Verified facts about the Anytype API, with sources |
-| [docs/research/michel-reuse.md](docs/research/michel-reuse.md) | What anyagent reuses from Michel |
+| [docs/research/michel-reuse.md](docs/research/michel-reuse.md) | What anybot reuses from Michel |
 | [docs/research/temporal-agent-harness.md](docs/research/temporal-agent-harness.md) | The npm harness: install check, API, limits |
 | [docs/SPIKES.md](docs/SPIKES.md) | Spikes: done, planned, and what each must prove |
 | [docs/OPEN-QUESTIONS.md](docs/OPEN-QUESTIONS.md) | What is still undecided |
@@ -70,6 +70,6 @@ agents run from Anytype by hand), Hermes Agent Bot Mode, Osaurus, Noodle.
 
 ## Licence
 
-[Apache-2.0](LICENSE). anyagent talks to Anytype over its HTTP API and does not bundle
+[Apache-2.0](LICENSE). anybot talks to Anytype over its HTTP API and does not bundle
 [anytype-heart](https://github.com/anyproto/anytype-heart), which has its own licence
 ([ADR 0004](docs/adr/0004-typescript-over-the-http-api.md)).

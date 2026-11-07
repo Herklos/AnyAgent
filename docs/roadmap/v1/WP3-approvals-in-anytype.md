@@ -36,7 +36,7 @@ Change: `packages/core/src/schema.ts` (`aa_approval`, `aa_approvers`, schema ver
    - consider only reactions ✅ and ❌ whose participant is in the current approvers list **and is not an agent account**;
    - one kind present: that decision; both present: **deny wins**; none: nothing yet;
    - the decider is the first approver (by reaction time if available, else id order) who gave the winning kind.
-   Then send the update `anyagent.decision` to the workflow `{ requestId, approved, decidedBy }` with `updateId = decision:<requestId>` and `waitForStage: ACCEPTED` (confirm acceptance by awaiting `handle.result()`: a validator rejection is not thrown at `ACCEPTED`, see v0 WP5); treat `UnknownApproval` and "already decided" as success.
+   Then send the update `anybot.decision` to the workflow `{ requestId, approved, decidedBy }` with `updateId = decision:<requestId>` and `waitForStage: ACCEPTED` (confirm acceptance by awaiting `handle.result()`: a validator rejection is not thrown at `ACCEPTED`, see v0 WP5); treat `UnknownApproval` and "already decided" as success.
 4. **Restart safety.** On start, for every pending approval, read its message once and apply step 3, so a reaction made while the gateway was down is applied. The `updateId` makes a repeat harmless.
 5. **`recordDecision`** (node activity): sets `aa_status`, `aa_decided_by`, `aa_decided_at`, and posts a short reply to the approval message: `✅ approved by <name>` / `❌ denied by <name>` / `⌛ expired, denied`.
 6. **Approval by editing the object's status** counts only if the backend shows who made the edit (v0 WP2 step 7, and spike 005's answer): then an edit to `approved` or `denied` by an approver is treated like a reaction. If the modifier is not visible, ignore status edits, and say so in the guide.
@@ -71,8 +71,8 @@ Change: `packages/core/src/schema.ts` (`aa_approval`, `aa_approvers`, schema ver
 ## Checks
 
 ```bash
-pnpm --filter @anyagent/core test && pnpm --filter @anyagent/gateway test && pnpm --filter @anyagent/node test && pnpm --filter @anyagent/admin test
-ANYAGENT_LIVE_ANYTYPE=1 pnpm --filter @anyagent/gateway test    # or NOT RUN with reason
+pnpm --filter @anybot/core test && pnpm --filter @anybot/gateway test && pnpm --filter @anybot/node test && pnpm --filter @anybot/admin test
+ANYBOT_LIVE_ANYTYPE=1 pnpm --filter @anybot/gateway test    # or NOT RUN with reason
 pnpm check
 ```
 

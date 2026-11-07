@@ -26,7 +26,7 @@ aa_approval ── requester ──► aa_agent, task ──► aa_task
 
 ## aa_settings
 
-One per space. Created by `anyagent bootstrap`.
+One per space. Created by `anybot bootstrap`.
 
 | Key | Format | Writer | Notes |
 | --- | --- | --- | --- |
@@ -58,7 +58,7 @@ expressed by how many `aa_agent`s link the same `aa_account`.
 | Key | Format | Writer | Notes |
 | --- | --- | --- | --- |
 | `aa_handle` | text | person | Stable id used in node config, e.g. `bots`, `eng-pool`, `chief` |
-| `aa_participant_id` | text | `anyagent account add` | The account's participant id in this space (from `GET /v2/spaces/{s}/members/me`) |
+| `aa_participant_id` | text | `anybot account add` | The account's participant id in this space (from `GET /v2/spaces/{s}/members/me`) |
 | `aa_tag_always` | checkbox | person | Add the handle tag even when one agent uses the account alone |
 | `aa_lifecycle` | select | person | `live` \| `retired` |
 

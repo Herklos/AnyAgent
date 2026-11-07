@@ -6,7 +6,7 @@
 
 ## Context
 
-Michel ([Herklos/Michel](https://github.com/Herklos/Michel), Apache-2.0) has two layers anyagent can reuse:
+Michel ([Herklos/Michel](https://github.com/Herklos/Michel), Apache-2.0) has two layers anybot can reuse:
 
 1. **Harness adapters** (`packages/harness/adapters`, 2,890 lines): ACP over a child process, native Codex app-server,
    an OpenAI-compatible tool loop with an MCP bridge, a registry, and a scripted fake agent. Plain Node code.
@@ -49,10 +49,10 @@ Checked on 2026-11-06 ([research/temporal-agent-harness.md](../research/temporal
 
 ## Consequences
 
-- No submodule and no fork. Upstream fixes arrive by bumping a version, and Michel and anyagent run the same engine.
-- About 300 lines of workflow code anyagent would otherwise own are not written: the queue, the approval gate and auto
+- No submodule and no fork. Upstream fixes arrive by bumping a version, and Michel and anybot run the same engine.
+- About 300 lines of workflow code anybot would otherwise own are not written: the queue, the approval gate and auto
   mode.
-- anyagent is exposed to an experimental 0.x API. Exact pins and the workflow tests (spike 006) contain that.
+- anybot is exposed to an experimental 0.x API. Exact pins and the workflow tests (spike 006) contain that.
 - Messages enter through an update, so the gateway uses update-with-start, not signal-with-start
   ([ADR 0011](0011-event-gateway.md)).
 - 0.3.1 has no coalescing of queued messages into one turn. Each queued delivery is its own turn (see the workflow spec).

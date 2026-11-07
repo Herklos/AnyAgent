@@ -38,7 +38,7 @@ Change: `packages/gateway/src/{pipeline.ts,supervisor.ts,agents.ts}`, `packages/
    and ask a node to post one notice (`Stopped: the agents have exchanged <n> messages without a person. A person's message continues the conversation.`). The next person message resets it. `hop` is passed in `ChatInput` for the log.
 7. **Replies:** a turn that came from a group message posts in that group's chat as a reply to the message; on a shared account the first line is the handle tag `**@handle**` ([ADR 0005](../../adr/0005-identity-agents-map-to-accounts.md) decision 4); an exclusive account adds it only if `aa_tag_always`. Notices follow the same rule.
 8. **Context for the turn:** the group's `aa_purpose` and its member handles with their one-line role (the first line of each member's body), and the last N messages of the chat (default 20, `tuning.groupContextMessages`, text only, each truncated) are given to the harness as data in a clearly delimited block, not as instructions.
-9. **Privacy:** a space is the privacy boundary (Q6): every member can read every chat. `anyagent doctor` prints that sentence once per org; the guide says it.
+9. **Privacy:** a space is the privacy boundary (Q6): every member can read every chat. `anybot doctor` prints that sentence once per org; the guide says it.
 
 ## Steps
 
@@ -65,7 +65,7 @@ Change: `packages/gateway/src/{pipeline.ts,supervisor.ts,agents.ts}`, `packages/
 ## Checks
 
 ```bash
-pnpm --filter @anyagent/core test && pnpm --filter @anyagent/gateway test && pnpm --filter @anyagent/node test && pnpm --filter @anyagent/workflows test
+pnpm --filter @anybot/core test && pnpm --filter @anybot/gateway test && pnpm --filter @anybot/node test && pnpm --filter @anybot/workflows test
 pnpm check
 ```
 

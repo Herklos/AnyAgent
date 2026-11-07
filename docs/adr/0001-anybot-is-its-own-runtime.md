@@ -1,4 +1,4 @@
-# ADR 0001: anyagent is its own runtime
+# ADR 0001: anybot is its own runtime
 
 - Status: accepted (owner, 2026-11-06)
 - Date: 2026-11-06
@@ -11,21 +11,21 @@ the cost: "Editing Anytype does not push configs; apply with `hermes-profiles` a
 user asks." Each runtime also brings its own limits, for example Hermes Bot Mode rooms of 2–6 bots
 (`hermes-profiles/references/messaging-groups.md`), which forced HQ Groups to be split into Subteam Groups.
 
-Three options were considered: anyagent as its own runtime; anyagent as a conductor that only bridges Anytype to
+Three options were considered: anybot as its own runtime; anybot as a conductor that only bridges Anytype to
 existing runtimes and automates the apply step; or both.
 
 ## Decision
 
-anyagent is **its own runtime**. It runs the agent loop itself on each node, drives CLI harnesses and model APIs through
+anybot is **its own runtime**. It runs the agent loop itself on each node, drives CLI harnesses and model APIs through
 adapters, and reads Anytype live. There is no apply step.
 
 ## Consequences
 
 - An edited agent, prompt or schedule object takes effect at the next turn boundary.
-- Hermes and Osaurus are not required. Room size, routing and scheduling follow anyagent's own rules.
-- anyagent must provide what those runtimes gave: harness drivers, sessions, approvals, schedules. Most of it comes
+- Hermes and Osaurus are not required. Room size, routing and scheduling follow anybot's own rules.
+- anybot must provide what those runtimes gave: harness drivers, sessions, approvals, schedules. Most of it comes
   from Michel ([ADR 0010](0010-reuse-michel-adapters-and-the-npm-harness.md)) and Temporal ([ADR 0003](0003-one-shared-temporal-one-workflow-per-agent.md)).
-- Features Hermes has and anyagent does not yet (voice, Cua computer use, browser profiles, curated memory) are out of
+- Features Hermes has and anybot does not yet (voice, Cua computer use, browser profiles, curated memory) are out of
   v0.
 
 ## Extension points

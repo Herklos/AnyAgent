@@ -1,4 +1,4 @@
-# v2 WP4: tasks, the state machine, and the `anyagent` tools for harnesses
+# v2 WP4: tasks, the state machine, and the `anybot` tools for harnesses
 
 **Goal.** Work is an object. An agent can create a task, hand it on, work it, deliver a result and see it reviewed, each step visible in Anytype and in the group chat, with exactly one writer per field. Because the harnesses are external programs, they reach Anytype only through a small set of tools that the node provides and checks;
 the read-write key never reaches a harness.
@@ -7,7 +7,7 @@ the read-write key never reaches a harness.
 
 ## Scope
 
-In: the task rules (pure), the task write activity with idempotency, waking the concerned agents on task changes, task notices in chat, the `anyagent` tools (`task_create`, `task_update`, `task_get`, `task_list`, `message_post`), the node-side bridge to the harness, the tools for the in-process (OpenAI) harness.
+In: the task rules (pure), the task write activity with idempotency, waking the concerned agents on task changes, task notices in chat, the `anybot` tools (`task_create`, `task_update`, `task_get`, `task_list`, `message_post`), the node-side bridge to the harness, the tools for the in-process (OpenAI) harness.
 Out: claims (v3), agents creating or editing agents, groups, prompts or triggers (v3), schedules by agents (WP7), file attachments, subtasks, due-date reminders.
 
 ## Read first
@@ -17,8 +17,8 @@ and Michel `packages/mcp/michel` as a reference for tools given to agents (read,
 
 ## Files
 
-Create: `packages/core/src/task-rules.ts`, `packages/mcp/src/{bridge.ts,tools.ts,server.ts,index.ts}` (new package `@anyagent/mcp`), `packages/node/src/{tool-api.ts,activities/task-write.ts}`, `packages/gateway/src/tasks.ts`, `apps/cli/src/mcp-bridge.ts`, tests in each, `docs/specs/org-tools.md`.
-Change: `packages/workflows/src/{contracts.ts,anyagent-workflow.ts}` (`objectChanged` handler), `packages/harness/src/registry.ts` (`mcpTools` capability, `mcpServers` in `SessionInit`), `packages/harness/src/openai/tools.ts` (the same tools natively), `packages/gateway/src/supervisor.ts`.
+Create: `packages/core/src/task-rules.ts`, `packages/mcp/src/{bridge.ts,tools.ts,server.ts,index.ts}` (new package `@anybot/mcp`), `packages/node/src/{tool-api.ts,activities/task-write.ts}`, `packages/gateway/src/tasks.ts`, `apps/cli/src/mcp-bridge.ts`, tests in each, `docs/specs/org-tools.md`.
+Change: `packages/workflows/src/{contracts.ts,anybot-workflow.ts}` (`objectChanged` handler), `packages/harness/src/registry.ts` (`mcpTools` capability, `mcpServers` in `SessionInit`), `packages/harness/src/openai/tools.ts` (the same tools natively), `packages/gateway/src/supervisor.ts`.
 Dependency: `@modelcontextprotocol/sdk` pinned exactly (verify the version on npm; Michel used 1.32.2).
 
 ## The task rules (pure)
@@ -38,7 +38,7 @@ Dependency: `@modelcontextprotocol/sdk` pinned exactly (verify the version on np
 5. **Origin:** a task created in answer to a message stores `aa_origin_message` as `chatId/messageId`; the group's chat message that started it gets a reply with the task link.
 6. **The tools** (`docs/specs/org-tools.md` is written in this package): `task_create { title, body?, assignee?, reviewer?, criterion?, due?, group? }` (group defaults to the one the turn came from), `task_update { taskId, status?, result?, assignee?, reviewer?, criterion?, due? }`, `task_get { taskId }`, `task_list { status?, assignee?, group? }` (max 50),
    `message_post { groupId, text, replyTo? }` (only to groups the agent is a member of; rate limited to 6 per turn). Each returns plain text and structured content, with errors as tool errors carrying the rule's reason.
-7. **The bridge, so the key stays on the node:** `anyagent mcp-bridge` is a tiny stdio MCP server (no secrets, no Anytype client) that the harness starts from `mcpServers`; it forwards each call over a **Unix domain socket** in the agent's home directory to the node's `tool-api`, authenticated by a random per-turn token passed in the bridge's environment.
+7. **The bridge, so the key stays on the node:** `anybot mcp-bridge` is a tiny stdio MCP server (no secrets, no Anytype client) that the harness starts from `mcpServers`; it forwards each call over a **Unix domain socket** in the agent's home directory to the node's `tool-api`, authenticated by a random per-turn token passed in the bridge's environment.
    The node validates the token (agent id, org, current task or group, expiry at turn end), checks permissions (WP7 for creation, here for task rules), calls `taskWrite` or the backend, and answers. Tokens die with the turn; a replayed token fails. Unix only.
 8. **Harness support:** a descriptor declares `mcpTools: true` if the harness accepts MCP servers (Claude Code, Codex and Grok through their ACP or app-server session setup; verify live). The in-process OpenAI harness gets the same tools natively with the same checks. **Headless Vibe has no org tools**; `doctor` says so and an agent on it cannot create tasks.
 9. **Harness environment:** the node's read-write key is never in the environment of a harness or of the bridge (test below).
@@ -71,7 +71,7 @@ Dependency: `@modelcontextprotocol/sdk` pinned exactly (verify the version on np
 ## Checks
 
 ```bash
-pnpm --filter @anyagent/core test && pnpm --filter @anyagent/mcp test && pnpm --filter @anyagent/node test && pnpm --filter @anyagent/gateway test && pnpm --filter @anyagent/workflows test
+pnpm --filter @anybot/core test && pnpm --filter @anybot/mcp test && pnpm --filter @anybot/node test && pnpm --filter @anybot/gateway test && pnpm --filter @anybot/workflows test
 pnpm check
 ```
 

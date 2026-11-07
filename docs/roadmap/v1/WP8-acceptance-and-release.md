@@ -20,7 +20,7 @@ Change: `docs/ROADMAP.md` (v1 status), `README.md`, `CHANGELOG.md`, specs and `d
 
 ## The automated suite (fakes; needs a Temporal dev server)
 
-Same process layout as v0's suite (mock Anytype server, Temporal dev server with a database file, `anyagent run` as a child with the fake harness and a fake OpenAI-compatible server).
+Same process layout as v0's suite (mock Anytype server, Temporal dev server with a database file, `anybot run` as a child with the fake harness and a fake OpenAI-compatible server).
 
 | Test | Roadmap v1 check | What it asserts |
 | --- | --- | --- |
@@ -30,7 +30,7 @@ Same process layout as v0's suite (mock Anytype server, Temporal dev server with
 | T-V1-WP8-04 | models | an agent on the fake OpenAI-compatible server reads a file, refuses a write in `read_only`, asks in `ask`, writes in `full` |
 | T-V1-WP8-05 | stop | `/stop` ends a running turn, drops the queue, denies a pending approval, posts one notice |
 | T-V1-WP8-06 | two orgs | two orgs, one agent each: replies, approvals, `/stop` and schedules stay in their org; one org's backend stopped does not stop the other |
-| T-V1-WP8-07 | status | `anyagent status` shows running, waiting approval, idle and paused correctly through the above |
+| T-V1-WP8-07 | status | `anybot status` shows running, waiting approval, idle and paused correctly through the above |
 | T-V1-WP8-08 | regression | the whole v0 suite still passes unchanged |
 | T-V1-WP8-09 | upgrade | a space created by v0 is upgraded by `init` to `0.2.0` with its agent still working and nothing lost |
 
@@ -64,7 +64,7 @@ What shipped (harnesses with `ask`, endpoints and models tested, variants verifi
 
 ```bash
 pnpm check
-pnpm --filter @anyagent/e2e test
+pnpm --filter @anybot/e2e test
 git diff --stat main...HEAD -- docs/adr    # expect: only the ADRs this release was meant to change (0020, 0021)
 ```
 

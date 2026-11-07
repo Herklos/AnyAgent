@@ -33,11 +33,11 @@ Dependency added: `better-sqlite3` `13.0.3`.
 - **Pipeline** (`pipeline.ts`, pure given its inputs, so it is tested without Temporal): for each chat event, drop `removed`; drop messages whose author is the org's own account or that carry an agent marker (loop guard);
   drop messages whose key is already delivered; drop messages from authors not allowed by `isAllowedAuthor` (log "ignored: author not allowed", never reply); otherwise build `ChatInput` with key `chat:<chatId>:<messageId>`.
   An `upsert` of an already-delivered key is ignored (edits do not re-run a turn in v0).
-- **Delivery** (`delivery.ts`): `startUpdateWithStart` the workflow `AnyAgent` (id `agent:<spaceId>:<agentObjectId>`, task queue `anyagent`, init `{ spaceId, agentId, nodeQueue, orgId }`) with update `anyagent.chat`,
+- **Delivery** (`delivery.ts`): `startUpdateWithStart` the workflow `AnyBot` (id `agent:<spaceId>:<agentObjectId>`, task queue `anybot`, init `{ spaceId, agentId, nodeQueue, orgId }`) with update `anybot.chat`,
   `updateId = key`, `workflowIdConflictPolicy: USE_EXISTING`, `waitForStage: ACCEPTED`. **Only after acceptance** commit the cursor and mark the key delivered. **Pitfall (found reviewing the WP5 implementation, with a reproduction):** with `waitForStage: ACCEPTED` the start call can return before the workflow's validator has run, so a rejection (the workflow is closing, `AgentClosed`) is **not** thrown there; it only surfaces from `await handle.result()` (a `WorkflowUpdateFailedError` whose cause is an `ApplicationFailure`). Acceptance must therefore be confirmed by awaiting `handle.result()` (or by using `waitForStage: COMPLETED` for a short admit handler), and the closing error must be detected by its type, not by a message regex. Otherwise a message sent while a workflow closes is marked delivered and lost. On `AgentClosed` or "workflow already completed",
   wait briefly and retry (update-with-start then starts a new run). On a Temporal outage, do not commit and retry with backoff, so the cursor does not move past undelivered messages. A crash between acceptance and commit redelivers the
   message with the same update id, which Temporal drops within the run and the core drops by key across runs of the same history.
-- **Rotation** (`rotation.ts`): every 30 s per active workflow (and after each delivery batch), query `anyagent.rotation`; if `idle` and (`continueAsNewSuggested` or `accepted >= 1500`) send the close signal. The next message starts a new run.
+- **Rotation** (`rotation.ts`): every 30 s per active workflow (and after each delivery batch), query `anybot.rotation`; if `idle` and (`continueAsNewSuggested` or `accepted >= 1500`) send the close signal. The next message starts a new run.
   Never close a non-idle workflow. Log each rotation.
 - **Configuration used:** `orgs[]`, `temporal`, `state.dir`; no new keys.
 
@@ -70,7 +70,7 @@ Dependency added: `better-sqlite3` `13.0.3`.
 ## Checks
 
 ```bash
-pnpm --filter @anyagent/gateway test      # expect: pass; Temporal tests pass or are reported skipped with the reason
+pnpm --filter @anybot/gateway test      # expect: pass; Temporal tests pass or are reported skipped with the reason
 pnpm check
 ```
 

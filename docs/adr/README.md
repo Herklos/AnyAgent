@@ -5,7 +5,7 @@ commit as the behaviour it decides.
 
 | ADR | Decision | Status |
 | --- | --- | --- |
-| [0001](0001-anyagent-is-its-own-runtime.md) | anyagent is its own runtime (no apply step into Hermes/Osaurus) | accepted |
+| [0001](0001-anybot-is-its-own-runtime.md) | anybot is its own runtime (no apply step into Hermes/Osaurus) | accepted |
 | [0002](0002-anytype-is-the-source-of-truth.md) | Anytype is the source of truth and the bus; Temporal holds execution only | accepted |
 | [0003](0003-one-shared-temporal-one-workflow-per-agent.md) | One shared Temporal; exactly one workflow per agent | accepted |
 | [0004](0004-typescript-over-the-http-api.md) | TypeScript, over the Anytype HTTP/SSE API (heart not embedded) | accepted |

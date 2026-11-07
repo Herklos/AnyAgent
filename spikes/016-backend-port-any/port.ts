@@ -1,4 +1,4 @@
-// The backend port (ADR 0017): everything anyagent needs from the system that holds the org.
+// The backend port (ADR 0017): everything anybot needs from the system that holds the org.
 // Five areas: identity, org (read), objects (write), chat, events. Plus SchemaAdmin for bootstrap (spike 009).
 // Code asks for a capability, never for a backend's name.
 

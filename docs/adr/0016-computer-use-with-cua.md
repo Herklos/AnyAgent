@@ -9,7 +9,7 @@
 Michel's plan for computer use (Michel `docs/PLAN.md` §15 and line 97; `docs/adr/0012-remote-desktop-and-browser-control.md`)
 is a ladder: terminal and files, a shared browser, accessibility-driven desktop control, then pixels. At Michel
 `402865d` it names `vercel-labs/agent-desktop` as the near-term driver; cua is not mentioned there. The owner wants
-anyagent to be compatible with **cua**.
+anybot to be compatible with **cua**.
 
 Verified in `trycua/cua@6d840c5` (2026-11-06), `README.md` and `libs/cua-driver/README.md`:
 
@@ -25,7 +25,7 @@ Verified in `trycua/cua@6d840c5` (2026-11-06), `README.md` and `libs/cua-driver/
 
 ## Decision
 
-1. **Computer use is a tool profile on the node, exposed to harnesses as an MCP server.** Every harness anyagent
+1. **Computer use is a tool profile on the node, exposed to harnesses as an MCP server.** Every harness anybot
    supports can use MCP: CLI harnesses natively, the OpenAI-compatible loop through Michel's MCP bridge. Node config
    declares profiles, for example:
    - `desktop` → `cua-driver mcp` on the node's own desktop;
@@ -40,7 +40,7 @@ Verified in `trycua/cua@6d840c5` (2026-11-06), `README.md` and `libs/cua-driver/
    model may approve within the criteria set `computer_use`.
 4. **Generic seam.** cua is the first implementation of a `computer` tool-profile kind. Michel's `agent-desktop` choice
    fits the same seam as a second kind, so the two projects stay compatible.
-5. **Distribution.** anyagent depends on nothing from cua at build time. It launches what the person installed (cua
+5. **Distribution.** anybot depends on nothing from cua at build time. It launches what the person installed (cua
    CLI, driver, Spaces). It never bundles FSL or AGPL parts.
 
 ## Consequences
