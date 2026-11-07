@@ -101,7 +101,7 @@ The gateway's reconciler maps each `aa_schedule` to a Temporal Schedule with id
 
 The turn for a schedule uses the schedule's body as the prompt and posts to `aa_deliver_to`.
 
-## Activities (node task queue `node:<handle>`)
+## Activities (node task queue `node:<spaceId>:<handle>`, [ADR 0018](../adr/0018-one-or-more-orgs-per-deployment.md))
 
 | Activity | Does | Timeouts / retries |
 | --- | --- | --- |

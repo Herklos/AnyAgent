@@ -17,7 +17,7 @@ Anytype alone cannot serialise decisions across machines: any-sync merges concur
 
 ## Decision
 
-1. One Temporal serves every node of a deployment. Each node is a Temporal worker on its own task queue `node:<handle>`.
+1. One Temporal serves every node of a deployment. Each node is a Temporal worker on its own task queue `node:<spaceId>:<handle>` (amended by [ADR 0018](0018-one-or-more-orgs-per-deployment.md): a handle is unique only inside an org).
 2. **Self-hosted or Temporal Cloud, by configuration only.** The gateway and every node read the same connection
    block: `temporal: {address, namespace, tls?: {cert, key, ca}, apiKeyEnv?}`. Self-hosted means the dev server or a
    cluster on a private network such as Tailscale. Temporal Cloud uses mTLS or an API key (the TypeScript connection

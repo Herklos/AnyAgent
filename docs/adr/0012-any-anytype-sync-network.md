@@ -22,7 +22,7 @@ Verified in `anyproto/anytype-cli@017b954` (2026-11-05):
 1. anyagent has **no network setting of its own**. Choosing a network means creating and logging in each account (the
    agent accounts and the gateway's viewer) with or without `--network-config`. That step is part of the account setup
    people already do (`anytype auth create`, `anytype space join`), documented in the setup guide.
-2. Every account of a deployment must be on the **same network as the space**. This is inferred, because a space lives on
+2. Every account of an org must be on the **same network as the org's space**; the orgs of one deployment may be on different networks ([ADR 0018](0018-one-or-more-orgs-per-deployment.md)). This is inferred, because a space lives on
    one network, and spike 012 checks it. `anyagent doctor` checks that every configured endpoint and the gateway see the
    same space id and members.
 3. The node and gateway config may record `network: anytype | self-hosted` for display only. No code branches on it.

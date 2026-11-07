@@ -24,14 +24,14 @@ Each feature was ranked by, in this order:
 
 | Release | Theme | The owner can… | Rough size |
 | --- | --- | --- | --- |
-| **v0** | One agent in a chat | …talk to an AI agent running on their machine from Anytype (desktop or phone); it keeps working across restarts. Read-only by default. | 4–5 engineer-weeks |
-| **v1** | A safe, proactive assistant | …let it do real work with approvals from the chat, schedule it, run it on local or cloud models, and stop it. | 3–4 |
+| **v0** | One agent in a chat | …talk to an AI agent running on their machine from Anytype (desktop or phone); it keeps working across restarts. Read-only by default. | 5–6 engineer-weeks |
+| **v1** | A safe, proactive assistant | …let it do real work with approvals from the chat, schedule it, run it on local or cloud models, stop it, and serve more than one org. | 4–5 |
 | **v2** | A team | …run several agents in group chats on several machines, with hierarchy and tasks. | 5–6 |
 | **v3** | Autonomy | …let agents act within permissions, wake on webhooks, and approve routine calls with a decision model. | 4–5 |
 
 Sizes are my judgement from the component list, not measured; recalibrate after v0. Coding agents shorten the
-calendar (roughly by half, from the earlier estimate) but not the spikes. Together they come to about 16–20 engineer-weeks, a little more than the
-old single-v0 estimate (14–16) because every release is finished before the next. Computer use (cua) is a further 2–3.
+calendar (roughly by half, from the earlier estimate) but not the spikes. Together they come to about 18–22 engineer-weeks, more than the
+old single-v0 estimate (14–16) because every release is finished before the next and v0 now ships three harnesses. Computer use (cua) is a further 2–3.
 
 ## v0: one agent in a chat
 
@@ -54,8 +54,17 @@ It survives restarts without answering twice.
 - One workflow per live `aa_agent`, built with `defineAgent` on the pinned npm harness
   ([ADR 0010](adr/0010-reuse-michel-adapters-and-the-npm-harness.md)); one handler, `chat`. A turn: read the agent
   object fresh → 👀 on the message → run the harness → post the reply. Messages that arrive during a turn queue.
-- One harness, **Claude Code over ACP** (Michel's adapter, copied with provenance). In `read_only` every permission
-  request is denied and the reply says so; `full` allows everything and only a person can set it.
+- Three harnesses, as registry entries ([Q17](OPEN-QUESTIONS.md), settled): **Claude Code** and **Grok Build** over
+  ACP, and **Codex** over its app-server, using Michel's adapters copied with provenance (Michel
+  `packages/harness/adapters`). `aa_harness` picks one per agent. In `read_only` every permission request is denied and
+  the reply says so; `full` allows everything and only a person can set it. **`read_only` must hold even when the
+  harness's own configuration would approve a call itself**, so each harness runs with a controlled home and
+  configuration (Michel audit G247 for Claude Code, G172 for Grok, whose `~/.grok/config.toml` can answer a tool call
+  before the host sees it), and the acceptance script proves it per harness. **Grok Build ships only if its live check
+  passes**: Michel has run it against a fake agent only (G172), and the official page names headless `-p` and "full ACP
+  support" but not the ACP command or permission modes. If it does not pass, it moves to v1.
+- **Org-aware from the start** ([ADR 0018](adr/0018-one-or-more-orgs-per-deployment.md)): the configuration is a list of
+  orgs, state and task queues are keyed by space; v0 is accepted with one org, v1 with two.
 - **Owner only by default.** The agent answers messages from `aa_allowed_authors`; empty means the space owner. Anyone
   else is ignored. Without this, any space member could run commands on your machine.
 - Loop guard (its own messages are never input), idempotent delivery by message id, and rotation of an idle workflow before
@@ -64,15 +73,17 @@ It survives restarts without answering twice.
   made in the app), `anyagent run`, and `anyagent doctor` (Anytype key and scope, space joined, Temporal reachable,
   `claude` installed).
 
-**Does not ship:** approvals, groups, @mentions, tasks, schedules, triggers, webhooks, more than one node, a second
-harness, local-model endpoints, the decision model, permissions over the org, shared prompts, `/stop`.
+**Does not ship:** approvals, groups, @mentions, tasks, schedules, triggers, webhooks, more than one node,
+the OpenAI-compatible harness and local-model endpoints, the decision model, permissions over the org, shared prompts, `/stop`.
 (More than one `aa_agent` should work, since each is its own workflow; v0 tests one.)
 
 **Done when** (an acceptance script, run twice from a clean space):
 
 1. `anyagent init`, `agent create` and `run` on a fresh space; a message from the owner in the agent's chat gets a reply.
 2. A message from another member gets no reply and nothing runs.
-3. Asked to create a file, the agent in `read_only` refuses and no file exists. Switched to `full` by editing the object, it creates it.
+3. For each harness installed on the node (Claude Code, Codex, and Grok Build if it ships): asked to create a file, the
+   agent in `read_only` refuses and no file exists, **including with a harness configuration that tries to auto-approve**;
+   switched to `full` by editing the object, it creates it.
 4. Edit the object's body and the next turn follows it; set `aa_lifecycle` to `paused` and there is no reply.
 5. `kill -9` the process mid-turn and restart: earlier messages are not answered again, and the interrupted one gets a
    "interrupted, send it again" notice.
@@ -82,7 +93,7 @@ harness, local-model endpoints, the decision model, permissions over the org, sh
 
 **Spikes first:** [002](SPIKES.md) live `anytype serve` (needs the `anytype-cli` binary and network access to a sync
 network, or a self-hosted any-sync); [004](SPIKES.md) update-with-start from the gateway; [006](SPIKES.md) the
-workflow on the harness package, chat handler only; [007](SPIKES.md) the Claude Code adapter, `read_only` only;
+workflow on the harness package, chat handler only; [007](SPIKES.md) the three CLI adapters, `read_only` with a hostile harness configuration;
 [009](SPIKES.md) schema bootstrap for these two types. [016](../spikes/016-backend-port-any/) (the port) is done.
 
 **Risks it retires:** that heart's v2 streams work in a headless `anytype serve`, that the npm harness and Temporal
@@ -90,7 +101,13 @@ pin hold up, that a turn is durable. **Known risks:** if the streams are disable
 (`StreamDisabled`, see [research](research/anytype-api.md)), the adapter polls the message list instead; if the v2 API
 cannot create a chat, the person creates it in the app. Both are decided by spike 002.
 
-**New open questions:** [Q17](OPEN-QUESTIONS.md) (the first harness), [Q18](OPEN-QUESTIONS.md) (owner-only default).
+**Known risk, an owner decision ([Q19](OPEN-QUESTIONS.md)):** Michel's [provider-terms research](https://github.com/Herklos/Michel/blob/main/docs/research/provider-terms.md)
+rates driving a consumer Claude subscription from an orchestrator **high** risk, Codex and Grok **medium**, and says to
+prefer API keys or the official login on the owner's own machine. `anyagent init` shows the notice and keeps the API-key
+path open.
+
+**Settled by the owner:** [Q17](OPEN-QUESTIONS.md) (Claude Code, Codex and Grok Build) and
+[Q18](OPEN-QUESTIONS.md) (owner-only by default).
 
 ## v1: a safe, proactive assistant
 
@@ -104,20 +121,22 @@ the models you choose.
    `aa_settings.aa_approvers` is added. Decisions record who and when.
 2. **Schedules**: `aa_schedule` (cron, timezone, enabled, deliver to the agent's chat) as Temporal Schedules,
    reconciled from Anytype. A schedule's turn posts to the chat.
-3. **Model endpoints and a second harness** ([ADR 0014](adr/0014-model-endpoints-local-and-cloud.md)): the
-   OpenAI-compatible loop against `llama-server` or a cloud API, with `aa_endpoint`; this is also the first proof that a
-   harness is a registry entry and not a branch.
-4. **`/stop`**: the owner stops a running turn from the chat.
-5. **Status and notices**: `anyagent status`, a readable notice for every failed turn, usage in the notice.
-6. **Variants by configuration only**: Temporal Cloud, and a self-hosted any-sync
+3. **Model endpoints and the OpenAI-compatible harness** ([ADR 0014](adr/0014-model-endpoints-local-and-cloud.md)):
+   the loop against `llama-server` or a cloud API, with `aa_endpoint`: local models, and a harness that needs no CLI.
+4. **More than one org** ([ADR 0018](adr/0018-one-or-more-orgs-per-deployment.md)): one deployment serving two spaces,
+   with an agent in each; replies, cursors, queues and approvals do not cross, and an org whose backend is down does
+   not stop the other.
+5. **`/stop`**: the owner stops a running turn from the chat.
+6. **Status and notices**: `anyagent status`, a readable notice for every failed turn, usage in the notice.
+7. **Variants by configuration only**: Temporal Cloud, and a self-hosted any-sync
    ([ADR 0012](adr/0012-any-anytype-sync-network.md)); the v0 acceptance script passes on both.
 
 **Done when:** an `ask` agent asks for approval and acts only after ✅; a ❌, an expiry and an approval from a
 non-approver each do the right thing; a weekday schedule posts; an agent on a llama-server model answers; `/stop`
-ends a running turn; the v0 script passes on Temporal Cloud and on the self-hosted network.
+ends a running turn; two spaces served by one deployment never mix; the v0 script passes on Temporal Cloud and on the self-hosted network.
 
 **Spikes first:** the approval half of [006](SPIKES.md); [011](SPIKES.md) approver identity (a person, never an agent
-account); the OpenAI-loop half of [007](SPIKES.md); [012](SPIKES.md).
+account); the OpenAI-loop half of [007](SPIKES.md); [012](SPIKES.md); a two-org run of [004](SPIKES.md).
 
 **Schema delta (additive):** `aa_approval`, `aa_schedule`; on `aa_agent` `aa_endpoint`, `aa_effort`; on `aa_settings`
 `aa_approvers`. `aa_approval_mode` gains `ask`.

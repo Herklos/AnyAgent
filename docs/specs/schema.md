@@ -43,7 +43,7 @@ A machine that runs agents. Body: free notes.
 
 | Key | Format | Writer | Notes |
 | --- | --- | --- | --- |
-| `aa_handle` | text | person | Stable lowercase id, e.g. `mac-studio`. Task queue = `node:<handle>` |
+| `aa_handle` | text | person | Stable lowercase id, e.g. `mac-studio`. Task queue = `node:<spaceId>:<handle>` ([ADR 0018](../adr/0018-one-or-more-orgs-per-deployment.md)) |
 | `aa_harnesses` | multi_select | node | Harnesses detected on the machine (`claude-code`, `codex`, `opencode`, `openai`, …) |
 | `aa_last_seen` | date | node | Heartbeat, written at most every 5 minutes |
 | `aa_accounts` | multi_select | node | Account handles this node has an endpoint for (from its config; informational) |

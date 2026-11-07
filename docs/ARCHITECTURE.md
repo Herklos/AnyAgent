@@ -31,7 +31,7 @@ Status: **proposed** (specification stage). Decisions are in [adr/](adr/); open 
 | **Event gateway** | one per deployment, next to Temporal ([ADR 0011](adr/0011-event-gateway.md)) | The only way in: Anytype chat and object streams, webhooks → dedupe → route → update-with-start. Loop guard, rotation, schedule reconciler. Reads Anytype, never writes. |
 | **Temporal** | one per deployment: self-hosted or Temporal Cloud, chosen by configuration ([ADR 0003](adr/0003-one-shared-temporal-one-workflow-per-agent.md)) | One workflow per agent, Temporal Schedules, serialised updates. |
 | **Agent workflow** | Temporal (deterministic code) | `defineAgent` from `@temporalio/agent-harness` (npm, pinned): turn queue, approval gate and auto mode, claims. Spec: [agent-workflow.md](specs/agent-workflow.md). |
-| **Node** | each machine that runs agents | Temporal worker on `node:<handle>`; runs turns through harness adapters; writes to Anytype through the endpoint of each agent's account ([ADR 0005](adr/0005-identity-agents-map-to-accounts.md)). |
+| **Node** | each machine that runs agents | Temporal worker on `node:<spaceId>:<handle>` ([ADR 0018](adr/0018-one-or-more-orgs-per-deployment.md)); runs turns through harness adapters; writes to Anytype through the endpoint of each agent's account ([ADR 0005](adr/0005-identity-agents-map-to-accounts.md)). |
 | **`anytype serve`** | one per Anytype account, anywhere on the private network | Anytype JSON API (`:31012`) for that account ([research](research/anytype-api.md)). One shared account, a pool, or one per agent ([ADR 0005](adr/0005-identity-agents-map-to-accounts.md)). |
 | **Harness adapters** | node, inside activities | Claude Code, Codex, OpenCode, any ACP agent, OpenAI-compatible APIs ([ADR 0010](adr/0010-reuse-michel-adapters-and-the-npm-harness.md)). |
 | **Model endpoints** | node config | llama.cpp (`llama-server`) and any OpenAI-compatible API, local or cloud, for agents and the decision model ([ADR 0014](adr/0014-model-endpoints-local-and-cloud.md)). |
@@ -182,6 +182,6 @@ another tool's config.
 
 ## 10. Deliberately not generalised (v0)
 
-- One space per deployment, one gateway (no HA pair yet).
+- One or more orgs per deployment ([ADR 0018](adr/0018-one-or-more-orgs-per-deployment.md)), one gateway (no HA pair yet).
 - No chat platforms besides Anytype; no sandbox in v0 (cua sandboxes come with computer use, after v0); no migration
   from the `anytype-agents` schema.
