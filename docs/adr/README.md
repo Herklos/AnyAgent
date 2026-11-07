@@ -23,3 +23,4 @@ commit as the behaviour it decides.
 | [0016](0016-computer-use-with-cua.md) | Desktop and computer use through cua | accepted as a plan (after v0) |
 | [0017](0017-anytype-backend-behind-a-port.md) | Anytype (anytype-heart) behind a backend port; `any` planned as the second backend; others far later | accepted |
 | [0018](0018-one-or-more-orgs-per-deployment.md) | A deployment serves one or more orgs (spaces, on Anytype or later Anytwo) | accepted |
+| [0019](0019-own-workflow-core-behind-a-seam.md) | Own the small workflow core behind a seam; decide on the harness at v1; no agent framework | proposed |

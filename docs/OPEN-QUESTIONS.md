@@ -16,6 +16,7 @@ reused.
 | Q14 | Report upstream to `temporal-community/temporal-agent-harness`: 0.3.1 fails to import with Temporal SDK 1.25 (deep import of `@temporalio/common/lib/time.js`), and propose continue-as-new for the TypeScript agent workflow? | not reported; anyagent pins SDK 1.24.0 and rotates runs | [research/temporal-agent-harness.md](research/temporal-agent-harness.md). Posting to an outside repository is the owner's call |
 | Q15 | Computer use: which comes first after v0, cua sandboxes (Linux container, macOS VM) or cua-driver on a node's own desktop? | sandboxes first | [ADR 0016](adr/0016-computer-use-with-cua.md); Michel's plan also puts containers first |
 | Q19 | Use consumer subscription logins (Claude, Codex, Grok) to drive agents, or API keys? Michel rates the Claude subscription route high risk for an orchestrator | the owner's choice per agent; `init` shows a terms notice; API keys always work | [Michel provider-terms research](https://github.com/Herklos/Michel/blob/main/docs/research/provider-terms.md) |
+| Q20 | Workflow layer: write the small core ourselves behind an `AgentCore` seam and decide on the harness at v1 (recommended), adopt `@temporalio/agent-harness` now, or never adopt it? Also: no agent framework | own core for v0, behind the seam; the seam makes either answer cheap | [ADR 0019](adr/0019-own-workflow-core-behind-a-seam.md) (proposed), [research](research/harness-vs-own-vs-framework.md) |
 
 ## Settled
 

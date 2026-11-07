@@ -78,3 +78,17 @@ From `@temporalio/client` 1.24.0 type definitions: `startUpdateWithStart` / `exe
 (same file, line 94), `updateId` (`lib/workflow-options.d.ts`, line 71) and `apiKey` on the connection
 (`lib/connection.d.ts`, line 100, for Temporal Cloud). Not checked yet: the minimum Temporal server version that supports
 update-with-start, and that a repeated `updateId` is deduplicated within a run (spike 004).
+
+## Update 2026-11-07: `0.4.0`
+
+`@temporalio/agent-harness` **0.4.0** was published on 2026-11-07 (02:21 UTC), the sixth release in five days. Read from the
+registry metadata and the tarball (read-only; not installed or run):
+
+- Dependency ranges are unchanged (`@temporalio/*` `^1.24.0`).
+- The deep import `@temporalio/common/lib/time.js` is **still present** (`dist/src/harness/agent-workflow.js`, line 10), so it
+  still fails on SDK 1.25 and the exact pin to 1.24.0 stays.
+- There is still **no continue-as-new** anywhere in the package.
+- **Steering is now exported** (`ClaimedSteering`), so the earlier note that it is missing applies to `0.3.1` only.
+
+Whether to depend on it at all is analysed in [harness-vs-own-vs-framework.md](harness-vs-own-vs-framework.md) and proposed
+in [ADR 0019](../adr/0019-own-workflow-core-behind-a-seam.md).

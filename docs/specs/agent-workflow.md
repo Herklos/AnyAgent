@@ -1,5 +1,9 @@
 # The agent workflow (v0 draft)
 
+> **Under review:** [ADR 0019](../adr/0019-own-workflow-core-behind-a-seam.md) proposes that v0 implements this behaviour with
+> our own small `AgentCore` instead of `defineAgent`, and decides on the harness at v1. The behaviour below does not change; the
+> names (`defineAgent`, `handler`, `MidTurn`) describe the harness-based shape that the own core follows.
+
 One workflow per `aa_agent` ([ADR 0003](../adr/0003-one-shared-temporal-one-workflow-per-agent.md)). It is built with
 `defineAgent` from `@temporalio/agent-harness`, installed from npm and pinned
 ([ADR 0010](../adr/0010-reuse-michel-adapters-and-the-npm-harness.md); API notes in
