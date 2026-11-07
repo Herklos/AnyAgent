@@ -15,14 +15,24 @@
   "scripts": {
     "build": "tsc -b",
     "typecheck": "tsc -b --pretty false",
-    "test": "vitest run --config ../../vitest.config.ts --project @anyagent/node"
+    "test": "tsc -b && vitest run --config ../../vitest.config.ts --project @anyagent/node"
   },
   "dependencies": {
+    "@anyagent/backend": "workspace:*",
+    "@anyagent/core": "workspace:*",
+    "@anyagent/harness": "workspace:*",
+    "@anyagent/workflows": "workspace:*",
     "@temporalio/activity": "1.24.0",
     "@temporalio/client": "1.24.0",
-    "@temporalio/worker": "1.24.0"
+    "@temporalio/common": "1.24.0",
+    "@temporalio/worker": "1.24.0",
+    "better-sqlite3": "13.0.3"
   },
   "devDependencies": {
+    "@anyagent/admin": "workspace:*",
+    "@types/better-sqlite3": "9.6.0",
+    "@temporalio/testing": "1.24.0",
+    "@temporalio/workflow": "1.24.0",
     "typescript": "5.9.3",
     "vitest": "5.1.0"
   }
