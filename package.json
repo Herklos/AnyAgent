@@ -1,0 +1,32 @@
+{
+  "name": "anyagent-workspace",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc -b --pretty false",
+    "lint": "biome check .",
+    "test": "vitest run",
+    "docs-check": "node scripts/docs-check.mjs",
+    "check-pins": "node scripts/check-pins.mjs",
+    "check": "pnpm run typecheck && pnpm run lint && pnpm run test && pnpm run docs-check && pnpm run check-pins"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.6",
+    "@temporalio/worker": "1.24.0",
+    "@temporalio/workflow": "1.24.0",
+    "@types/node": "22.19.1",
+    "typescript": "5.9.3",
+    "vitest": "5.1.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@swc/core",
+      "protobufjs"
+    ]
+  }
+}

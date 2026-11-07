@@ -5,7 +5,7 @@ a bare "done". A package is `done` only when every achievement is ticked and eve
 
 | WP | Status | Branch / last commit | Owner of the work | Notes |
 | --- | --- | --- | --- | --- |
-| WP0 | not started | | | |
+| WP0 | done | `cursor/v0-wp0-workspace-d30c` | cloud agent | |
 | WP1 | not started | | | |
 | WP2 | not started | | | |
 | WP3 | not started | | | |
@@ -27,21 +27,60 @@ Settled by the owner (2026-11-07), no longer open:
 
 ## Pins actually installed
 
-(Fill in exact versions per package after WP0, and any deviation from the list in the README.)
+Exact versions after WP0 (`pnpm-lock.yaml`):
+
+| Package | Version |
+| --- | --- |
+| `typescript` | `5.9.3` |
+| `vitest` | `5.1.0` |
+| `@biomejs/biome` | `2.6.6` |
+| `@types/node` | `22.19.1` |
+| `@temporalio/activity` | `1.24.0` |
+| `@temporalio/client` | `1.24.0` |
+| `@temporalio/common` | `1.24.0` |
+| `@temporalio/testing` | `1.24.0` |
+| `@temporalio/worker` | `1.24.0` |
+| `@temporalio/workflow` | `1.24.0` |
+| `pnpm` (packageManager) | `10.28.0` |
+| Node (engines) | `>=22.18` |
+
+No `@temporalio/agent-harness*`. CI action SHAs:
+
+| Action | SHA | Tag |
+| --- | --- | --- |
+| `actions/checkout` | `11bd71901bbe5b1630ceea73d27597364c9af683` | v4.2.2 |
+| `actions/setup-node` | `49933ea5288caeca8642d1e84afbd3f7d6820020` | v4.4.0 |
+| `pnpm/action-setup` | `a7487c7e89a18df4991f7f222e4898a00d66ddda` | v4.1.0 |
+| `temporalio/setup-temporal` | `2c191895c5712a783cd2917236760ce3dab7398b` | v0.1.0 |
 
 ## Questions for the owner
 
-(Write each as: WP, the question, what you did meanwhile.)
+(none for WP0)
 
 ## Evidence
 
-Append one block per work package:
+### WP0: workspace, tooling, CI, pins  (done, 2026-11-07)
 
-```
-### WPn: <title>  (status, date)
-Built: <paths>
+Built:
+- Root: `package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`, `tsconfig.json`, `tsconfig.base.json`, `biome.json`, `vitest.config.ts`, `.nvmrc`, `.gitignore`, `.github/workflows/ci.yml`
+- Scripts: `scripts/check-pins.mjs`, `scripts/docs-check.mjs`
+- Packages: `packages/{core,backend,backend-anytype,admin,workflows,harness,gateway,node}`, `apps/cli`, `e2e` (each with `src/index.ts`, smoke test)
+- `packages/workflows/src/workflows.ts` (Temporal bundle entry)
+- Root tests: `test/{pins,docs-check,bundle-workflow}.test.ts`
+- Docs: `AGENTS.md` Commands section, `README.md` Develop section
+
 Checks:
-  - <command>  ->  <result summary>      (PASS | FAIL | NOT RUN: reason)
-Achievements: <ticked list copied from the work package>
-Deviations: <none | what and why>
-```
+- `pnpm install --frozen-lockfile` -> PASS (lockfile committed)
+- `pnpm check` -> PASS (typecheck, lint, 16 tests, docs-check, check-pins)
+- `pnpm -r build` -> PASS (`dist/` in every package)
+- `node scripts/check-pins.mjs` -> `ok: 1.24.0 everywhere` (PASS)
+- `git status --short` after build -> no untracked `dist/` (PASS; `dist/` in `.gitignore`)
+- CI Temporal job: wired with `temporalio/setup-temporal@2c191895…`; WP0 has no Temporal integration tests yet (WP3). Local `bundleWorkflowCode` PASS (T-WP0-03).
+
+Achievements:
+- [x] `pnpm check` is green locally and in CI, with the Temporal job either green or explicitly skipped with a reason.
+- [x] Every `@temporalio/*` package is exactly 1.24.0, enforced by a failing test if that changes.
+- [x] No package imports another package's `src/`; only built entry points.
+- [x] AGENTS.md and README describe the commands.
+
+Deviations: none material. Biome ignores `spikes/` and `docs/` so WP0 does not reformat pre-existing markdown/spike sources. Root package named `anyagent-workspace` so it does not collide with the CLI package name `anyagent`.

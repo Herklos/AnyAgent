@@ -16,7 +16,23 @@ runs one durable workflow per agent, and nodes (your machines) run the harnesses
 ## Layout
 
 `docs/` (vision, architecture, ADRs, specs, research), `spikes/` (throwaway proofs, each with a README stating what it
-proved and what it did not). Planned once code starts: `packages/` (TypeScript, pnpm workspace) and `apps/node`.
+proved and what it did not), `packages/` (`core`, `backend`, `backend-anytype`, `admin`, `workflows`, `harness`,
+`gateway`, `node`), `apps/cli` (`anyagent`), `e2e/`.
+
+## Commands
+
+```bash
+pnpm install          # install workspace deps (Node >= 22.18, pnpm 10.28.0)
+pnpm check            # typecheck, lint, test, docs-check, check-pins
+pnpm typecheck        # tsc -b across project references
+pnpm lint             # biome check
+pnpm test             # vitest run (all packages)
+pnpm build            # tsc -b → dist/ in every package
+pnpm docs-check       # relative Markdown links under docs/, README.md, AGENTS.md
+pnpm check-pins       # every @temporalio/* is exactly 1.24.0; no agent-harness
+pnpm --filter @anyagent/<pkg> test   # one package only (e.g. @anyagent/workflows)
+pnpm --filter anyagent test          # the CLI package
+```
 
 ## Rules
 
