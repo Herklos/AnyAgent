@@ -59,7 +59,7 @@ your choice, and coordinates with the others through the same Anytype spaces you
 | [docs/research/temporal-agent-harness.md](docs/research/temporal-agent-harness.md) | The npm harness: install check, API, limits |
 | [docs/SPIKES.md](docs/SPIKES.md) | Spikes: done, planned, and what each must prove |
 | [docs/OPEN-QUESTIONS.md](docs/OPEN-QUESTIONS.md) | What is still undecided |
-| [docs/ROADMAP.md](docs/ROADMAP.md) | v0 slice and what comes after |
+| [docs/ROADMAP.md](docs/ROADMAP.md) | Releases v0 to v3, most important first, and what comes after |
 
 ## Inspiration
 

@@ -26,7 +26,7 @@ Verified in `anyproto/anytype-cli@017b954` (2026-11-05):
    one network, and spike 012 checks it. `anyagent doctor` checks that every configured endpoint and the gateway see the
    same space id and members.
 3. The node and gateway config may record `network: anytype | self-hosted` for display only. No code branches on it.
-4. v0 is accepted on both networks ([ROADMAP.md](../ROADMAP.md)).
+4. The acceptance script is passed on both networks at v1 ([ROADMAP.md](../ROADMAP.md)).
 
 ## Consequences
 
