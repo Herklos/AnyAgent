@@ -145,7 +145,10 @@ describe("T-WP3-13 agent-core.md behaviours map to tests", () => {
     const blocks = [...spec.matchAll(/Tests:\s*([^\n]+)/g)];
     expect(blocks.length).toBeGreaterThanOrEqual(1);
     for (const m of blocks) {
-      const ids = m[1]!.split(/,\s*/).map((s) => s.trim()).filter(Boolean);
+      const ids = m[1]!
+        .split(/,\s*/)
+        .map((s) => s.trim())
+        .filter(Boolean);
       for (const id of ids) {
         expect(titles.includes(id), `test title mentions ${id}`).toBe(true);
       }
