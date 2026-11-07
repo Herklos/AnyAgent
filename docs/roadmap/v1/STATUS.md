@@ -5,8 +5,8 @@ blocks below, never a bare "done"; `NOT RUN (reason)` for anything not run.
 
 | WP | Status | Branch / last commit | Owner of the work | Notes |
 | --- | --- | --- | --- | --- |
-| WP1 | done | `cursor/v1-wp1-carryover-gate-d30c` | cloud agent | ANY-12; ADR 0021 proposed (own gate) |
-| WP2 | not started | | | may start on own gate while 0021 proposed |
+| WP1 | done | `cursor/v1-wp1-carryover-gate-d30c` | cloud agent | ANY-12; ADR 0021 proposed (own gate); merged #10 |
+| WP2 | in progress | `cursor/v1-wp2-approval-gate-d30c` | cloud agent | ApprovalBook + ask + Temporal gate |
 | WP3 | not started | | | |
 | WP4 | not started | | | |
 | WP5 | not started | | | |
@@ -58,3 +58,20 @@ Achievements:
 - [x] v0 e2e suite green on starting tip `eaa77ef`
 
 Deviations: harness spike 021 not built (early exit on criteria 1/2/5).
+
+### WP2: approval gate and ask mode  (in progress, 2026-11-07)
+
+Built:
+- `packages/workflows/src/core/{approval-book,approval}.ts`; own-core optional `approvals`
+- `decidePermission` mode `ask`; schema/config `approvalTtlMinutes`; resolveConfig `mode-unsupported`
+- Node `permissionClient` bridge; stub `createApproval`/`recordDecision`
+- Tests T-V1-WP2-01..09, 11, 12; `spikes/006-agent-core/APPROVALS.md`
+
+Checks: `pnpm check` PASS locally (pending CI)
+
+Achievements:
+- [x] ask turn pauses on gated call; approve/deny/expiry Temporal paths
+- [x] no allow without decision (Temporal fail / unknown / double / expiry)
+- [x] responsive status/rotation while pending
+- [x] events per approval measured (APPROVALS.md)
+- [x] specs updated

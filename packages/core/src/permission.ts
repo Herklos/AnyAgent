@@ -1,6 +1,6 @@
 import { fileFloorReason, hardFloorReason } from "./floor/command-floor.js";
 
-export type Mode = "read_only" | "full";
+export type Mode = "read_only" | "full" | "ask";
 
 export type PermissionKind =
   | "read"
@@ -24,13 +24,16 @@ export interface PermissionRequest {
 export interface PermissionDecisionResult {
   allow: boolean;
   reason: string;
+  /** ask mode: caller must consult the approval gate (not a hard deny). */
+  needsApproval?: boolean;
 }
 
-/** Kinds allowed in v0 read_only. Deliberately excludes `fetch` (see WP4). */
+/** Kinds allowed without asking in read_only and ask. Deliberately excludes `fetch`. */
 export const READ_ONLY_KINDS = new Set<PermissionKind>(["read", "search", "think"]);
 
 /**
- * Host permission decision. Floor first in every mode; then read_only restricts kinds.
+ * Host permission decision. Floor first in every mode; then mode rules.
+ * In `ask`, safe kinds allow; everything else (including fetch) sets needsApproval.
  */
 export function decidePermission(mode: Mode, req: PermissionRequest): PermissionDecisionResult {
   const cmd = (req.rawInput as { command?: unknown } | undefined)?.command;
@@ -49,6 +52,17 @@ export function decidePermission(mode: Mode, req: PermissionRequest): Permission
       return { allow: false, reason: "read-only agent" };
     }
     return { allow: true, reason: "read-only allow" };
+  }
+
+  if (mode === "ask") {
+    if (req.kind && READ_ONLY_KINDS.has(req.kind)) {
+      return { allow: true, reason: "ask allow (safe kind)" };
+    }
+    return {
+      allow: false,
+      reason: "needs approval",
+      needsApproval: true,
+    };
   }
 
   return { allow: true, reason: "full allow" };

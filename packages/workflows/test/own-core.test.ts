@@ -141,6 +141,8 @@ describe("T-WP3-13 agent-core.md behaviours map to tests", () => {
       readFileSync(join(root, "packages/workflows/test/admission.test.ts"), "utf8"),
       readFileSync(join(root, "packages/workflows/test/own-core.test.ts"), "utf8"),
       readFileSync(join(root, "packages/workflows/test/core.contract.ts"), "utf8"),
+      readFileSync(join(root, "packages/workflows/test/approval.temporal.test.ts"), "utf8"),
+      readFileSync(join(root, "packages/workflows/test/approval-book.test.ts"), "utf8"),
     ].join("\n");
     const blocks = [...spec.matchAll(/Tests:\s*([^\n]+)/g)];
     expect(blocks.length).toBeGreaterThanOrEqual(1);

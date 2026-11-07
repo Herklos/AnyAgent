@@ -27,7 +27,7 @@ export const V0_SCHEMA: TypeDef[] = [
         key: "aa_approval_mode",
         label: "Approval mode",
         format: "select",
-        options: ["read_only", "full"],
+        options: ["read_only", "full", "ask"],
       },
       { key: "aa_allowed_authors", label: "Allowed authors", format: "text" },
       {

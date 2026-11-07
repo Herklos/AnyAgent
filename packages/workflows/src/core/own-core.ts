@@ -12,6 +12,7 @@ import {
   workflowInfo,
 } from "@temporalio/workflow";
 import { AdmissionQueue } from "./admission.js";
+import { type ApprovalActivities, installApprovalGate } from "./approval.js";
 import type {
   Admission,
   AgentCore,
@@ -39,11 +40,27 @@ function validateChatInput(input: unknown): asserts input is ChatInput {
   }
 }
 
-export function createOwnCore(opts?: { rotateAfterAccepted?: number }): AgentCore {
+export function createOwnCore(opts?: {
+  rotateAfterAccepted?: number;
+  /** Enable approval gate handlers (v1 ask mode). Default false for pure chat fixtures; AnyBot enables. */
+  approvals?: boolean;
+  approvalActivities?: ApprovalActivities;
+  approvalTtlMs?: number;
+}): AgentCore {
   const queue = new AdmissionQueue(opts);
+  const withApprovals = opts?.approvals === true;
 
   return {
     async run(handler: TurnHandler): Promise<void> {
+      const gate = withApprovals
+        ? installApprovalGate({
+            ...(opts?.approvalActivities ? { activities: opts.approvalActivities } : {}),
+            ...(opts?.approvalTtlMs !== undefined
+              ? { defaultExpiresInMs: opts.approvalTtlMs }
+              : {}),
+          })
+        : undefined;
+
       setHandler(
         chatUpdate,
         (input) => {
@@ -62,20 +79,21 @@ export function createOwnCore(opts?: { rotateAfterAccepted?: number }): AgentCor
       setHandler(closeSignal, () => {
         queue.requestClose();
       });
-      // Queries are pure: pass workflowInfo into snapshot/rotation; never store it.
       setHandler(statusQuery, () => {
         const info = workflowInfo();
-        return queue.snapshot({
+        const base = queue.snapshot({
           historyLength: info.historyLength,
           continueAsNewSuggested: info.continueAsNewSuggested,
         });
+        return gate ? gate.attachToStatus(base) : base;
       });
       setHandler(rotationQuery, () => {
         const info = workflowInfo();
-        return queue.rotation({
+        const base = queue.rotation({
           historyLength: info.historyLength,
           continueAsNewSuggested: info.continueAsNewSuggested,
         });
+        return gate ? gate.attachToRotation(base) : base;
       });
 
       for (;;) {

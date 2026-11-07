@@ -25,7 +25,7 @@ export interface AgentSpecWire {
   harness: string;
   model?: string;
   chatId: string;
-  approvalMode: "read_only" | "full";
+  approvalMode: "read_only" | "full" | "ask";
   allowedAuthors: string[];
   lifecycle: "live" | "paused";
   instructions: string;
@@ -36,7 +36,7 @@ export type ResolvedConfig =
   | { ok: true; spec: AgentSpecWire; ownerIds: string[] }
   | {
       ok: false;
-      reason: "invalid" | "unacceptable-editor" | "workdir-outside-roots";
+      reason: "invalid" | "unacceptable-editor" | "workdir-outside-roots" | "mode-unsupported";
       detail: string;
     };
 
@@ -89,6 +89,20 @@ export interface NodeActivities {
   }): Promise<void>;
   runTurn(i: TurnRequest): Promise<TurnResult>;
   deliver(i: DeliverRequest): Promise<{ messageId: string }>;
+  /** WP3 fills these in against Anytype; WP2 stubs are no-ops. */
+  createApproval(i: {
+    requestId: string;
+    toolName: string;
+    summary: string;
+    risk: string;
+  }): Promise<void>;
+  recordDecision(i: {
+    requestId: string;
+    approved: boolean;
+    decidedBy: string;
+    reason?: string;
+    expired?: boolean;
+  }): Promise<void>;
 }
 
 /** Failure → notice text (one notice per failure; loop continues). */

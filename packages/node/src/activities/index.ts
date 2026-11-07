@@ -20,7 +20,12 @@ export interface ActivityFactoryOpts {
   modifierCapable?: boolean;
 }
 
-export function createNodeActivities(opts: ActivityFactoryOpts) {
+export function createNodeActivities(
+  opts: ActivityFactoryOpts & {
+    permissionClient?: import("./run-turn.js").PermissionWorkflowClient;
+    approvalTtlMs?: number;
+  },
+) {
   return {
     resolveConfig: createResolveConfig({
       backendForOrg: opts.backendForOrg,
@@ -35,6 +40,13 @@ export function createNodeActivities(opts: ActivityFactoryOpts) {
       store: opts.store,
       ...(opts.maxMessageChars !== undefined ? { maxMessageChars: opts.maxMessageChars } : {}),
     }),
-    runTurn: createRunTurn({ store: opts.store }),
+    runTurn: createRunTurn({
+      store: opts.store,
+      ...(opts.permissionClient ? { permissionClient: opts.permissionClient } : {}),
+      ...(opts.approvalTtlMs !== undefined ? { approvalTtlMs: opts.approvalTtlMs } : {}),
+    }),
+    // WP3: persist to Anytype. WP2 stubs keep the workflow gate testable.
+    createApproval: async () => {},
+    recordDecision: async () => {},
   };
 }
