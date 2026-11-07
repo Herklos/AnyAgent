@@ -1,0 +1,15 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/core" },
+    { "path": "packages/backend" },
+    { "path": "packages/backend-anytype" },
+    { "path": "packages/admin" },
+    { "path": "packages/workflows" },
+    { "path": "packages/harness" },
+    { "path": "packages/gateway" },
+    { "path": "packages/node" },
+    { "path": "apps/cli" },
+    { "path": "e2e" }
+  ]
+}

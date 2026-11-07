@@ -68,6 +68,21 @@ your choice, and coordinates with the others through the same Anytype spaces you
 [Herklos/skills](https://github.com/Herklos/skills) (`anytype-agents`, `hermes-profiles`, `osaurus-agents`: an org of
 agents run from Anytype by hand), Hermes Agent Bot Mode, Osaurus, Noodle.
 
+## Develop
+
+Requires Node `>=22.18` and pnpm `10.28.0` (see `packageManager` in the root `package.json`).
+
+```bash
+pnpm install
+pnpm check            # typecheck + lint + test + docs-check + check-pins
+pnpm test             # all packages
+pnpm --filter @anyagent/workflows test   # one package
+pnpm build            # emit dist/ for every package
+```
+
+Workspace layout: `packages/{core,backend,backend-anytype,admin,workflows,harness,gateway,node}`, `apps/cli`, `e2e/`.
+See [AGENTS.md](AGENTS.md) for the full command list and [docs/roadmap/v0/](docs/roadmap/v0/README.md) for the build plan.
+
 ## Licence
 
 [Apache-2.0](LICENSE). anybot talks to Anytype over its HTTP API and does not bundle

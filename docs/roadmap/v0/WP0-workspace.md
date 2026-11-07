@@ -42,9 +42,10 @@ Must not change: anything under `docs/adr/`, `docs/specs/`, `spikes/`.
    `1.24.0`, or if any `@temporalio/agent-harness*` package is present (Q20).
 6. **Docs check.** `scripts/docs-check.mjs`: every relative Markdown link under `docs/`, `README.md`, `AGENTS.md` resolves to a file or
    directory; exit 1 listing the broken ones. (The same check is run by hand today.)
-7. **CI.** `.github/workflows/ci.yml` on push and pull request: Node 22, pnpm via `pnpm/action-setup`, `pnpm install --frozen-lockfile`,
-   then `pnpm check`. A second job runs the Temporal tests with a dev server provided by the official `temporalio/setup-temporal`
-   action. Pin every third-party action to a commit SHA and record the SHAs in STATUS.md.
+7. **CI.** `.github/workflows/ci.yml` on pull request and on push to `main`: Node 22, pnpm via `pnpm/action-setup`,
+   `pnpm install --frozen-lockfile`, then `pnpm check`. A second job runs the Temporal tests; the SDK's
+   `TestWorkflowEnvironment.createLocal()` downloads its own server (no `setup-temporal` action). Pin every
+   third-party action to a commit SHA and record the SHAs in STATUS.md.
 8. **Docs.** Add the commands to AGENTS.md and a short "Develop" section to the README (install, check, test, how to run only one package).
 
 ## Tests
@@ -67,7 +68,7 @@ git status --short    # expect: no untracked build output (dist/ is ignored)
 
 ## Achievements
 
-- [ ] `pnpm check` is green locally and in CI, with the Temporal job either green or explicitly skipped with a reason.
+- [x] `pnpm check` is green locally and in CI, with the Temporal job either green or explicitly skipped with a reason.
 - [ ] Every `@temporalio/*` package is exactly 1.24.0, enforced by a failing test if that changes.
 - [ ] No package imports another package's `src/`; only built entry points.
 - [ ] AGENTS.md and README describe the commands.
