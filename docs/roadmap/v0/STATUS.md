@@ -9,7 +9,7 @@ a bare "done". A package is `done` only when every achievement is ticked and eve
 | WP1 | done (live NOT RUN) | `cursor/v0-wp1-backend-d30c` | cloud agent | Spike 002 not run; adapter `verified: false` |
 | WP2 | done | `cursor/v0-wp2-schema-config-d30c` | cloud agent | Fail-closed review fixes |
 | WP3 | done | `cursor/v0-wp3-agent-core-d30c` | cloud agent | Contract + spike 006 measurement + replay/budget |
-| WP4 | blocked (Michel@402865d not reachable: GitHub 404) | | | Needs owner access to Herklos/Michel for adapter copy |
+| WP4 | in progress | `cursor/v0-wp4-harness-permissions-d30c` | cloud agent | Michel@402865d copied; live harnesses NOT RUN; Grok+Vibe → v1 |
 | WP5 | done (spike 004 partial) | `cursor/v0-wp5-gateway-d30c` | cloud agent | Spike 004 on SDK test server; Cloud/self-hosted NOT RUN |
 | WP6 | not started | | | |
 | WP7 | not started | | | |
@@ -56,9 +56,29 @@ No `@temporalio/agent-harness*`. CI action SHAs:
 
 ## Questions for the owner
 
-(none for WP0)
+(none for WP0 — Michel@402865d is reachable again)
 
 ## Evidence
+
+### WP4: harness adapters, permissions, read_only  (in progress, 2026-11-07)
+
+Built:
+- Copied from `Herklos/Michel@402865d` with provenance headers: harness `types/jsonrpc-child/acp/codex/registry/fake-agent*`, core `floor/{command-floor,command-policy,path-policy}`
+- New: `packages/core/src/permission.ts`, `packages/harness/src/{home,config-guard,headless-cli}.ts`, `startSession` / `spawnPlanFor`
+- `THIRD_PARTY_NOTICES.md`, `spikes/007-harness-readonly/README.md`
+
+Checks (local, pending CI):
+- Floor + `decidePermission` unit tests
+- Fake ACP / Codex fixture / vibe fake CLI / home+guard / hostile deny
+- Live Claude/Codex/Grok/Vibe -> NOT RUN
+- Grok Build + Vibe marked `shipping: v1` until live spike 007
+
+Achievements:
+- [ ] Claude Code and Codex live T-WP4-10/11 — **NOT RUN** (blocks WP8)
+- [x] Grok + Vibe moved to v1 with reason recorded in registry + spike 007
+- [x] Copied files have provenance; `THIRD_PARTY_NOTICES.md` listed
+- [x] `headless-cli` kind tested on fixtures (T-WP4-13a)
+- [ ] Per-harness table corrected from live observation — still hypothesis
 
 ### WP0: workspace, tooling, CI, pins  (done, 2026-11-07)
 
