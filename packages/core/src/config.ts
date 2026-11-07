@@ -1,6 +1,6 @@
-import { isAbsolute, resolve } from "node:path";
 import { readFileSync } from "node:fs";
 import { homedir } from "node:os";
+import { isAbsolute, resolve } from "node:path";
 import { parse as parseYaml } from "yaml";
 import { z } from "zod";
 
@@ -44,7 +44,12 @@ const ConfigSchema = z
       .strict(),
     tuning: z
       .object({
-        turnTimeoutMin: z.number().int().positive().max(24 * 60).optional(),
+        turnTimeoutMin: z
+          .number()
+          .int()
+          .positive()
+          .max(24 * 60)
+          .optional(),
         rotateAfterAccepted: z.number().int().positive().max(100_000).optional(),
         maxMessageChars: z.number().int().positive().max(1_000_000).optional(),
       })
@@ -133,8 +138,7 @@ export function loadConfig(path: string): AnyagentConfig {
     },
     tuning: {
       turnTimeoutMin: cfg.tuning?.turnTimeoutMin ?? TUNING_DEFAULTS.turnTimeoutMin,
-      rotateAfterAccepted:
-        cfg.tuning?.rotateAfterAccepted ?? TUNING_DEFAULTS.rotateAfterAccepted,
+      rotateAfterAccepted: cfg.tuning?.rotateAfterAccepted ?? TUNING_DEFAULTS.rotateAfterAccepted,
       maxMessageChars: cfg.tuning?.maxMessageChars ?? TUNING_DEFAULTS.maxMessageChars,
     },
   };

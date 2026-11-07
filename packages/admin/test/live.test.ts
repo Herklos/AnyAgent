@@ -10,6 +10,8 @@ describe("T-WP2-08 live admin", () => {
   it("prints skip reason when live is off", ({ expect }) => {
     if (live) return;
     expect(live).toBe(false);
-    console.info("T-WP2-08 skipped: ANYAGENT_LIVE_ANYTYPE not set (NOT RUN: no live anytype serve)");
+    console.info(
+      "T-WP2-08 skipped: ANYAGENT_LIVE_ANYTYPE not set (NOT RUN: no live anytype serve)",
+    );
   });
 });
