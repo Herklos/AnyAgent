@@ -68,7 +68,7 @@ git status --short    # expect: no untracked build output (dist/ is ignored)
 
 ## Achievements
 
-- [ ] `pnpm check` is green locally and in CI, with the Temporal job either green or explicitly skipped with a reason.
+- [x] `pnpm check` is green locally and in CI, with the Temporal job either green or explicitly skipped with a reason.
 - [ ] Every `@temporalio/*` package is exactly 1.24.0, enforced by a failing test if that changes.
 - [ ] No package imports another package's `src/`; only built entry points.
 - [ ] AGENTS.md and README describe the commands.

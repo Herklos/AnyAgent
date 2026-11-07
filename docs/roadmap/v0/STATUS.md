@@ -78,10 +78,10 @@ Checks:
 - `git status --short` after build -> no untracked `dist/` (PASS; `dist/` in `.gitignore`)
 - CI Temporal job: no longer uses `temporalio/setup-temporal` (v0.1.0 was broken; tests use `createLocal()`). WP0 has no Temporal integration tests yet (WP3). Local `bundleWorkflowCode` PASS (T-WP0-03).
 - Vitest project roots are absolute from the config file so `pnpm --filter @anyagent/workflows test` (CI temporal job) does not resolve `packages/*` under the package cwd.
-- Green CI achievement left unticked until a green Temporal job run is recorded.
+- CI green evidence: [run 42381213306](https://github.com/Herklos/AnyBots/actions/runs/42381213306) — `check` SUCCESS, `temporal` SUCCESS (after dropping setup-temporal + absolute vitest roots).
 
 Achievements:
-- [ ] `pnpm check` is green locally and in CI, with the Temporal job either green or explicitly skipped with a reason.
+- [x] `pnpm check` is green locally and in CI, with the Temporal job either green or explicitly skipped with a reason.
 - [x] Every `@temporalio/*` package is exactly 1.24.0, enforced by a failing test if that changes.
 - [x] No package imports another package's `src/`; only built entry points.
 - [x] AGENTS.md and README describe the commands.
