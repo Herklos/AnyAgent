@@ -114,10 +114,37 @@ importers:
 
   packages/gateway:
     dependencies:
+      '@anyagent/admin':
+        specifier: workspace:*
+        version: link:../admin
+      '@anyagent/backend':
+        specifier: workspace:*
+        version: link:../backend
+      '@anyagent/core':
+        specifier: workspace:*
+        version: link:../core
+      '@anyagent/workflows':
+        specifier: workspace:*
+        version: link:../workflows
       '@temporalio/client':
         specifier: 1.24.0
         version: 1.24.0
+      better-sqlite3:
+        specifier: 13.0.3
+        version: 13.0.3
     devDependencies:
+      '@temporalio/testing':
+        specifier: 1.24.0
+        version: 1.24.0
+      '@temporalio/worker':
+        specifier: 1.24.0
+        version: 1.24.0
+      '@temporalio/workflow':
+        specifier: 1.24.0
+        version: 1.24.0
+      '@types/better-sqlite3':
+        specifier: 9.6.0
+        version: 9.6.0
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -642,6 +669,9 @@ packages:
     resolution: {integrity: sha512-pIA9nxkDCCbBnNuMSffQ44HWHYe3zXFfrDpDLwzh/FUSx8uLbsBM8jwf5oUMf+5eV/qVW9PknZhOu9IFO4XnPA==}
     engines: {node: '>= 20.3.0'}
 
+  '@types/better-sqlite3@9.6.0':
+    resolution: {integrity: sha512-ZEEwBSgMu7GYJOynoagg5X9JbxfL6dTJDsgViJIqh67jV44kyOr9RXfmFjLK5rzC4MWssP06t9hu/JwGDnUbCg==}
+
   '@types/chai@5.2.3':
     resolution: {integrity: sha512-Mw558oeA9fFbv65/y4mHtXDs9bPnFMZAL/jxdPFUpOHHIXX91mcgEHbS5Lahr+pwZFR8A7GQleRWeI6cGFC2UA==}
 
@@ -763,6 +793,10 @@ packages:
     resolution: {integrity: sha512-GNk8KX52CHqeNKGk8+7tZnQab/2k1t/BgrUHPKNdijzpEhF1saPQZHVKb6m5loSAxB39gyrTYw34Qf9CQ3u1qQ==}
     engines: {node: '>=6.0.0'}
     hasBin: true
+
+  better-sqlite3@13.0.3:
+    resolution: {integrity: sha512-RbOBxmLBG8uvFUc15X9+9SFemKcQ0WBuISBVkpuiaUB2qblC8UWlHEjdWVoZ8AdhSwmoEgsiXKfopX0CQxaACQ==}
+    engines: {node: '>=22'}
 
   browserslist@4.29.5:
     resolution: {integrity: sha512-khTmKu5NGYTotqcYo8Bew2k4RAE9PuXRSFRXG2lQBrCEQHyeQ/vX6gKMxfokwywBsLiXZMnHsmWMG1pnO8J7uQ==}
@@ -1052,6 +1086,10 @@ packages:
   nexus-rpc@0.0.3:
     resolution: {integrity: sha512-ksIBeYHDv6FHAR1h3Vwk0kQ6REhdo1STqDHXMzu/yn/VN/XzgOor2IUjewG6paoA7IgxlIPZoOU/PD78PC6HTg==}
     engines: {node: '>= 20.0.0'}
+
+  node-addon-api@8.9.2:
+    resolution: {integrity: sha512-VijLXbi3UACN69I0JVXJsX4tjACjNoQDgv2gTF6sx2wWEi8tkSg2eX8p5gSIFi8z2+DL3oHmY6OyKce38SDolg==}
+    engines: {node: ^18 || ^20 || >= 21}
 
   node-releases@2.0.63:
     resolution: {integrity: sha512-6li2QanLsAXpIH2R6j77MzRyvOyrvdTqlKtO4CgBdHGNvN99ZZfyxszHc5o5+IZBWD5u6Hzwg83JoGXmqZNG9Q==}
@@ -1790,6 +1828,10 @@ snapshots:
       '@temporalio/proto': 1.24.0
       nexus-rpc: 0.0.3
 
+  '@types/better-sqlite3@9.6.0':
+    dependencies:
+      '@types/node': 22.19.1
+
   '@types/chai@5.2.3':
     dependencies:
       '@types/deep-eql': 4.0.2
@@ -1927,6 +1969,10 @@ snapshots:
   assertion-error@2.0.1: {}
 
   baseline-browser-mapping@2.11.35: {}
+
+  better-sqlite3@13.0.3:
+    dependencies:
+      node-addon-api: 8.9.2
 
   browserslist@4.29.5:
     dependencies:
@@ -2116,6 +2162,8 @@ snapshots:
   nanoid@3.3.20: {}
 
   nexus-rpc@0.0.3: {}
+
+  node-addon-api@8.9.2: {}
 
   node-releases@2.0.63: {}
 

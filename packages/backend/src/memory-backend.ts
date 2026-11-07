@@ -200,28 +200,7 @@ export class MemoryBackend implements Backend, SchemaAdmin {
       void input.name;
       return id;
     },
-    post: async (chatId: string, input: PostInput) => {
-      const rows = this.chatRows(chatId);
-      const id = this.id("m");
-      const m: ChatMessage = {
-        id,
-        chatId,
-        authorId: this.me,
-        text: input.text ?? "",
-        mentions: [],
-        createdAt: new Date().toISOString(),
-        edited: false,
-        reactions: {},
-        cursor: "0",
-        ...(input.replyTo ? { replyTo: input.replyTo } : {}),
-        ...(input.agent ? { agent: input.agent } : {}),
-        ...(input.control ? { control: input.control } : {}),
-      };
-      const row: MsgRow = { m, deleted: false, seq: 0 };
-      rows.set(id, row);
-      this.touch(chatId, row, "added");
-      return this.msg(row);
-    },
+    post: async (chatId: string, input: PostInput) => this.postMessage(chatId, this.me, input),
     edit: async (chatId: string, id: string, text: string) => {
       const row = this.chatRows(chatId).get(id);
       if (!row || row.deleted) throw new NotFound(`message ${id}`);
@@ -267,6 +246,45 @@ export class MemoryBackend implements Backend, SchemaAdmin {
       opts: { after?: string; signal?: AbortSignal } = {},
     ): AsyncIterable<WatchEvent> => this.watch(spec, opts),
   };
+
+  /**
+   * Test helper: post a chat message as a given author (port `chat.post` always uses `me`).
+   * Used by gateway and multi-author conformance scenarios.
+   */
+  async postAs(chatId: string, authorId: string, input: PostInput): Promise<ChatMessage> {
+    return this.postMessage(chatId, authorId, input);
+  }
+
+  /** Test helper: remove an object and emit `removed` for watchers. */
+  deleteObject(id: string): void {
+    if (!this.objs.has(id)) return;
+    this.objs.delete(id);
+    const s = this.bump();
+    this.emit({ kind: "object", op: "removed", id, cursor: String(s) });
+  }
+
+  private postMessage(chatId: string, authorId: string, input: PostInput): ChatMessage {
+    const rows = this.chatRows(chatId);
+    const id = this.id("m");
+    const m: ChatMessage = {
+      id,
+      chatId,
+      authorId,
+      text: input.text ?? "",
+      mentions: [],
+      createdAt: new Date().toISOString(),
+      edited: false,
+      reactions: {},
+      cursor: "0",
+      ...(input.replyTo ? { replyTo: input.replyTo } : {}),
+      ...(input.agent ? { agent: input.agent } : {}),
+      ...(input.control ? { control: input.control } : {}),
+    };
+    const row: MsgRow = { m, deleted: false, seq: 0 };
+    rows.set(id, row);
+    this.touch(chatId, row, "added");
+    return this.msg(row);
+  }
 
   private async *watch(
     spec: WatchSpec,

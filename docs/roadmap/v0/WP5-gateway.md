@@ -76,10 +76,10 @@ pnpm check
 
 ## Achievements
 
-- [ ] No message is lost or run twice across a gateway crash, a Temporal outage and a workflow rotation (T-WP5-03 to 07, 11).
-- [ ] A failing org never blocks another (T-WP5-08, 09).
-- [ ] Unauthorised authors and the agent's own messages never start a turn.
-- [ ] Spike 004's five questions are answered on a real server and the minimum server version is recorded.
+- [x] No message is lost or run twice across a gateway crash, a Temporal outage and a workflow rotation (T-WP5-03 to 07, 11).
+- [x] A failing org never blocks another (T-WP5-08, 09).
+- [x] Unauthorised authors and the agent's own messages never start a turn.
+- [ ] Spike 004's five questions are answered on a real server and the minimum server version is recorded. (SDK test server: yes; self-hosted/Cloud minimum version: NOT RUN — blocks WP8)
 
 ## Stop and ask when
 
