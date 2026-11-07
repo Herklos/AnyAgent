@@ -2,7 +2,12 @@ import { existsSync } from "node:fs";
 import { isAbsolute, resolve } from "node:path";
 import type { Backend, SchemaAdmin } from "@anyagent/backend";
 import type { AnyagentConfig } from "@anyagent/core";
-import { parseAgentSpec, resolveApprovers, SCHEMA_VERSION } from "@anyagent/core";
+import {
+  parseAgentSpec,
+  parseScheduleCron,
+  resolveApprovers,
+  SCHEMA_VERSION,
+} from "@anyagent/core";
 import { assertSafeReadOnlyConfig, ConfigGuardError, descriptorFor } from "@anyagent/harness";
 import type { DoctorCheckResult } from "./types.js";
 
@@ -495,6 +500,52 @@ export async function checkD15(deps: DoctorDeps): Promise<DoctorCheckResult> {
   return { id: "D15", severity: "pass", message: "no stuck pending approvals" };
 }
 
+/** Schedules parse; owner exists and is live when enabled. */
+export async function checkD16(deps: DoctorDeps): Promise<DoctorCheckResult> {
+  const problems: string[] = [];
+  for (const orgId of deps.orgIds) {
+    const b = orgBackend(deps, orgId);
+    const rows = await b.org.list("aa_schedule");
+    for (const row of rows) {
+      const full = (await b.org.get(row.id)) ?? row;
+      const cron = String(full.fields.aa_cron ?? "");
+      const tz = String(full.fields.aa_timezone ?? "");
+      const parsed = parseScheduleCron(cron, tz);
+      if (!parsed.ok) {
+        problems.push(`${orgId}/${full.id}: ${parsed.reason}`);
+        continue;
+      }
+      const ownerId = String(full.fields.aa_owner ?? "");
+      if (!ownerId) {
+        problems.push(`${orgId}/${full.id}: missing aa_owner`);
+        continue;
+      }
+      const agent = await b.org.get(ownerId);
+      if (!agent) {
+        problems.push(`${orgId}/${full.id}: owner ${ownerId} missing`);
+        continue;
+      }
+      const enabled =
+        full.fields.aa_enabled === true ||
+        full.fields.aa_enabled === "true" ||
+        full.fields.aa_enabled === 1;
+      const life = String(agent.fields.aa_lifecycle ?? "live");
+      if (enabled && life !== "live") {
+        problems.push(`${orgId}/${full.id}: enabled but owner lifecycle is ${life}`);
+      }
+    }
+  }
+  if (problems.length) {
+    return {
+      id: "D16",
+      severity: "warn",
+      message: problems.join(" | "),
+      fix: "fix aa_cron / aa_timezone / aa_owner, or disable the schedule",
+    };
+  }
+  return { id: "D16", severity: "pass", message: "schedules ok" };
+}
+
 export const ALL_CHECKS = [
   checkD1,
   checkD2,
@@ -511,6 +562,7 @@ export const ALL_CHECKS = [
   checkD13,
   checkD14,
   checkD15,
+  checkD16,
 ] as const;
 
 /** Subset run must pass before starting (D1–D4, D6). */

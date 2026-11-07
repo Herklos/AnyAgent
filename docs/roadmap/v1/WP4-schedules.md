@@ -67,10 +67,10 @@ pnpm check
 
 ## Achievements
 
-- [ ] A weekday schedule posts at the right local time, including across a DST change.
-- [ ] The reconciler is idempotent and converges: create, change, pause, delete.
-- [ ] The projection fields are written by a node and never by the gateway.
-- [ ] A restart or a short outage loses no occurrence that is inside the catch-up window and duplicates none.
+- [x] A weekday schedule posts at the right local time, including across a DST change.
+- [x] The reconciler is idempotent and converges: create, change, pause, delete.
+- [x] The projection fields are written by a node and never by the gateway.
+- [x] A restart or a short outage loses no occurrence that is inside the catch-up window and duplicates none.
 
 ## Stop and ask when
 

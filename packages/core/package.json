@@ -18,9 +18,10 @@
     "test": "vitest run --config ../../vitest.config.ts --project @anyagent/core"
   },
   "dependencies": {
-    "zod": "4.6.7",
+    "@anyagent/backend": "workspace:*",
+    "croner": "9.1.0",
     "yaml": "2.9.1",
-    "@anyagent/backend": "workspace:*"
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "typescript": "5.9.3",

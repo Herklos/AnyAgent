@@ -160,6 +160,7 @@ describe("T-WP7-03 / T-WP7-04 doctor checks", () => {
       "D13",
       "D14",
       "D15",
+      "D16",
     ]);
     expect(typeof report.ok).toBe("boolean");
     JSON.stringify(report);

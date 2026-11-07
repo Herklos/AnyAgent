@@ -8,7 +8,7 @@ blocks below, never a bare "done"; `NOT RUN (reason)` for anything not run.
 | WP1 | done | `cursor/v1-wp1-carryover-gate-d30c` | cloud agent | ANY-12; ADR 0021 proposed (own gate); merged #10 |
 | WP2 | done | `cursor/v1-wp2-approval-gate-d30c` | cloud agent | ApprovalBook + ask + Temporal gate; merged #11 |
 | WP3 | done | `cursor/v1-wp3-approvals-anytype-d30c` | cloud agent | aa_approval + gateway reactions |
-| WP4 | not started | | | |
+| WP4 | in progress | `cursor/v1-wp4-schedules-d30c` | cloud agent | aa_schedule + Temporal Schedules; PR pending |
 | WP5 | not started | | | |
 | WP6 | not started | | | |
 | WP7 | not started | | | |
@@ -95,3 +95,28 @@ Achievements:
 - [x] spike 011 table in CI; status-edit when modifier visible
 
 Deviations: saved-query `Approvals – Pending` skipped (no port API); live T-V1-WP3-12 NOT RUN.
+
+### WP4: schedules  (in progress, 2026-11-07)
+
+Built:
+- `packages/core/src/schedule.ts` (parse/validate, desiredSchedule, diffSchedules) + croner 9.1.0
+- Schema `aa_schedule` (already on 0.2.0 from WP3)
+- Gateway reconciler `schedules.ts` + `RealTemporalSchedulePort` (SKIP, 10m catch-up; memo aa_cron/aa_timezone)
+- Workflows `ScheduleKick`, `ScheduleProjection`; AnyBot `scheduleFired` + 🕘 prefix
+- Node `resolveSchedule`, `writeScheduleProjection`, `schedule-control` (deliverScheduleFired, describeScheduleNext)
+- Doctor D16; CLI run wires schedule port + control activities
+- Specs: schema.md, agent-workflow.md
+
+Checks (local):
+- `@anyagent/core` 273 passed (incl. T-V1-WP4-01/02 cron, DST, desired, diff)
+- `@anyagent/gateway` 34 passed (T-V1-WP4-03/10 reconciler)
+- `@anyagent/node` 22 passed (T-V1-WP4-04/05/08/09/11 scheduleFired e2e + projection)
+- T-V1-WP4-06 Temporal catch-up / T-V1-WP4-12 live → **NOT RUN** (no long Temporal schedule soak; no throwaway Anytype)
+
+Achievements:
+- [x] cron/zone parse + DST next times (croner)
+- [x] reconciler idempotent create/pause/delete
+- [x] projection via node activity only
+- [x] duplicate key → one turn; paused agent → no turn
+
+Deviations: Temporal SDK uses `timezone` (not doc's `timezoneName`); ScheduleKick delivers via activity (workflow cannot client-update).

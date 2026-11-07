@@ -5,14 +5,22 @@ import { createDeliver } from "./deliver.js";
 import { createMarkReceived } from "./mark-received.js";
 import { createRecordDecision } from "./record-decision.js";
 import { createResolveConfig } from "./resolve-config.js";
+import { createResolveSchedule } from "./resolve-schedule.js";
 import { createRunTurn } from "./run-turn.js";
+import { createWriteScheduleProjection } from "./write-schedule-projection.js";
 
 export { createCreateApproval } from "./create-approval.js";
 export { createDeliver, splitReply } from "./deliver.js";
 export { createMarkReceived } from "./mark-received.js";
 export { createRecordDecision } from "./record-decision.js";
 export { createResolveConfig } from "./resolve-config.js";
+export { createResolveSchedule } from "./resolve-schedule.js";
 export { createRunTurn, HarnessUnavailable } from "./run-turn.js";
+export {
+  createScheduleControlActivities,
+  scheduleControlFromClient,
+} from "./schedule-control.js";
+export { createWriteScheduleProjection } from "./write-schedule-projection.js";
 
 export interface ActivityFactoryOpts {
   store: NodeStore;
@@ -51,5 +59,12 @@ export function createNodeActivities(
     }),
     createApproval: createCreateApproval({ backendForOrg: opts.backendForOrg }),
     recordDecision: createRecordDecision({ backendForOrg: opts.backendForOrg }),
+    resolveSchedule: createResolveSchedule({
+      backendForOrg: opts.backendForOrg,
+      ownerIdsForOrg: opts.ownerIdsForOrg,
+    }),
+    writeScheduleProjection: createWriteScheduleProjection({
+      backendForOrg: opts.backendForOrg,
+    }),
   };
 }

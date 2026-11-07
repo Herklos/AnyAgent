@@ -41,6 +41,13 @@ export {
   type RotationClient,
   TemporalRotationClient,
 } from "./rotation.js";
+export {
+  RealTemporalSchedulePort,
+  type ScheduleReconciler,
+  type ScheduleReconcilerOpts,
+  startScheduleReconciler,
+  type TemporalSchedulePort,
+} from "./schedules.js";
 export { GatewayState } from "./state.js";
 export {
   type MultiOrgGateway,

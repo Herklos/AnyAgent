@@ -9,8 +9,12 @@ export {
   createNodeActivities,
   createRecordDecision,
   createResolveConfig,
+  createResolveSchedule,
   createRunTurn,
+  createScheduleControlActivities,
+  createWriteScheduleProjection,
   HarnessUnavailable,
+  scheduleControlFromClient,
   splitReply,
 } from "./activities/index.js";
 export { TemporalPermissionClient } from "./permission-client.js";

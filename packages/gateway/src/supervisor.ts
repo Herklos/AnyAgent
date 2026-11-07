@@ -6,6 +6,11 @@ import { deliverAndCommit } from "./delivery.js";
 import { logGateway } from "./log.js";
 import { pipelineEvent, sourceForChat } from "./pipeline.js";
 import { maybeRotate, type RotationClient } from "./rotation.js";
+import {
+  type ScheduleReconciler,
+  startScheduleReconciler,
+  type TemporalSchedulePort,
+} from "./schedules.js";
 import type { GatewayState } from "./state.js";
 
 export interface OrgSupervisorOpts {
@@ -16,6 +21,8 @@ export interface OrgSupervisorOpts {
   delivery: DeliveryClient;
   rotation?: RotationClient;
   decision?: DecisionClient;
+  /** When set, reconcile aa_schedule ↔ Temporal Schedules. */
+  schedules?: TemporalSchedulePort;
   /** Agent account ids refused as approvers (defaults to identity.self). */
   agentAccounts?: string[];
   nodeQueue: string;
@@ -54,6 +61,7 @@ export function startOrgSupervisor(opts: OrgSupervisorOpts): OrgSupervisor {
   let rotationTimer: ReturnType<typeof setInterval> | undefined;
   let pruneTimer: ReturnType<typeof setInterval> | undefined;
   let approvalWatcher: ApprovalWatcher | undefined;
+  let scheduleReconciler: ScheduleReconciler | undefined;
   const chatWatchers = new Map<string, AbortController>();
   let agents: AgentMap = new Map();
   let selfId = "";
@@ -76,6 +84,7 @@ export function startOrgSupervisor(opts: OrgSupervisorOpts): OrgSupervisor {
       for (const ac of chatWatchers.values()) ac.abort();
       chatWatchers.clear();
       await approvalWatcher?.stop();
+      await scheduleReconciler?.stop();
       await discoveryStop?.();
     },
     handleChatEvent: async (agent, event) => {
@@ -281,6 +290,16 @@ export function startOrgSupervisor(opts: OrgSupervisorOpts): OrgSupervisor {
           ...(opts.sleep ? { sleep: opts.sleep } : {}),
         });
       }
+      if (opts.schedules) {
+        scheduleReconciler = startScheduleReconciler({
+          orgId: opts.orgId,
+          spaceId: opts.spaceId,
+          backend: opts.backend,
+          schedules: opts.schedules,
+          nodeQueue: opts.nodeQueue,
+          ...(opts.sleep ? { sleep: opts.sleep } : {}),
+        });
+      }
       const discovery = await startAgentDiscovery({
         backend: opts.backend,
         orgId: opts.orgId,
@@ -347,6 +366,7 @@ export function startGateway(opts: {
   delivery: DeliveryClient;
   rotation?: RotationClient;
   decision?: DecisionClient;
+  schedules?: TemporalSchedulePort;
   workflowType?: string;
   taskQueue?: string;
   rotateAfterAccepted?: number;
@@ -366,6 +386,7 @@ export function startGateway(opts: {
       delivery: opts.delivery,
       ...(opts.rotation ? { rotation: opts.rotation } : {}),
       ...(opts.decision ? { decision: opts.decision } : {}),
+      ...(opts.schedules ? { schedules: opts.schedules } : {}),
       ...(org.agentAccounts ? { agentAccounts: org.agentAccounts } : {}),
       ...(opts.workflowType ? { workflowType: opts.workflowType } : {}),
       ...(opts.taskQueue ? { taskQueue: opts.taskQueue } : {}),

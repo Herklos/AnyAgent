@@ -112,7 +112,57 @@ export interface NodeActivities {
     reason?: string;
     expired?: boolean;
   }): Promise<void>;
+  resolveSchedule(i: {
+    orgId: string;
+    spaceId: string;
+    scheduleId: string;
+    agentId: string;
+  }): Promise<ResolvedSchedule>;
+  writeScheduleProjection(i: {
+    orgId: string;
+    spaceId: string;
+    scheduleObjectId: string;
+    nextRunIso?: string;
+    lastRunIso?: string;
+  }): Promise<void>;
 }
+
+export type ResolvedSchedule =
+  | {
+      ok: true;
+      scheduleObjectId: string;
+      name: string;
+      prompt: string;
+      chatId: string;
+      /** Treated as the author for floor / ask / full (standing instruction). */
+      ownerAuthorId: string;
+      agentLifecycle: "live" | "paused";
+    }
+  | { ok: false; reason: string };
+
+export interface ScheduleKickInput {
+  orgId: string;
+  spaceId: string;
+  /** aa_schedule object id. */
+  scheduleId: string;
+  agentId: string;
+  /** Agent's node task queue (for starting AnyBot + projection). */
+  nodeQueue: string;
+  /** ISO occurrence time when known (tests); else Temporal search attribute / runId. */
+  scheduledTimeIso?: string;
+}
+
+export interface ScheduleProjectionInput {
+  orgId: string;
+  spaceId: string;
+  scheduleObjectId: string;
+  nodeQueue: string;
+  nextRunIso?: string;
+  lastRunIso?: string;
+}
+
+export const SCHEDULE_KICK_WORKFLOW = "ScheduleKick";
+export const SCHEDULE_PROJECTION_WORKFLOW = "ScheduleProjection";
 
 /** Failure → notice text (one notice per failure; loop continues). */
 export type TurnFailureKind =

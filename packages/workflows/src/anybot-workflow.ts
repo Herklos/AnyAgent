@@ -39,6 +39,7 @@ export async function AnyBot(init: AgentInit): Promise<void> {
   const { acts, runTurnActs } = nodeActs(init.nodeQueue);
   const core = createOwnCore({
     approvals: true,
+    schedules: true,
     approvalActivities: {
       createApproval: (i) =>
         acts.createApproval({
@@ -57,8 +58,79 @@ export async function AnyBot(init: AgentInit): Promise<void> {
     },
   });
   await core.run(async (input: ChatInput) => {
+    if (input.scheduleId) {
+      await handleScheduleTurn(init, input, acts, runTurnActs);
+      return;
+    }
     await handleTurn(init, input, acts, runTurnActs);
   });
+}
+
+async function handleScheduleTurn(
+  init: AgentInit,
+  input: ChatInput,
+  acts: NodeActivities,
+  runTurnActs: Pick<NodeActivities, "runTurn">,
+): Promise<void> {
+  const resolved = await acts.resolveSchedule({
+    orgId: init.orgId,
+    spaceId: init.spaceId,
+    scheduleId: input.scheduleId!,
+    agentId: init.agentId,
+  });
+  if (!resolved.ok) return;
+  if (resolved.agentLifecycle === "paused") return;
+
+  const cfg = await acts.resolveConfig({
+    orgId: init.orgId,
+    spaceId: init.spaceId,
+    agentId: init.agentId,
+  });
+  if (!cfg.ok) return;
+  if (cfg.spec.lifecycle === "paused") return;
+
+  const turnInput: ChatInput = {
+    key: input.key,
+    chatId: resolved.chatId,
+    messageId: input.messageId,
+    authorId: resolved.ownerAuthorId,
+    text: resolved.prompt,
+    ...(input.scheduleId !== undefined ? { scheduleId: input.scheduleId } : {}),
+  };
+
+  let turnText: string;
+  try {
+    const result = await runTurnActs.runTurn({
+      orgId: init.orgId,
+      spaceId: init.spaceId,
+      agentId: init.agentId,
+      workflowId: workflowInfo().workflowId,
+      chatId: turnInput.chatId,
+      messageId: turnInput.messageId,
+      authorId: turnInput.authorId,
+      text: turnInput.text,
+      spec: cfg.spec,
+    });
+    turnText = result.text;
+  } catch {
+    return;
+  }
+
+  if (!turnText.trim()) return;
+
+  const prefixed = `🕘 ${resolved.name}\n${turnText}`;
+  try {
+    await acts.deliver({
+      orgId: init.orgId,
+      spaceId: init.spaceId,
+      chatId: resolved.chatId,
+      kind: "reply",
+      text: prefixed,
+      key: input.key,
+    });
+  } catch {
+    // log only
+  }
 }
 
 async function handleTurn(
