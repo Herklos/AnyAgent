@@ -58,6 +58,21 @@ export {
   READ_ONLY_KINDS,
 } from "./permission.js";
 export {
+  type AgentLifecycleView,
+  type DesiredSchedule,
+  desiredSchedule,
+  diffSchedules,
+  type ExistingTemporalSchedule,
+  isValidIanaZone,
+  nextRunTimes,
+  type ParseScheduleResult,
+  parseScheduleCron,
+  type ScheduleDiffOp,
+  type ScheduleSpecFields,
+  scheduleFieldsFromObject,
+  temporalScheduleId,
+} from "./schedule.js";
+export {
   SCHEMA_VERSION,
   V0_SCHEMA,
   V0_SCHEMA_VERSION,

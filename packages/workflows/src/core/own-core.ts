@@ -19,11 +19,19 @@ import type {
   ChatInput,
   CoreStatus,
   RotationHint,
+  ScheduleFiredInput,
   TurnHandler,
 } from "./types.js";
-import { CHAT_UPDATE, CLOSE_SIGNAL, ROTATION_QUERY, STATUS_QUERY } from "./types.js";
+import {
+  CHAT_UPDATE,
+  CLOSE_SIGNAL,
+  ROTATION_QUERY,
+  SCHEDULE_UPDATE,
+  STATUS_QUERY,
+} from "./types.js";
 
 export const chatUpdate = defineUpdate<Admission, [ChatInput]>(CHAT_UPDATE);
+export const scheduleFiredUpdate = defineUpdate<Admission, [ScheduleFiredInput]>(SCHEDULE_UPDATE);
 export const closeSignal = defineSignal(CLOSE_SIGNAL);
 export const statusQuery = defineQuery<CoreStatus>(STATUS_QUERY);
 export const rotationQuery = defineQuery<RotationHint>(ROTATION_QUERY);
@@ -40,15 +48,31 @@ function validateChatInput(input: unknown): asserts input is ChatInput {
   }
 }
 
+function validateScheduleFired(input: unknown): asserts input is ScheduleFiredInput {
+  if (
+    input === null ||
+    typeof input !== "object" ||
+    typeof (input as ScheduleFiredInput).key !== "string" ||
+    typeof (input as ScheduleFiredInput).scheduleId !== "string" ||
+    !(input as ScheduleFiredInput).key ||
+    !(input as ScheduleFiredInput).scheduleId
+  ) {
+    throw ApplicationFailure.nonRetryable("BadInput", "BadInput");
+  }
+}
+
 export function createOwnCore(opts?: {
   rotateAfterAccepted?: number;
   /** Enable approval gate handlers (v1 ask mode). Default false for pure chat fixtures; AnyBot enables. */
   approvals?: boolean;
   approvalActivities?: ApprovalActivities;
   approvalTtlMs?: number;
+  /** Enable scheduleFired update (v1 WP4). Default false for pure chat fixtures; AnyBot enables. */
+  schedules?: boolean;
 }): AgentCore {
   const queue = new AdmissionQueue(opts);
   const withApprovals = opts?.approvals === true;
+  const withSchedules = opts?.schedules === true;
 
   return {
     async run(handler: TurnHandler): Promise<void> {
@@ -76,6 +100,31 @@ export function createOwnCore(opts?: {
           },
         },
       );
+      if (withSchedules) {
+        setHandler(
+          scheduleFiredUpdate,
+          (input) => {
+            validateScheduleFired(input);
+            // Placeholder chat fields; AnyBot resolveSchedule fills them in the turn handler.
+            return queue.admit({
+              key: input.key,
+              chatId: "",
+              messageId: `schedule:${input.scheduleId}`,
+              authorId: "",
+              text: "",
+              scheduleId: input.scheduleId,
+            });
+          },
+          {
+            validator: (input) => {
+              if (queue.isClosing) {
+                throw ApplicationFailure.nonRetryable("AgentClosed", "AgentClosed");
+              }
+              validateScheduleFired(input);
+            },
+          },
+        );
+      }
       setHandler(closeSignal, () => {
         queue.requestClose();
       });

@@ -192,6 +192,8 @@ Implemented in `packages/core/src/schema.ts` (schema version **`0.2.0`**, v1 WP3
   Instructions are the object **body**.
 - `aa_approval`: `aa_request_id`, `aa_requester`, `aa_action`, `aa_risk` (low|medium|high), `aa_status`
   (pending|approved|denied|expired), `aa_message`, `aa_expires_at`, `aa_decided_by`, `aa_decided_at`.
+- `aa_schedule`: `aa_owner`, `aa_cron` (5-field), `aa_timezone` (IANA), `aa_enabled`, `aa_next_run`,
+  `aa_last_run`; body = prompt. No `aa_deliver_to` in v1 (result posts in the owner's chat).
 
 Spike 005: last-modifier visibility is **not proven live** (spike 002 NOT RUN). Status-edit approvals are
 implemented when `modifiedById` is present (MemoryBackend); ignored when missing. Spike 011: `resolveApprovers`

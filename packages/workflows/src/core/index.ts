@@ -12,6 +12,7 @@ export {
   closeSignal,
   createOwnCore,
   rotationQuery,
+  scheduleFiredUpdate,
   statusQuery,
 } from "./own-core.js";
 export * from "./types.js";

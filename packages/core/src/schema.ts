@@ -69,4 +69,16 @@ export const V0_SCHEMA: TypeDef[] = [
       { key: "aa_decided_at", label: "Decided at", format: "text" },
     ],
   },
+  {
+    key: "aa_schedule",
+    label: "Schedule",
+    fields: [
+      { key: "aa_owner", label: "Owner agent", format: "text" },
+      { key: "aa_cron", label: "Cron", format: "text" },
+      { key: "aa_timezone", label: "Timezone", format: "text" },
+      { key: "aa_enabled", label: "Enabled", format: "checkbox" },
+      { key: "aa_next_run", label: "Next run", format: "text" },
+      { key: "aa_last_run", label: "Last run", format: "text" },
+    ],
+  },
 ];

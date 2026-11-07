@@ -15,6 +15,9 @@ export interface StartWorkersOpts {
   namespace?: string;
   permissionClient?: import("./activities/run-turn.js").PermissionWorkflowClient;
   approvalTtlMs?: number;
+  /** Control activities for ScheduleKick (deliverScheduleFired, describeScheduleNext). */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  scheduleControlActivities?: Record<string, (...args: any[]) => any>;
 }
 
 /**
@@ -58,6 +61,7 @@ export async function startWorkers(opts: StartWorkersOpts): Promise<{
     namespace: opts.namespace ?? opts.config.temporal.namespace,
     taskQueue: WORKFLOW_TASK_QUEUE,
     workflowsPath: opts.workflowsPath,
+    ...(opts.scheduleControlActivities ? { activities: opts.scheduleControlActivities } : {}),
   });
 
   const nodeWorkers: Worker[] = [];

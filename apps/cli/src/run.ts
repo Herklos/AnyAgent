@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import { listAgents } from "@anyagent/admin";
 import {
   GatewayState,
+  RealTemporalSchedulePort,
   startGateway,
   TemporalDecisionClient,
   TemporalDeliveryClient,
@@ -10,6 +11,7 @@ import {
 } from "@anyagent/gateway";
 import {
   createNodeActivities,
+  scheduleControlFromClient,
   startNodeWorker,
   startWorkers,
   TemporalPermissionClient,
@@ -47,6 +49,7 @@ export async function cmdRun(opts: { config?: string }): Promise<number> {
   const temporalConn = await Connection.connect({ address: config.temporal.address });
   const client = new Client({ connection: temporalConn, namespace: config.temporal.namespace });
   const permissionClient = TemporalPermissionClient.fromClient(client);
+  const scheduleControlActivities = scheduleControlFromClient(client);
   const approvalTtlMs = config.tuning.approvalTtlMinutes * 60 * 1000;
 
   const workflowsPath = resolveWorkflowsPath();
@@ -56,6 +59,7 @@ export async function cmdRun(opts: { config?: string }): Promise<number> {
     workflowsPath,
     permissionClient,
     approvalTtlMs,
+    scheduleControlActivities,
   });
 
   const connection = await NativeConnection.connect({
@@ -97,6 +101,7 @@ export async function cmdRun(opts: { config?: string }): Promise<number> {
   const delivery = TemporalDeliveryClient.fromClient(client);
   const rotation = new TemporalRotationClient(client.workflow);
   const decision = TemporalDecisionClient.fromClient(client);
+  const schedules = RealTemporalSchedulePort.fromClient(client);
   const state = new GatewayState(join(config.state.dir, "gateway.sqlite"));
 
   const gateway = startGateway({
@@ -104,6 +109,7 @@ export async function cmdRun(opts: { config?: string }): Promise<number> {
     delivery,
     rotation,
     decision,
+    schedules,
     workflowType: "AnyBot",
     taskQueue: "anybot",
     rotateAfterAccepted: config.tuning.rotateAfterAccepted,

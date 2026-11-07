@@ -6,6 +6,7 @@ export const STATUS_QUERY = "anyagent.status";
 export const ROTATION_QUERY = "anyagent.rotation";
 export const PERMISSION_UPDATE = "anybot.permission";
 export const DECISION_UPDATE = "anybot.decision";
+export const SCHEDULE_UPDATE = "anybot.scheduleFired";
 
 export interface ChatInput {
   key: string;
@@ -14,6 +15,13 @@ export interface ChatInput {
   authorId: string;
   text: string;
   replyTo?: string;
+  /** When set, this turn is a schedule fire (prompt resolved in the handler). */
+  scheduleId?: string;
+}
+
+export interface ScheduleFiredInput {
+  key: string;
+  scheduleId: string;
 }
 
 export type Disposition = "opened" | "queued" | "duplicate";

@@ -69,9 +69,14 @@ Failure → exactly one notice, then the loop continues:
 Unchanged from the AgentCore design: the gateway queries `rotation`, sends `close` when idle and history is long,
 then update-with-start under the same workflow id. Session id stays on the node.
 
-## Schedules
+## Schedules (v1 WP4)
 
-Not started in WP6 (still gateway / later WP). Spec sketch for later; v0 has no `ScheduleKick`.
+- Gateway reconciler lists/watches `aa_schedule` and converges Temporal Schedules
+  (`schedule:<spaceId>:<objectId>`), overlap `SKIP`, catch-up 10 minutes; never writes Anytype.
+- `ScheduleKick` (task queue `anybot`) delivers `anybot.scheduleFired` with
+  `updateId = <scheduleId>:<scheduled time>`; `resolveSchedule` loads the prompt; reply is posted
+  in the owner's chat prefixed with `🕘 <schedule name>`.
+- `ScheduleProjection` + `writeScheduleProjection` set `aa_next_run` / `aa_last_run` on the node queue.
 
 ## Activities (node task queue `node:<spaceId>:<handle>`, [ADR 0018](../adr/0018-one-or-more-orgs-per-deployment.md))
 
