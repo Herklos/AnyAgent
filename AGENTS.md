@@ -10,6 +10,8 @@ runs one durable workflow per agent, and nodes (your machines) run the harnesses
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): the components and how a message becomes work.
 - [docs/adr/](docs/adr/): the decisions. Change an ADR in the same commit as the behaviour it decides.
 - [docs/OPEN-QUESTIONS.md](docs/OPEN-QUESTIONS.md): do not settle one of these silently; ask the owner.
+- [docs/roadmap/v0/](docs/roadmap/v0/README.md): the build plan for v0, in work packages with scope, tests and checks. If you are asked to build
+  something for v0, start there and keep its [STATUS.md](docs/roadmap/v0/STATUS.md) up to date.
 
 ## Layout
 

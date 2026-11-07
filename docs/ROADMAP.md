@@ -1,5 +1,7 @@
 # Roadmap: releases v0 to v3
 
+> The detailed, step by step build plan for **v0** is in [roadmap/v0/](roadmap/v0/README.md): nine work packages, each with scope, tests, checks and achievements.
+
 The plan is four small releases, each usable on its own, most important first. **v0 is as small as it can be while still
 being worth using**; every later release adds one theme and is finished (tests, docs, migration) before the next
 starts. Dates are not promised: the order is.
@@ -48,17 +50,20 @@ It survives restarts without answering twice.
 - One backend, Anytype through `anytype serve` and one bot account that joined the space, behind the backend port
   ([ADR 0017](adr/0017-anytype-backend-behind-a-port.md)): identity, chat, events, and reading the agent object.
 - Schema, created by `anyagent init`: `aa_settings` (the schema version only) and `aa_agent` with `aa_handle`,
-  `aa_harness`, `aa_model`, `aa_chat` (the agent's own chat), `aa_approval_mode` (`read_only` or `full`),
-  `aa_allowed_authors` and `aa_lifecycle` (`live` or `paused`). The agent's **instructions are the object's body**.
+  `aa_harness`, `aa_model`, `aa_chat` (the agent's own chat), `aa_workdir` (where the harness works, inside the node's
+  allowed roots), `aa_approval_mode` (`read_only` or `full`), `aa_allowed_authors` and `aa_lifecycle` (`live` or `paused`). The agent's **instructions are the object's body**.
   The person-only fields are the ones in [ADR 0013](adr/0013-agent-permissions-over-the-org.md).
-- One workflow per live `aa_agent`, built with `defineAgent` on the pinned npm harness
-  ([ADR 0010](adr/0010-reuse-michel-adapters-and-the-npm-harness.md)); one handler, `chat`. A turn: read the agent
+- One workflow per live `aa_agent`, on a small `AgentCore` of our own behind a seam
+  ([ADR 0019](adr/0019-own-workflow-core-behind-a-seam.md), proposed, [Q20](OPEN-QUESTIONS.md); the harness from npm is the
+  alternative and the seam makes either cheap); one handler, `chat`. A turn: read the agent
   object fresh → 👀 on the message → run the harness → post the reply. Messages that arrive during a turn queue.
 - Three harnesses, as registry entries ([Q17](OPEN-QUESTIONS.md), settled): **Claude Code** and **Grok Build** over
   ACP, and **Codex** over its app-server, using Michel's adapters copied with provenance (Michel
   `packages/harness/adapters`). `aa_harness` picks one per agent. In `read_only` every permission request is denied and
   the reply says so; `full` allows everything and only a person can set it. **`read_only` must hold even when the
-  harness's own configuration would approve a call itself**, so each harness runs with a controlled home and
+  harness's own configuration would approve a call itself** (the harness's own read-only mode is used as well as the host's
+  denial: Codex sandbox `read-only`, Grok `--sandbox read-only`, Claude Code in its asking mode with refusal, per Michel's
+  `docs/research/sandbox-spike.md`; `fetch` is not read-only in v0), so each harness runs with a controlled home and
   configuration (Michel audit G247 for Claude Code, G172 for Grok, whose `~/.grok/config.toml` can answer a tool call
   before the host sees it), and the acceptance script proves it per harness. **Grok Build ships only if its live check
   passes**: Michel has run it against a fake agent only (G172), and the official page names headless `-p` and "full ACP
@@ -93,13 +98,13 @@ the OpenAI-compatible harness and local-model endpoints, the decision model, per
 
 **Spikes first:** [002](SPIKES.md) live `anytype serve` (needs the `anytype-cli` binary and network access to a sync
 network, or a self-hosted any-sync); [004](SPIKES.md) update-with-start from the gateway; [006](SPIKES.md) the
-workflow on the harness package, chat handler only; [007](SPIKES.md) the three CLI adapters, `read_only` with a hostile harness configuration;
+agent core on a Temporal server, with history events per message measured (ADR 0019); [007](SPIKES.md) the three CLI adapters, `read_only` with a hostile harness configuration;
 [009](SPIKES.md) schema bootstrap for these two types. [016](../spikes/016-backend-port-any/) (the port) is done.
 
 **Risks it retires:** that heart's v2 streams work in a headless `anytype serve`, that the npm harness and Temporal
-pin hold up, that a turn is durable. **Known risks:** if the streams are disabled in the CLI build
-(`StreamDisabled`, see [research](research/anytype-api.md)), the adapter polls the message list instead; if the v2 API
-cannot create a chat, the person creates it in the app. Both are decided by spike 002.
+pin holds up, that a turn is durable, and what the workflow core costs in history. **Known risks:** if the streams are disabled in the CLI build
+(`StreamDisabled`, see [research](research/anytype-api.md)), the adapter polls the message list instead; the v2 route list has `POST /v2/spaces/{s}/chats`, but
+what it accepts is unverified, and if it cannot create a chat the person creates it in the app. Both are decided by spike 002.
 
 **Known risk, an owner decision ([Q19](OPEN-QUESTIONS.md)):** Michel's [provider-terms research](https://github.com/Herklos/Michel/blob/main/docs/research/provider-terms.md)
 rates driving a consumer Claude subscription from an orchestrator **high** risk, Codex and Grok **medium**, and says to
