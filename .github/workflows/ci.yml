@@ -2,6 +2,7 @@ name: ci
 
 on:
   push:
+    branches: [main]
   pull_request:
 
 jobs:
@@ -45,13 +46,10 @@ jobs:
           node-version: "22"
           cache: pnpm
 
-      - name: Setup Temporal CLI
-        uses: temporalio/setup-temporal@2c191895c5712a783cd2917236760ce3dab7398b # v0.1.0
-
       - name: Install
         run: pnpm install --frozen-lockfile
 
+      # No setup-temporal action: TestWorkflowEnvironment.createLocal() downloads
+      # its own server. The v0.1.0 action also broke (script not found in caller cwd).
       - name: Temporal tests
         run: pnpm --filter @anyagent/workflows test
-        # WP0 has no Temporal integration tests yet; the job proves the
-        # setup-temporal action and filter wiring. WP3 adds the suite.

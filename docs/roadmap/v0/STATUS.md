@@ -51,7 +51,8 @@ No `@temporalio/agent-harness*`. CI action SHAs:
 | `actions/checkout` | `11bd71901bbe5b1630ceea73d27597364c9af683` | v4.2.2 |
 | `actions/setup-node` | `49933ea5288caeca8642d1e84afbd3f7d6820020` | v4.4.0 |
 | `pnpm/action-setup` | `a7487c7e89a18df4991f7f222e4898a00d66ddda` | v4.1.0 |
-| `temporalio/setup-temporal` | `2c191895c5712a783cd2917236760ce3dab7398b` | v0.1.0 |
+
+`temporalio/setup-temporal` is not used: workflow tests call `TestWorkflowEnvironment.createLocal()`, which downloads its own Temporal server.
 
 ## Questions for the owner
 
@@ -75,10 +76,10 @@ Checks:
 - `pnpm -r build` -> PASS (`dist/` in every package)
 - `node scripts/check-pins.mjs` -> `ok: 1.24.0 everywhere` (PASS)
 - `git status --short` after build -> no untracked `dist/` (PASS; `dist/` in `.gitignore`)
-- CI Temporal job: wired with `temporalio/setup-temporal@2c191895…`; WP0 has no Temporal integration tests yet (WP3). Local `bundleWorkflowCode` PASS (T-WP0-03).
+- CI Temporal job: no longer uses `temporalio/setup-temporal` (v0.1.0 was broken; tests use `createLocal()`). WP0 has no Temporal integration tests yet (WP3). Local `bundleWorkflowCode` PASS (T-WP0-03). Green CI achievement left unticked until a green Temporal job run is recorded.
 
 Achievements:
-- [x] `pnpm check` is green locally and in CI, with the Temporal job either green or explicitly skipped with a reason.
+- [ ] `pnpm check` is green locally and in CI, with the Temporal job either green or explicitly skipped with a reason.
 - [x] Every `@temporalio/*` package is exactly 1.24.0, enforced by a failing test if that changes.
 - [x] No package imports another package's `src/`; only built entry points.
 - [x] AGENTS.md and README describe the commands.

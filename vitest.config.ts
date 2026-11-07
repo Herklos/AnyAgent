@@ -20,7 +20,7 @@ export default defineConfig({
       test: {
         name: p.name,
         root: p.root,
-        include: p.root === "." ? ["test/**/*.test.ts"] : ["test/**/*.test.ts"],
+        include: ["test/**/*.test.ts"],
         environment: "node",
       },
     })),
