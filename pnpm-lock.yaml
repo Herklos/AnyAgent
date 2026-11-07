@@ -75,7 +75,28 @@ importers:
 
   e2e:
     dependencies:
+      '@anyagent/admin':
+        specifier: workspace:*
+        version: link:../packages/admin
+      '@anyagent/backend':
+        specifier: workspace:*
+        version: link:../packages/backend
+      '@anyagent/core':
+        specifier: workspace:*
+        version: link:../packages/core
+      '@anyagent/harness':
+        specifier: workspace:*
+        version: link:../packages/harness
+      '@anyagent/node':
+        specifier: workspace:*
+        version: link:../packages/node
+      '@anyagent/workflows':
+        specifier: workspace:*
+        version: link:../packages/workflows
       '@temporalio/client':
+        specifier: 1.24.0
+        version: 1.24.0
+      '@temporalio/common':
         specifier: 1.24.0
         version: 1.24.0
       '@temporalio/testing':
@@ -84,6 +105,12 @@ importers:
       '@temporalio/worker':
         specifier: 1.24.0
         version: 1.24.0
+      '@temporalio/workflow':
+        specifier: 1.24.0
+        version: 1.24.0
+      anyagent:
+        specifier: workspace:*
+        version: link:../apps/cli
     devDependencies:
       typescript:
         specifier: 5.9.3

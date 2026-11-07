@@ -15,6 +15,14 @@ reused.
 | Q14 | Report upstream to `temporal-community/temporal-agent-harness`: 0.3.1 fails to import with Temporal SDK 1.25 (deep import of `@temporalio/common/lib/time.js`), and propose continue-as-new for the TypeScript agent workflow? | not reported; anybot pins SDK 1.24.0 and rotates runs | [research/temporal-agent-harness.md](research/temporal-agent-harness.md). Posting to an outside repository is the owner's call |
 | Q15 | Computer use: which comes first after v0, cua sandboxes (Linux container, macOS VM) or cua-driver on a node's own desktop? | sandboxes first | [ADR 0016](adr/0016-computer-use-with-cua.md); Michel's plan also puts containers first |
 
+## Facts recorded (not decisions)
+
+| Fact | Source |
+| --- | --- |
+| WP8 automated suite (fakes) PASS; live Anytype / spike 002 / spike 004 Cloud / live harness matrices **NOT RUN** in the cloud agent environment | [v0 REPORT](roadmap/v0/REPORT.md) (2026-11-07) |
+| Own AgentCore ~11.18 history events / ~4.9 KB per message (50 msgs) — input for ADR 0019 v1 harness decision | WP3 spike 006 / REPORT |
+| Claude Code and Codex are **not live-shipped** until a live PASS row exists; Grok + Vibe remain `shipping: v1` | REPORT + WP4 STATUS |
+
 ## Settled
 
 | # | Decision | Where |

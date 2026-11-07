@@ -18,9 +18,18 @@
     "test": "vitest run --config ../vitest.config.ts --project @anyagent/e2e"
   },
   "dependencies": {
+    "@anyagent/admin": "workspace:*",
+    "@anyagent/backend": "workspace:*",
+    "@anyagent/core": "workspace:*",
+    "@anyagent/harness": "workspace:*",
+    "@anyagent/node": "workspace:*",
+    "@anyagent/workflows": "workspace:*",
+    "anyagent": "workspace:*",
     "@temporalio/client": "1.24.0",
     "@temporalio/testing": "1.24.0",
-    "@temporalio/worker": "1.24.0"
+    "@temporalio/worker": "1.24.0",
+    "@temporalio/workflow": "1.24.0",
+    "@temporalio/common": "1.24.0"
   },
   "devDependencies": {
     "typescript": "5.9.3",

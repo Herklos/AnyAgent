@@ -37,6 +37,10 @@ Computer use (cua) is a further 2–3.
 
 ## v0: one agent in a chat
 
+> **Status (2026-11-07):** code + automated fakes acceptance **done** ([REPORT](roadmap/v0/REPORT.md)). Live Anytype,
+> Temporal Cloud / self-hosted min version, and live Claude Code / Codex matrices **NOT RUN**. Harnesses are not
+> live-certified; Grok Build and Vibe remain deferred to v1. Owner tags when ready ([RELEASE.md](../RELEASE.md)).
+
 **Value.** From Anytype on a laptop or a phone, ask a Claude Code agent on your own machine about what is on that
 machine (a repository, a folder of notes), and get the answer in the same chat, with nothing able to change your files.
 It survives restarts without answering twice.
