@@ -60,7 +60,7 @@ your choice, and coordinates with the others through the same Anytype spaces you
 | [docs/SPIKES.md](docs/SPIKES.md) | Spikes: done, planned, and what each must prove |
 | [docs/OPEN-QUESTIONS.md](docs/OPEN-QUESTIONS.md) | What is still undecided |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Releases v0 to v3, most important first, and what comes after |
-| [docs/roadmap/v0/](docs/roadmap/v0/README.md) | The v0 build plan: nine work packages for an implementing agent, with tests and checks |
+| [docs/roadmap/](docs/roadmap/v0/README.md) | The build plans for v0 to v3: work packages for an implementing agent, each with scope, tests and checks ([v1](docs/roadmap/v1/README.md), [v2](docs/roadmap/v2/README.md), [v3](docs/roadmap/v3/README.md)) |
 
 ## Inspiration
 

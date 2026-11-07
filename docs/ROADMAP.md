@@ -1,6 +1,6 @@
 # Roadmap: releases v0 to v3
 
-> The detailed, step by step build plan for **v0** is in [roadmap/v0/](roadmap/v0/README.md): nine work packages, each with scope, tests, checks and achievements.
+> Detailed, step by step build plans, each in work packages with scope, tests, checks and achievements: [v0](roadmap/v0/README.md) (nine packages), [v1](roadmap/v1/README.md) (eight), [v2](roadmap/v2/README.md) (eight) and [v3](roadmap/v3/README.md) (six). Each release starts only when the previous one is released.
 
 The plan is four small releases, each usable on its own, most important first. **v0 is as small as it can be while still
 being worth using**; every later release adds one theme and is finished (tests, docs, migration) before the next
@@ -26,14 +26,14 @@ Each feature was ranked by, in this order:
 
 | Release | Theme | The owner can… | Rough size |
 | --- | --- | --- | --- |
-| **v0** | One agent in a chat | …talk to an AI agent running on their machine from Anytype (desktop or phone); it keeps working across restarts. Read-only by default. | 6–7 engineer-weeks |
-| **v1** | A safe, proactive assistant | …let it do real work with approvals from the chat, schedule it, run it on local or cloud models, stop it, and serve more than one org. | 4–5 |
-| **v2** | A team | …run several agents in group chats on several machines, with hierarchy and tasks. | 5–6 |
-| **v3** | Autonomy | …let agents act within permissions, wake on webhooks, and approve routine calls with a decision model. | 4–5 |
+| **v0** | One agent in a chat | …talk to an AI agent running on their machine from Anytype (desktop or phone); it keeps working across restarts. Read-only by default. | 7–9 engineer-weeks |
+| **v1** | A safe, proactive assistant | …let it do real work with approvals from the chat, schedule it, run it on local or cloud models, stop it, and serve more than one org. | 7–8 |
+| **v2** | A team | …run several agents in group chats on several machines, with hierarchy and tasks. | 8–10 |
+| **v3** | Autonomy | …let agents act within permissions, wake on webhooks, and approve routine calls with a decision model. | 7–8 |
 
-Sizes are my judgement from the component list, not measured; recalibrate after v0. Coding agents shorten the
-calendar (roughly by half, from the earlier estimate) but not the spikes. Together they come to about 19–23 engineer-weeks, more than the
-old single-v0 estimate (14–16) because every release is finished before the next and v0 now ships four harnesses. Computer use (cua) is a further 2–3.
+Sizes are the sum of the work-package estimates in each release's pack, for one agent working alone; they are my judgement, not measured, and should be recalibrated after v0. They replace my first, coarser guesses (19–23 in total), which were too low: the packs include the
+spikes, live runs, adversarial tests, migration and acceptance of every release. Together they come to about **29–35 engineer-weeks**; independent packages can run in parallel, and coding agents shorten the calendar (roughly by half, from the earlier estimate) but not the spikes.
+Computer use (cua) is a further 2–3.
 
 ## v0: one agent in a chat
 
@@ -118,6 +118,8 @@ prefer API keys or the official login on the owner's own machine. Some subscript
 
 ## v1: a safe, proactive assistant
 
+> Detailed build plan: [roadmap/v1/](roadmap/v1/README.md) (eight work packages).
+
 **Value.** Let the agent do real work without giving it free rein, have it work while you are away, and run it on
 the models you choose.
 
@@ -150,6 +152,8 @@ account); the OpenAI-loop half of [007](SPIKES.md); [012](SPIKES.md); a two-org 
 
 ## v2: a team
 
+> Detailed build plan: [roadmap/v2/](roadmap/v2/README.md) (eight work packages).
+
 **Value.** More than one agent, working together in shared chats, on more than one machine.
 
 **Ships, in this order**
@@ -174,6 +178,8 @@ the task goes to `review` then `done`, and the answer is in chat, repeated with 
 [003](SPIKES.md) as needed for accounts.
 
 ## v3: autonomy and reach
+
+> Detailed build plan: [roadmap/v3/](roadmap/v3/README.md) (six work packages).
 
 **Value.** Agents that act on their own within limits, wake on the outside world, and ask a person only when needed.
 
