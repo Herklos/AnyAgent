@@ -28,7 +28,7 @@ Chosen by the owner (2026-11-06). Done when, in one Anytype space:
 12. The chief creates its own `aa_schedule` (`schedule.self`); an edit of a group by an agent without `group.edit` is
     refused with a notice ([ADR 0013](adr/0013-agent-permissions-over-the-org.md)).
 
-Order: spikes 002 → 004 → 006 → 007 → 009 → 011 → 013 → 008, then 012 and 015 ([SPIKES.md](SPIKES.md)).
+Order: spikes 002 → 004 → 006 → 007 → 009 → 011 → 013 → 008, then 012, 015 and 016 ([SPIKES.md](SPIKES.md)).
 
 ## After v0 (unordered)
 

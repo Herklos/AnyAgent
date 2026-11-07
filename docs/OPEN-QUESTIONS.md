@@ -15,6 +15,7 @@ reused.
 | Q13 | Agent replies: one final message, or a "working…" message edited as the turn streams? | one final message | Editing costs writes and sync traffic |
 | Q14 | Report upstream to `temporal-community/temporal-agent-harness`: 0.3.1 fails to import with Temporal SDK 1.25 (deep import of `@temporalio/common/lib/time.js`), and propose continue-as-new for the TypeScript agent workflow? | not reported; anyagent pins SDK 1.24.0 and rotates runs | [research/temporal-agent-harness.md](research/temporal-agent-harness.md). Posting to an outside repository is the owner's call |
 | Q15 | Computer use: which comes first after v0, cua sandboxes (Linux container, macOS VM) or cua-driver on a node's own desktop? | sandboxes first | [ADR 0016](adr/0016-computer-use-with-cua.md); Michel's plan also puts containers first |
+| Q16 | Backend: Anytype (anytype-heart) only, `any`/Anytwo only, or Anytype now behind a port with `any` planned as the second backend? | Anytype behind a port (C) | [ADR 0017](adr/0017-anytype-backend-behind-a-port.md) (proposed); evidence in [research/any-vs-anytype.md](research/any-vs-anytype.md) |
 
 ## Settled
 
