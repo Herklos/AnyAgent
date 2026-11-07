@@ -34,7 +34,7 @@ Dependency added: `better-sqlite3` `13.0.3`.
   drop messages whose key is already delivered; drop messages from authors not allowed by `isAllowedAuthor` (log "ignored: author not allowed", never reply); otherwise build `ChatInput` with key `chat:<chatId>:<messageId>`.
   An `upsert` of an already-delivered key is ignored (edits do not re-run a turn in v0).
 - **Delivery** (`delivery.ts`): `startUpdateWithStart` the workflow `AnyAgent` (id `agent:<spaceId>:<agentObjectId>`, task queue `anyagent`, init `{ spaceId, agentId, nodeQueue, orgId }`) with update `anyagent.chat`,
-  `updateId = key`, `workflowIdConflictPolicy: USE_EXISTING`, `waitForStage: ACCEPTED`. **Only after acceptance** commit the cursor and mark the key delivered. On `AgentClosed` or "workflow already completed",
+  `updateId = key`, `workflowIdConflictPolicy: USE_EXISTING`, `waitForStage: ACCEPTED`. **Only after acceptance** commit the cursor and mark the key delivered. **Pitfall (found reviewing the WP5 implementation, with a reproduction):** with `waitForStage: ACCEPTED` the start call can return before the workflow's validator has run, so a rejection (the workflow is closing, `AgentClosed`) is **not** thrown there; it only surfaces from `await handle.result()` (a `WorkflowUpdateFailedError` whose cause is an `ApplicationFailure`). Acceptance must therefore be confirmed by awaiting `handle.result()` (or by using `waitForStage: COMPLETED` for a short admit handler), and the closing error must be detected by its type, not by a message regex. Otherwise a message sent while a workflow closes is marked delivered and lost. On `AgentClosed` or "workflow already completed",
   wait briefly and retry (update-with-start then starts a new run). On a Temporal outage, do not commit and retry with backoff, so the cursor does not move past undelivered messages. A crash between acceptance and commit redelivers the
   message with the same update id, which Temporal drops within the run and the core drops by key across runs of the same history.
 - **Rotation** (`rotation.ts`): every 30 s per active workflow (and after each delivery batch), query `anyagent.rotation`; if `idle` and (`continueAsNewSuggested` or `accepted >= 1500`) send the close signal. The next message starts a new run.
@@ -45,7 +45,7 @@ Dependency added: `better-sqlite3` `13.0.3`.
 
 1. **Spike 004 first** (needs a Temporal dev server; if none, write the test plan and mark NOT RUN, which blocks WP8): with the WP3 fixture workflow, show on a real server that update-with-start (a) starts a missing workflow and delivers,
    (b) delivers to a running one (`USE_EXISTING`), (c) drops a repeated `updateId` within a run, (d) fails with a recognisable error when the workflow is closing, and a retry starts a new run, (e) works with `waitForStage: ACCEPTED`
-   and returns before the turn ends. Record the minimum Temporal server version that supports it. Update `spikes/004-update-with-start/README.md`.
+   and returns before the turn ends, and **record whether a validator rejection is thrown by that call or only by `handle.result()`** (it is the latter on the version tested at review: the rejection of an update sent to a closing workflow is invisible at `ACCEPTED`). Record the minimum Temporal server version that supports it. Update `spikes/004-update-with-start/README.md`.
 2. **State store**, with tests.
 3. **Pipeline**, with tests (pure).
 4. **Delivery** against the real client in tests with the Temporal helper, plus a fake client for the failure cases.

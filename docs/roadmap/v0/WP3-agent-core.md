@@ -83,7 +83,7 @@ export function createOwnCore(opts?: { rotateAfterAccepted?: number }): AgentCor
 - T-WP3-10 (Temporal) `status` and `rotation` answer during a long turn without waiting for it.
 - T-WP3-11 (Temporal) replaying a recorded history succeeds (determinism).
 - T-WP3-12 (Temporal) history events per message stay within the budget set from the measurement.
-- T-WP3-13 `docs/specs/agent-core.md` behaviours map one to one to contract test names (a small script checks that each behaviour number is referenced by a test title).
+- T-WP3-13 `docs/specs/agent-core.md` behaviours map one to one to contract test names (a small script checks that each behaviour number is referenced by a test title). The behaviours are separate `it` blocks, one per numbered behaviour, run against every implementation of the seam; a single `it` that asserts several behaviours, or a suite that passes when the Temporal server is missing, does not satisfy this test).
 
 ## Checks
 

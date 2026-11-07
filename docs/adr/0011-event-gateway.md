@@ -24,7 +24,7 @@ A dedicated **event gateway** process (`apps/gateway`) is the only path from the
    `aa_agent` / `aa_group` / `aa_trigger` built from the object stream) → **update-with-start** the agent workflow(s)
    (the harness's message update naming the event's handler; `updateId` = the idempotency key;
    `workflowIdConflictPolicy: USE_EXISTING`; `waitForStage: ACCEPTED`) → commit the source cursor. The cursor is
-   committed once the update is **accepted**, not completed, because completion means the turn has ended. A crash
+   committed once the update is **accepted**, not completed, because completion means the turn has ended. Acceptance is confirmed by awaiting the update handle's result (the admit handler returns at once); the start call at `ACCEPTED` alone does not surface a validator rejection, so a message sent to a closing workflow would otherwise be marked delivered and lost (reproduced in review of the v0 WP5 implementation). A crash
    re-delivers. Temporal drops a repeated `updateId` within a run (to be verified, spike 004), and the gateway's own
    key store drops it across runs.
 3. **Reconciler**: the gateway also turns `aa_schedule` objects into Temporal Schedules and keeps `aa_next_run` /
