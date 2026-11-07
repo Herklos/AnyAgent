@@ -11,8 +11,24 @@ import { deliverAndCommit, TemporalDeliveryClient } from "../src/delivery.js";
 import { maybeRotate, TemporalRotationClient } from "../src/rotation.js";
 import { GatewayState } from "../src/state.js";
 import { startOrgSupervisor } from "../src/supervisor.js";
-import { skipOrFail, withTemporal } from "./support/temporal.js";
+import type { TestWorkflowEnvironment } from "@temporalio/testing";
+import { Skipped, withTemporal } from "./support/temporal.js";
 import { waitFor } from "./support/wait.js";
+
+async function runTemporal(
+  skip: (reason?: string) => void,
+  fn: (env: TestWorkflowEnvironment) => Promise<void>,
+): Promise<void> {
+  try {
+    await withTemporal(fn);
+  } catch (err) {
+    if (err instanceof Skipped) {
+      skip(err.message);
+      return;
+    }
+    throw err;
+  }
+}
 
 const here = dirname(fileURLToPath(import.meta.url));
 const workflowsPath = join(here, "../../workflows/test/fixtures/core-workflow.ts");
@@ -30,9 +46,8 @@ function db(): GatewayState {
 }
 
 describe("T-WP5 Temporal delivery", () => {
-  it("T-WP5-05 ten messages arrive in order, once each", async () => {
-    try {
-      await withTemporal(async (env) => {
+  it("T-WP5-05 ten messages arrive in order, once each", async ({ skip }) => {
+    await runTemporal(skip, async (env) => {
         const turns: string[] = [];
         const worker = await Worker.create({
           connection: env.nativeConnection,
@@ -83,19 +98,19 @@ describe("T-WP5 Temporal delivery", () => {
           worker.shutdown();
           await run;
         }
-      });
-    } catch (err) {
-      skipOrFail(err);
-    }
+    });
   }, 120_000);
 
-  it("T-WP5-06 AgentClosed: retry starts a new run; no loss or double", async () => {
-    try {
-      await withTemporal(async (env) => {
+  it("T-WP5-06 AgentClosed: retry starts a new run; no loss or double (×20)", async ({
+    skip,
+  }) => {
+    await runTemporal(skip, async (env) => {
+      // Loop so a rare ordering cannot hide the ACCEPTED/AgentClosed loss bug.
+      for (let round = 0; round < 20; round++) {
         const turns: string[] = [];
         const worker = await Worker.create({
           connection: env.nativeConnection,
-          taskQueue: "gw-close",
+          taskQueue: `gw-close-${round}`,
           workflowsPath,
           activities: {
             recordTurn: async (input: { key: string; text: string }) => {
@@ -107,32 +122,31 @@ describe("T-WP5 Temporal delivery", () => {
         try {
           const state = db();
           const delivery = TemporalDeliveryClient.fromClient(env.client);
+          const agentId = `agent-close-${round}`;
           const target = {
             orgId: "org",
             spaceId: "space",
-            agentId: "agent-close",
+            agentId,
             nodeQueue: "nq",
             workflowType: "coreFixtureWorkflow",
-            taskQueue: "gw-close",
+            taskQueue: `gw-close-${round}`,
           };
-          // Start a run and close it
           await deliverAndCommit({
             state,
             client: delivery,
             target,
             input: {
-              key: "chat:c:open",
+              key: `chat:c:open-${round}`,
               chatId: "c",
-              messageId: "open",
+              messageId: `open-${round}`,
               authorId: OWNER,
               text: "open",
             },
-            cursor: "1",
+            cursor: String(round * 2 + 1),
             chatId: "c",
           });
           await waitFor(() => turns.includes("open"), 30_000);
-          const handle = env.client.workflow.getHandle(`agent:space:agent-close`);
-          // Deliver while closing to exercise AgentClosed → retry → new run
+          const handle = env.client.workflow.getHandle(`agent:space:${agentId}`);
           const closing = handle.signal(CLOSE_SIGNAL).then(() => handle.result());
           await new Promise((r) => setTimeout(r, 20));
           await deliverAndCommit({
@@ -140,34 +154,32 @@ describe("T-WP5 Temporal delivery", () => {
             client: delivery,
             target,
             input: {
-              key: "chat:c:after",
+              key: `chat:c:after-${round}`,
               chatId: "c",
-              messageId: "after",
+              messageId: `after-${round}`,
               authorId: OWNER,
               text: "after",
             },
-            cursor: "2",
+            cursor: String(round * 2 + 2),
             chatId: "c",
-            sleep: (ms) => new Promise((r) => setTimeout(r, Math.min(ms, 100))),
           });
           await closing.catch(() => undefined);
           await waitFor(() => turns.includes("after"), 60_000);
-          expect(turns.filter((t) => t === "after")).toHaveLength(1);
-          expect(turns.filter((t) => t === "open")).toHaveLength(1);
+          expect(turns.filter((t) => t === "after"), `round ${round}`).toHaveLength(1);
+          expect(turns.filter((t) => t === "open"), `round ${round}`).toHaveLength(1);
           state.close();
         } finally {
           worker.shutdown();
           await run;
         }
-      });
-    } catch (err) {
-      skipOrFail(err);
-    }
-  }, 120_000);
+      }
+    });
+  }, 600_000);
 
-  it("T-WP5-07 rotation closes idle at threshold, never busy; next message works", async () => {
-    try {
-      await withTemporal(async (env) => {
+  it("T-WP5-07 rotation closes idle at threshold, never busy; next message works", async ({
+    skip,
+  }) => {
+    await runTemporal(skip, async (env) => {
         const turns: string[] = [];
         const worker = await Worker.create({
           connection: env.nativeConnection,
@@ -303,9 +315,6 @@ describe("T-WP5 Temporal delivery", () => {
           worker.shutdown();
           await run;
         }
-      });
-    } catch (err) {
-      skipOrFail(err);
-    }
+    });
   }, 180_000);
 });

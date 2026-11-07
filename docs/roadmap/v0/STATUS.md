@@ -149,8 +149,9 @@ Built:
 - Docs: `docs/SPIKES.md` (004 partial)
 
 Checks:
-- `pnpm --filter @anyagent/gateway test` -> PASS (T-WP5-01..11; Temporal on SDK test server)
-- `pnpm check` -> PASS
+- `pnpm --filter @anyagent/gateway test` -> PASS (T-WP5-01..11; Temporal on SDK test server; T-WP5-06 looped ×20)
+- Delivery awaits `handle.result()` after ACCEPTED so AgentClosed is visible; exponential backoff ~10s; typed `WorkflowUpdateFailedError` detection
+- Agent discovery reconnects; chat watch delays on clean end; `pruneDelivered` daily
 - Spike 004 self-hosted/Cloud minimum version -> NOT RUN
 
 Achievements:
@@ -159,7 +160,7 @@ Achievements:
 - [x] Unauthorised authors and own messages never start a turn (T-WP5-01).
 - [ ] Spike 004 five questions on a **self-hosted** server + minimum version — **partial** (SDK test server only; Cloud/self-hosted NOT RUN; blocks WP8 for that reason).
 
-Deviations: gateway Temporal tests use WP3 `coreFixtureWorkflow` (AnyAgent workflow is WP6). `workflowIdReusePolicy: ALLOW_DUPLICATE` set so post-rotation / post-close update-with-start can start a new run.
+Deviations: gateway Temporal tests use WP3 `coreFixtureWorkflow` (AnyAgent workflow is WP6). `workflowIdReusePolicy: ALLOW_DUPLICATE` set so post-rotation / post-close update-with-start can start a new run. Pack achievement boxes left unticked (evidence lives here).
 
 ### WP2: schema, config, init, agent create  (done, 2026-11-07)
 

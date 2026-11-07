@@ -1,5 +1,11 @@
 import { type Admission, CHAT_UPDATE, type ChatInput } from "@anyagent/workflows";
-import { type Client, WithStartWorkflowOperation, type WorkflowClient } from "@temporalio/client";
+import {
+  type Client,
+  WithStartWorkflowOperation,
+  type WorkflowClient,
+  WorkflowUpdateFailedError,
+} from "@temporalio/client";
+import { ApplicationFailure } from "@temporalio/common";
 import { logGateway } from "./log.js";
 import { sourceForChat } from "./pipeline.js";
 import type { GatewayState } from "./state.js";
@@ -42,14 +48,20 @@ export class TemporalDeliveryClient implements DeliveryClient {
       workflowIdConflictPolicy: "USE_EXISTING",
       workflowIdReusePolicy: "ALLOW_DUPLICATE",
     });
-    // waitForStage ACCEPTED: returns once the update is accepted, before the turn ends.
-    await this.workflow.startUpdateWithStart(CHAT_UPDATE, {
+    // waitForStage ACCEPTED returns before validator rejection is visible —
+    // always await handle.result() so AgentClosed surfaces here.
+    const handle = await this.workflow.startUpdateWithStart<
+      // Workflow type unused for update-with-start typing; update returns Admission.
+      (...args: unknown[]) => Promise<void>,
+      Admission,
+      [ChatInput]
+    >(CHAT_UPDATE, {
       args: [input],
       updateId: input.key,
       waitForStage: "ACCEPTED",
       startWorkflowOperation: startOp,
     });
-    return { disposition: "queued", turnNumber: 0 };
+    return await handle.result();
   }
 }
 
@@ -64,16 +76,31 @@ export interface DeliverAndCommitOpts {
   sleep?: (ms: number) => Promise<void>;
 }
 
-function isClosedOrCompleted(err: unknown): boolean {
+export function isAgentClosedError(err: unknown): boolean {
+  if (err instanceof WorkflowUpdateFailedError) {
+    const cause = err.cause;
+    if (cause instanceof ApplicationFailure && cause.type === "AgentClosed") return true;
+    if (cause && typeof cause === "object" && "type" in cause && cause.type === "AgentClosed") {
+      return true;
+    }
+    if (cause && /AgentClosed/i.test(cause.message ?? "")) return true;
+  }
   const msg = err instanceof Error ? `${err.name} ${err.message}` : String(err);
-  return /AgentClosed|already completed|workflow execution already completed|workflow not found for|is closed/i.test(
+  return /AgentClosed/i.test(msg);
+}
+
+function isClosedOrCompleted(err: unknown): boolean {
+  if (isAgentClosedError(err)) return true;
+  const msg = err instanceof Error ? `${err.name} ${err.message}` : String(err);
+  return /already completed|workflow execution already completed|workflow not found for|is closed/i.test(
     msg,
   );
 }
 
 /**
- * Deliver via update-with-start; only after acceptance commit cursor + mark delivered.
- * On AgentClosed / completed workflow, wait briefly and retry (update-with-start starts a new run).
+ * Deliver via update-with-start; only after the update **result** succeeds
+ * commit cursor + mark delivered. On AgentClosed / completed workflow, wait
+ * (exponential backoff, ~10s cap) and retry so update-with-start can start a new run.
  */
 export async function deliverAndCommit(opts: DeliverAndCommitOpts): Promise<"ok" | "retried"> {
   const sleep = opts.sleep ?? ((ms: number) => new Promise((r) => setTimeout(r, ms)));
@@ -91,7 +118,10 @@ export async function deliverAndCommit(opts: DeliverAndCommitOpts): Promise<"ok"
   };
 
   let lastErr: unknown;
-  for (let i = 0; i < 4; i++) {
+  // ~10s total for AgentClosed / completed: 200, 400, 800, 1600, 3200, 6400 ms
+  const maxAttempts = 7;
+  let backoff = 200;
+  for (let i = 0; i < maxAttempts; i++) {
     try {
       await attempt();
       logGateway({
@@ -105,8 +135,17 @@ export async function deliverAndCommit(opts: DeliverAndCommitOpts): Promise<"ok"
       return i === 0 ? "ok" : "retried";
     } catch (err) {
       lastErr = err;
-      if (!isClosedOrCompleted(err) || i === 3) break;
-      await sleep(50 * (i + 1));
+      if (!isClosedOrCompleted(err) || i === maxAttempts - 1) break;
+      logGateway({
+        org: opts.target.orgId,
+        space: opts.target.spaceId,
+        agent: opts.target.agentId,
+        key: opts.input.key,
+        outcome: "waiting-for-closing-run",
+        detail: `attempt ${i + 1}/${maxAttempts}; backoff ${backoff}ms`,
+      });
+      await sleep(backoff);
+      backoff = Math.min(backoff * 2, 6_400);
     }
   }
   const msg = lastErr instanceof Error ? lastErr.message : String(lastErr);

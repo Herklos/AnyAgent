@@ -78,17 +78,41 @@ export async function startAgentDiscovery(opts: {
 
   await applyList();
 
+  // Reconnect on stream end or backend error until aborted (comment previously claimed
+  // the supervisor restarted us; it does not).
   const watchLoop = (async () => {
-    try {
-      for await (const ev of opts.backend.events.watch(
-        { kind: "objects", type: "aa_agent" },
-        { signal: ac.signal },
-      )) {
-        if (ev.kind === "ready") continue;
-        await handleObjectEvent(ev);
+    let backoff = 200;
+    while (!ac.signal.aborted) {
+      try {
+        for await (const ev of opts.backend.events.watch(
+          { kind: "objects", type: "aa_agent" },
+          { signal: ac.signal },
+        )) {
+          if (ev.kind === "ready") continue;
+          await handleObjectEvent(ev);
+          backoff = 200;
+        }
+        if (ac.signal.aborted) return;
+        // Clean end: refresh list then reconnect with a small delay (no hot loop).
+        await applyList();
+        await new Promise((r) => setTimeout(r, backoff));
+        backoff = Math.min(backoff * 2, 10_000);
+      } catch {
+        if (ac.signal.aborted) return;
+        logGateway({
+          org: opts.orgId,
+          space: opts.spaceId,
+          outcome: "agent-discovery-reconnect",
+          detail: `backoff ${backoff}ms`,
+        });
+        await new Promise((r) => setTimeout(r, backoff));
+        backoff = Math.min(backoff * 2, 10_000);
+        try {
+          await applyList();
+        } catch {
+          // keep trying on next loop
+        }
       }
-    } catch {
-      // aborted or backend error — supervisor handles retries
     }
   })();
 

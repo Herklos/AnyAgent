@@ -48,6 +48,7 @@ export function startOrgSupervisor(opts: OrgSupervisorOpts): OrgSupervisor {
   let stopReason: string | undefined;
   let discoveryStop: (() => Promise<void>) | undefined;
   let rotationTimer: ReturnType<typeof setInterval> | undefined;
+  let pruneTimer: ReturnType<typeof setInterval> | undefined;
   const chatWatchers = new Map<string, AbortController>();
   let agents: AgentMap = new Map();
   let selfId = "";
@@ -66,6 +67,7 @@ export function startOrgSupervisor(opts: OrgSupervisorOpts): OrgSupervisor {
     stop: async () => {
       stopped = true;
       if (rotationTimer) clearInterval(rotationTimer);
+      if (pruneTimer) clearInterval(pruneTimer);
       for (const ac of chatWatchers.values()) ac.abort();
       chatWatchers.clear();
       await discoveryStop?.();
@@ -182,9 +184,33 @@ export function startOrgSupervisor(opts: OrgSupervisorOpts): OrgSupervisor {
           // Re-resolve agent in case map changed
           const current = agents.get(agent.agentId);
           if (!current || current.chatId !== agent.chatId) return;
-          await handleEvent(current, event);
+          try {
+            await handleEvent(current, event);
+          } catch (err) {
+            // Permanent delivery failure after retries: advance cursor so one bad
+            // message cannot stall the chat forever. Stream/transport errors rethrow.
+            const msg = err instanceof Error ? `${err.name} ${err.message}` : String(err);
+            const transient =
+              err instanceof Unavailable ||
+              /Unavailable|ECONNRESET|socket|network/i.test(msg);
+            if (transient) throw err;
+            logGateway({
+              org: opts.orgId,
+              space: opts.spaceId,
+              agent: current.agentId,
+              outcome: "chat-event-skipped",
+              detail: msg.slice(0, 200),
+            });
+            if (event.kind === "chat" && event.cursor) {
+              opts.state.commit(opts.spaceId, sourceForChat(agent.chatId), event.cursor);
+            }
+            continue;
+          }
         }
-        backoff = initialBackoff;
+        if (stopped || signal.aborted) return;
+        // Clean stream end: delay before re-watch (avoid hot loop).
+        await sleep(Math.max(backoff, initialBackoff));
+        backoff = Math.min(Math.max(backoff, initialBackoff) * 2, maxBackoff);
       } catch (err) {
         if (signal.aborted || stopped) return;
         if (err instanceof Unauthorized) {
@@ -233,6 +259,19 @@ export function startOrgSupervisor(opts: OrgSupervisorOpts): OrgSupervisor {
       });
       discoveryStop = discovery.stop;
       syncChatWatchers(discovery.agents);
+      // ADR 0011 7-day retention: prune once at start and daily.
+      try {
+        opts.state.pruneDelivered();
+      } catch {
+        // ignore prune errors at start
+      }
+      pruneTimer = setInterval(() => {
+        try {
+          opts.state.pruneDelivered();
+        } catch {
+          // ignore
+        }
+      }, 24 * 60 * 60 * 1000);
       if (opts.rotation) {
         rotationTimer = setInterval(() => {
           void rotateAll();
