@@ -145,6 +145,18 @@ importers:
         specifier: 1.24.0
         version: 1.24.0
     devDependencies:
+      '@temporalio/activity':
+        specifier: 1.24.0
+        version: 1.24.0
+      '@temporalio/client':
+        specifier: 1.24.0
+        version: 1.24.0
+      '@temporalio/testing':
+        specifier: 1.24.0
+        version: 1.24.0
+      '@temporalio/worker':
+        specifier: 1.24.0
+        version: 1.24.0
       typescript:
         specifier: 5.9.3
         version: 5.9.3

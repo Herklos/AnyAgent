@@ -8,7 +8,7 @@ a bare "done". A package is `done` only when every achievement is ticked and eve
 | WP0 | done | `cursor/v0-wp0-workspace-d30c` | cloud agent | |
 | WP1 | done (live NOT RUN) | `cursor/v0-wp1-backend-d30c` | cloud agent | Spike 002 not run; adapter `verified: false` |
 | WP2 | not started | | | |
-| WP3 | not started | | | |
+| WP3 | done | `cursor/v0-wp3-agent-core-d30c` | cloud agent | Contract + spike 006 measurement + replay/budget |
 | WP4 | not started | | | |
 | WP5 | not started | | | |
 | WP6 | not started | | | |
@@ -113,3 +113,24 @@ Achievements:
 Deviations: mock-heart is an HTTP facade over `MemoryBackend` with wire shapes aligned to `mapping.ts`, not a byte-for-byte heart mock for every route; sufficient for CI conformance until spike 002. WP8 cannot pass without a live run.
 
 Questions for the owner: none beyond the recorded live NOT RUN (blocks WP8).
+
+### WP3: AgentCore seam and own core  (done, 2026-11-07)
+
+Built:
+- `packages/workflows/src/core/{types,admission,own-core,index}.ts`
+- `packages/workflows/test/{admission,own-core,core.contract}.ts`, `fixtures/core-workflow.ts`, `support/temporal.ts`
+- `e2e/support/temporal.ts`, `docs/specs/agent-core.md`, `spikes/006-agent-core/README.md`
+
+Checks:
+- `pnpm --filter @anyagent/workflows test` -> PASS (unit + per-behaviour Temporal contract T-WP3-06..10/08b + T-WP3-11 replay + T-WP3-12 budget)
+- Spike 006: **11.18 events / ~4.9 KB per message** (50 msgs); budget 14.5; under stop condition (25)
+- Queries are pure (no `setHistoryLength` mutation); missing Temporal server uses vitest `skip(reason)`
+
+Achievements:
+- [x] Core behind `AgentCore`, pure logic separated from Temporal wiring.
+- [x] Contract suite exported and passes on our core on a real Temporal test server.
+- [x] Events/bytes per message fully tabulated — spike 006 + research Measured section.
+- [x] `docs/specs/agent-core.md` exists.
+- [x] No `@temporalio/agent-harness*`.
+
+Deviations: none material after review fixes. Review briefly set status to in-progress while measurement was missing; now complete.

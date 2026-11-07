@@ -213,3 +213,15 @@ Stay on the own core when any of 1, 2 or 5 fails at v1. Revisit when upstream ta
   [Temporal blog](https://temporal.io/blog/building-durable-agents-with-temporal-and-ai-sdk-by-vercel),
   [changelog](https://temporal.io/changelog/ai-sdk-vercel-integration).
 - Package versions and dates: npm registry, read 2026-11-07.
+
+## Measured
+
+(WP3 / spike 006, 2026-11-07.) Own core on `TestWorkflowEnvironment.createLocal()` (SDK 1.24.0):
+
+| | Own core | Michel streaming harness |
+| --- | --- | --- |
+| History events per message/turn | **11.18** (50 messages → 559 events) | ~160 / turn |
+| History bytes per message | **~4.9 KB** | ~90 KB / turn |
+
+Budget used by T-WP3-12: measured × 1.3 ≈ 14.5 events/message. Replay of the recorded history passes (T-WP3-11). Details: [spikes/006-agent-core](../../spikes/006-agent-core/README.md).
+
