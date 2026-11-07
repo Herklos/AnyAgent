@@ -44,6 +44,16 @@ Not found (searched 2026-11-07 in our clones, a web search and pages 1–4 of th
 - any statement on whether Anytype and Anytwo accounts are linked;
 - any MCP plan for Anytwo.
 
+## Observed on a local `any` server (spike 016)
+
+[Spike 016](../../spikes/016-backend-port-any/README.md) ran a 17-check suite against `any@0b73c01` on a throwaway
+network: all passed. What it adds to the table above (observed, high confidence for one account, none for sync):
+
+- the API is enough for anyagent's backend port: org reads, chat, agent envelope, reactions, live streams, and
+  resume by a per-peer cursor (`_applySeq`) that also catches edits and reactions;
+- it has no server-side compare-and-set on property writes, and no authentication on its loopback API;
+- an `any` build needs Go 1.26.2 and about 70 s; it is a developer preview, so all of this can change.
+
 ## What this means for anyagent
 
 - **Anytype today.**
