@@ -9,9 +9,9 @@ a bare "done". A package is `done` only when every achievement is ticked and eve
 | WP1 | done (live NOT RUN) | `cursor/v0-wp1-backend-d30c` | cloud agent | Spike 002 not run; adapter `verified: false` |
 | WP2 | done | `cursor/v0-wp2-schema-config-d30c` | cloud agent | Fail-closed review fixes |
 | WP3 | done | `cursor/v0-wp3-agent-core-d30c` | cloud agent | Contract + spike 006 measurement + replay/budget |
-| WP4 | in progress | `cursor/v0-wp4-harness-permissions-d30c` | cloud agent | Michel@402865d copied; live harnesses NOT RUN; Grok+Vibe → v1 |
+| WP4 | done (live NOT RUN) | `cursor/v0-wp4-harness-permissions-d30c` | cloud agent | Michel@402865d; live harnesses NOT RUN; Grok+Vibe → v1 |
 | WP5 | done (spike 004 partial) | `cursor/v0-wp5-gateway-d30c` | cloud agent | Spike 004 on SDK test server; Cloud/self-hosted NOT RUN |
-| WP6 | not started | | | |
+| WP6 | in progress | `cursor/v0-wp6-node-and-turn-d30c` | cloud agent | AnyBot + node activities + NodeStore |
 | WP7 | not started | | | |
 | WP8 | not started | | | |
 
@@ -56,11 +56,32 @@ No `@temporalio/agent-harness*`. CI action SHAs:
 
 ## Questions for the owner
 
-(none for WP0 — Michel@402865d is reachable again)
+(none)
 
 ## Evidence
 
-### WP4: harness adapters, permissions, read_only  (in progress, 2026-11-07)
+### WP6: node activities and AnyBot workflow  (in progress, 2026-11-07)
+
+Built:
+- `packages/workflows/src/{contracts,anybot-workflow}.ts` — notices, `AnyBot` on AgentCore, activities on `init.nodeQueue`
+- `packages/node/src/{store,worker,activities/*}.ts` — SQLite sessions/ops; resolveConfig / markReceived / runTurn / deliver
+- Tests: T-WP6-01..14 (unit + Temporal mocked + e2e fake harness / MemoryBackend); `notices.test.ts`
+- `docs/specs/agent-workflow.md` updated to v0-as-built
+- `fake` allowed as test harness id in agent-spec / schema
+
+Checks (local):
+- `pnpm --filter @anyagent/workflows test` -> PASS
+- `pnpm --filter @anyagent/node test` -> PASS
+- workflow determinism grep (no Date/Math.random/node: in workflows/src) -> pending in check
+
+Achievements:
+- [x] Scripted message → reply + reactions through workflow, activities, fake harness, reference backend
+- [x] Failure rows → one notice; loop continues
+- [x] Session survives rotation (node store) / second run
+- [x] `read_only` write refusal (no effect file)
+- [x] `docs/specs/agent-workflow.md` describes what was built
+
+### WP4: harness adapters, permissions, read_only  (done (live NOT RUN), 2026-11-07)
 
 Built:
 - Copied from `Herklos/Michel@402865d` with provenance headers: harness `types/jsonrpc-child/acp/codex/registry/fake-agent*`, core `floor/{command-floor,command-policy,path-policy}`

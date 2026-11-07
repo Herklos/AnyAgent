@@ -18,7 +18,7 @@ export const V0_SCHEMA: TypeDef[] = [
         key: "aa_harness",
         label: "Harness",
         format: "select",
-        options: ["claude-code", "codex", "grok", "vibe"],
+        options: ["claude-code", "codex", "grok", "vibe", "fake"],
       },
       { key: "aa_model", label: "Model", format: "text" },
       { key: "aa_chat", label: "Chat", format: "text" },

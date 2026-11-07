@@ -233,7 +233,21 @@ export const coreContractCases: ContractCase[] = [
     async run(ctx, assert) {
       const h = await startHarness(ctx);
       try {
+        // Keep the run alive so close is observed as "closing" (not already completed).
+        const hold = h.handle.executeUpdate(chatUpdate, {
+          args: [baseInput("hold", "hold")],
+          updateId: "hold",
+        });
+        await waitFor(async () => (await h.handle.query(statusQuery)).state === "running", 5_000);
         await h.handle.signal(closeSignal);
+        await waitFor(async () => {
+          try {
+            return (await h.handle.query(statusQuery)).state === "closing";
+          } catch {
+            // Already completed — still a closed agent for the purpose of this check.
+            return true;
+          }
+        }, 5_000);
         let rejected = false;
         try {
           await h.handle.executeUpdate(chatUpdate, {
@@ -244,6 +258,7 @@ export const coreContractCases: ContractCase[] = [
           rejected = true;
         }
         assert.ok(rejected, "AgentClosed while closing");
+        await hold;
         await h.handle.result();
       } finally {
         await stopHarness(h);
