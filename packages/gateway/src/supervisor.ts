@@ -191,8 +191,7 @@ export function startOrgSupervisor(opts: OrgSupervisorOpts): OrgSupervisor {
             // message cannot stall the chat forever. Stream/transport errors rethrow.
             const msg = err instanceof Error ? `${err.name} ${err.message}` : String(err);
             const transient =
-              err instanceof Unavailable ||
-              /Unavailable|ECONNRESET|socket|network/i.test(msg);
+              err instanceof Unavailable || /Unavailable|ECONNRESET|socket|network/i.test(msg);
             if (transient) throw err;
             logGateway({
               org: opts.orgId,
@@ -204,7 +203,6 @@ export function startOrgSupervisor(opts: OrgSupervisorOpts): OrgSupervisor {
             if (event.kind === "chat" && event.cursor) {
               opts.state.commit(opts.spaceId, sourceForChat(agent.chatId), event.cursor);
             }
-            continue;
           }
         }
         if (stopped || signal.aborted) return;
@@ -265,13 +263,16 @@ export function startOrgSupervisor(opts: OrgSupervisorOpts): OrgSupervisor {
       } catch {
         // ignore prune errors at start
       }
-      pruneTimer = setInterval(() => {
-        try {
-          opts.state.pruneDelivered();
-        } catch {
-          // ignore
-        }
-      }, 24 * 60 * 60 * 1000);
+      pruneTimer = setInterval(
+        () => {
+          try {
+            opts.state.pruneDelivered();
+          } catch {
+            // ignore
+          }
+        },
+        24 * 60 * 60 * 1000,
+      );
       if (opts.rotation) {
         rotationTimer = setInterval(() => {
           void rotateAll();

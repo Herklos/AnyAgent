@@ -128,14 +128,16 @@ export async function startAgentDiscovery(opts: {
     const obj = ev.object ?? (await opts.backend.org.get(ev.id));
     if (!obj) return;
     const parsed = parseAgentSpec(obj, obj.body);
-    if (!parsed.ok) {
+    if (!parsed.ok || !parsed.spec.chatId) {
       if (!loggedInvalid.has(ev.id)) {
         logGateway({
           org: opts.orgId,
           space: opts.spaceId,
           agent: ev.id,
           outcome: "invalid-spec",
-          detail: parsed.errors.map((e) => `${e.field}:${e.message}`).join(","),
+          detail: !parsed.ok
+            ? parsed.errors.map((e) => `${e.field}:${e.message}`).join(",")
+            : "aa_chat:required",
         });
         loggedInvalid.add(ev.id);
       }

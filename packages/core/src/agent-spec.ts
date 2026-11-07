@@ -46,6 +46,12 @@ function readStringField(
     });
     return "";
   }
+  // Empty string is "present but blank": required fields must still fail
+  // (createAgent briefly writes aa_chat:"" before linking the chat).
+  if (opts.required && raw === "") {
+    errors.push({ field: key, message: "required" });
+    return "";
+  }
   return raw;
 }
 
